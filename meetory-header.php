@@ -1,4 +1,4 @@
-<?php require 'meetory-functions.php'; ?>
+<?php require_once 'meetory-functions.php'; ?>
 
 <!DOCTYPE html>
 <html lang="ja">

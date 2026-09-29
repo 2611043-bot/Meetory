@@ -11,9 +11,22 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// 共通処理を読み込む
+require_once '../meetory-functions.php';
+
+// DB接続
+$pdo = getPDO();
+
+// カテゴリーを取得
+$sql = "SELECT category_id, category_name FROM categories ORDER BY category_id";
+$stmt = $pdo->query($sql);
+
+// 取得したカテゴリーを配列にする
+$categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 
-<?php require '../meetory-header.php'; ?>
+<?php require_once '../meetory-header.php'; ?>
 
 <h1>商品出品</h1>
 
@@ -46,32 +59,27 @@ if (!isset($_SESSION['user_id'])) {
         </select>
     </p>
 
-    <p>
-        カテゴリ
-        <select name="category_id" required>
-            <option value="">選択してください</option>
-            <option value="1">ファッション</option>
-            <option value="2">家電</option>
-            <option value="3">本・漫画</option>
-            <option value="4">ゲーム</option>
-            <option value="5">その他</option>
-        </select>
-    </p>
+<p>
+    カテゴリ
+    <select name="category_id" required>
+        <option value="">選択してください</option>
+        <?php foreach ($categories as $category): ?>
+            <option value="<?= htmlspecialchars($category['category_id'], ENT_QUOTES, 'UTF-8') ?>">
+                <?= htmlspecialchars($category['category_name'], ENT_QUOTES, 'UTF-8') ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</p>
 
     <p>
-    <lavel for="goods_image">商品画像</lavel>
-
+    <label for="goods_image">商品画像</label>
     <input type="file" id="goods_image" name="goods_image" accept="image/*">
-    
     <img id="preview" style="width: 200px; display: none;">
-
         <script>
             document.getElementById('goods_image').addEventListener('change', function() {
             const file = this.files[0];
-
             if (file) {
             const preview = document.getElementById('preview');
-
             preview.src = URL.createObjectURL(file);
             preview.style.display = 'block';
                 }
