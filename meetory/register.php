@@ -4,8 +4,10 @@
 
 <form action="register-process.php" method="post">
 
+※空白を入れないでください。
+
 ユーザー名
-<input type="text" name="user_name" placeholder="空白は入れないでください。" required>
+<input type="text" name="user_name" required>
 メールアドレス
 <input type="email" name="email" placeholder="例) meetory@example.com" required>
 パスワード
