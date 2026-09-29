@@ -26,6 +26,9 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 // ユーザーが存在し、パスワードが正しいか確認
 if ($user && password_verify($password, $user['password'])) {
 
+    // セッションIDを新しくする
+    session_regenerate_id(true);
+
     // ログイン状態を保存
     $_SESSION['user_id'] = $user['user_id'];
     $_SESSION['user_name'] = $user['user_name'];
