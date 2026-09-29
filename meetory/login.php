@@ -8,6 +8,5 @@
 パスワード
 <input type="password" name="password" required>
 <input type="submit" value="ログイン">
-<!---FitHub共有テスト--->
 </form>
 <?php require '../meetory-footer.php'; ?>
