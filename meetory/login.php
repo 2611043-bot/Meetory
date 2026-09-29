@@ -8,5 +8,6 @@
 パスワード
 <input type="password" name="password" required>
 <input type="submit" value="ログイン">
+<a href="register.php">新規登録はこちら</a>
 </form>
 <?php require '../meetory-footer.php'; ?>
