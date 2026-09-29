@@ -34,7 +34,7 @@ if ($user && password_verify($password, $user['password'])) {
     $_SESSION['user_name'] = $user['user_name'];
 
     // ログイン後のページへ移動
-    header('Location: index.php');
+    header('Location: goods-register.php');
     exit;
 
 } else {

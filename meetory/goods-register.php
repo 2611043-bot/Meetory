@@ -17,7 +17,7 @@ if (!isset($_SESSION['user_id'])) {
 
 <h1>商品出品</h1>
 
-<form action="goods-register-process.php" method="post">
+<form action="goods-register-process.php" method="post" enctype="multipart/form-data">
 
     <p>
         商品名
@@ -56,6 +56,27 @@ if (!isset($_SESSION['user_id'])) {
             <option value="4">ゲーム</option>
             <option value="5">その他</option>
         </select>
+    </p>
+
+    <p>
+    <lavel for="goods_image">商品画像</lavel>
+
+    <input type="file" id="goods_image" name="goods_image" accept="image/*">
+    
+    <img id="preview" style="width: 200px; display: none;">
+
+        <script>
+            document.getElementById('goods_image').addEventListener('change', function() {
+            const file = this.files[0];
+
+            if (file) {
+            const preview = document.getElementById('preview');
+
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = 'block';
+                }
+            });
+        </script>
     </p>
 
     <input type="submit" value="出品する">
