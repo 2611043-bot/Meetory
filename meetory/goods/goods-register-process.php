@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // 共通処理を読み込む
-require_once '../meetory-functions.php';
+require_once '../../meetory-functions.php';
 
 // DB接続
 $pdo = getPDO();
@@ -23,21 +23,32 @@ $goods_condition = $_POST['goods_condition'] ?? '';
 $category_id = $_POST['category_id'] ?? '';
 $confirm = $_POST['confirm'] ?? '';
 
-// 確認画面に表示するときのXSS対策
-$display_goods_name = htmlspecialchars($goods_name, ENT_QUOTES, 'UTF-8');
-
-$display_description = htmlspecialchars($description, ENT_QUOTES, 'UTF-8');
-
-$display_price = htmlspecialchars($price, ENT_QUOTES, 'UTF-8');
-
-$display_goods_condition = htmlspecialchars($goods_condition, ENT_QUOTES, 'UTF-8');
-
-$display_category_id = htmlspecialchars($category_id, ENT_QUOTES, 'UTF-8');
-
-// 受け取った情報を確認する
+// 確認画面を表示する
+// confirm=1 が送られてきていない場合だけ表示
 if ($confirm !== '1') {
-echo <<<HTML
-<h2>商品情報の受け取り確認</h2>
+
+    // 確認画面に表示するときのXSS対策
+    $display_goods_name = htmlspecialchars($goods_name, ENT_QUOTES, 'UTF-8');
+    $display_description = htmlspecialchars($description, ENT_QUOTES, 'UTF-8');
+    $display_price = htmlspecialchars($price, ENT_QUOTES, 'UTF-8');
+    $display_goods_condition = htmlspecialchars($goods_condition, ENT_QUOTES, 'UTF-8');
+
+    // カテゴリ名を取得
+    $sql = "SELECT category_name FROM categories WHERE category_id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$category_id]);
+
+    $category = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $display_category_name = htmlspecialchars(
+        $category['category_name'],
+        ENT_QUOTES,
+        'UTF-8'
+    );
+    
+    echo <<<HTML
+
+<h2>商品情報の確認</h2>
 
 <p>商品名：{$display_goods_name}</p>
 
@@ -47,7 +58,7 @@ echo <<<HTML
 
 <p>商品状態：{$display_goods_condition}</p>
 
-<p>カテゴリID：{$display_category_id}</p>
+<p>カテゴリ：{$display_category_name}</p>
 
 <form action="goods-register-process.php" method="post">
 
@@ -66,20 +77,20 @@ echo <<<HTML
         value="{$display_goods_condition}">
 
     <input type="hidden" name="category_id"
-        value="{$display_category_id}">
+        value="{$category_id}">
 
     <input type="submit" value="この内容で登録する">
 
 </form>
 
 <a href="goods-register.php">修正する</a>
+
 HTML;
 
-exit;
+    exit;
 }
 
 // 入力内容のチェック
-
 // 商品名・説明の空欄チェック
 if (trim($goods_name) === '' || trim($description) === '') {
     exit('商品名と商品説明を入力してください。');
@@ -155,7 +166,7 @@ if ($image_uploaded) {
     $file_name = bin2hex(random_bytes(16)) . '.' . $extension;
 
     // 保存先
-    $upload_dir = __DIR__ . '/../uploads/goods/';
+    $upload_dir = __DIR__ . '/../../uploads/goods/';
 
     // フォルダがなければ作成
     if (!is_dir($upload_dir)) {
