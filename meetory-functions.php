@@ -1,15 +1,14 @@
 <?php
 
-function getPDO() {
-    // データベース接続設定情報
-    $host = '192.168.25.108';     // 接続先のDBサーバーのアドレス
-    $dbname = 'meetory';          // 使用するDB名
-    $user = 'admin';              // DBサーバーのログインID
-    $password = 'meetory88125';   // DBサーバーのパスワード
+function getPDO()
+{
+    $config = require __DIR__ . '/db-config.php';
 
-    // データベース接続
-    return new PDO("mysql:host={$host};dbname={$dbname};charset=utf8",
-                    $user, $password);
+    return new PDO(
+        "mysql:host={$config['host']};dbname={$config['dbname']};charset=utf8mb4",
+        $config['user'],
+        $config['password']
+    );
 }
 
 function data() {

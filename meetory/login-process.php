@@ -1,6 +1,12 @@
-<?php require '../meetory-header.php'; ?>
-
 <?php
+
+require_once '../meetory-functions.php';
+
+session_set_cookie_params([
+    'httponly' => true,
+    //'secure' => true,
+    'samesite' => 'Lax'
+]);
 
 session_start();
 
@@ -8,8 +14,16 @@ $pdo = getPDO();
 
 // ログイン画面から送られてきた情報を受け取る
 $user_name = trim($_POST['user_name']);
-$password = trim($_POST['password']);
+$password = $_POST['password'];
 
+// 入力チェック
+if ($user_name === '') {
+    exit('ユーザー名を入力してください。');
+}
+
+if ($password === '') {
+    exit('パスワードを入力してください。');
+}
 
 // ユーザー名からユーザー情報を取得
 $sql = 'SELECT * FROM users WHERE user_name = ?';
@@ -44,5 +58,3 @@ if ($user && password_verify($password, $user['password'])) {
 
 }
 ?>
-
-<?php require '../meetory-footer.php'; ?>
