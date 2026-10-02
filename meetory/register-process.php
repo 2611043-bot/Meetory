@@ -3,11 +3,69 @@
 <?php
 $pdo = getPDO();
 
+// CSRF対策
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
+$csrf_token = $_POST['csrf_token'] ?? '';
+
+if (
+    empty($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], $csrf_token)
+) {
+    exit('不正なリクエストです。');
+}
+
 // 新規登録画面から送られてきた情報を受け取る
-$user_name = trim($_POST['user_name']);                 // ユーザー名
-$email = trim($_POST['email']);                         // メールアドレス
-$password = trim($_POST['password']);                   // パスワード
-$password_confirm = trim($_POST['password_confirm']);   // パスワード（確認）
+$user_name = trim($_POST['user_name'] ?? '');
+$email = trim($_POST['email'] ?? '');
+$password = $_POST['password'] ?? '';
+$password_confirm = $_POST['password_confirm'] ?? '';
+
+// 未入力チェック
+if ($user_name === '') {
+    exit('ユーザー名を入力してください。');
+}
+
+if ($email === '') {
+    exit('メールアドレスを入力してください。');
+}
+
+if ($password === '') {
+    exit('パスワードを入力してください。');
+}
+
+if ($password_confirm === '') {
+    exit('パスワード（確認）を入力してください。');
+}
+
+// 文字数チェック
+if (mb_strlen($user_name) < 2 || mb_strlen($user_name) > 10) {
+    exit('ユーザー名は2～10文字で入力してください。');
+}
+
+// ユーザー名に空白が含まれていないか確認
+if (preg_match('/[\s　]/u', $user_name)) {
+    exit('ユーザー名に空白を入れないでください。');
+}
+
+if (mb_strlen($password) < 8 || mb_strlen($password) > 16) {
+    exit('パスワードは8～16文字で入力してください。');
+}
+// パスワードの強度チェック
+if (!preg_match('/[A-Za-z]/', $password)) {
+    exit('パスワードには英字を1文字以上含めてください。');
+}
+
+if (!preg_match('/[0-9]/', $password)) {
+    exit('パスワードには数字を1文字以上含めてください。');
+}
+
+// メールアドレスの形式チェック
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    exit('正しいメールアドレスを入力してください。');
+}
 
 // ユーザー名の禁止ワード
 $forbidden_words = [
@@ -90,12 +148,18 @@ $sql = 'INSERT INTO users (user_name, email, password)
 
 $stmt = $pdo->prepare($sql);
 
-$stmt->execute([
-    $user_name,
-    $email,
-    $hash
-]);
+try {
+    $stmt->execute([
+        $user_name,
+        $email,
+        $hash
+    ]);
+} catch (PDOException $e) {
+    exit('登録処理中にエラーが発生しました。');
+}
 
+// CSRFトークンを破棄
+unset($_SESSION['csrf_token']);
 
 // 登録完了後、ログイン画面へ移動
 header('Location: login.php');

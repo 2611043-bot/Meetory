@@ -2,9 +2,23 @@
 
 <h1>会員登録</h1>
 
+<?php
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
+
 <form action="register-process.php" method="post">
 
-※空白を入れないでください。
+
+<input type="hidden" name="csrf_token" 
+value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+
+※空白を入れないでください。パスワードには英字、数字を１文字以上含めてください。
 
 ユーザー名
 <input type="text" name="user_name" required>
