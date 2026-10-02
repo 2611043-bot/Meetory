@@ -1,4 +1,4 @@
-<?php require '../meetory-header.php'; ?>
+<?php require '../../meetory-header.php'; ?>
 
 <?php
 $pdo = getPDO();
@@ -166,4 +166,4 @@ header('Location: ../user/login.php');
 exit;
 ?>
 
-<?php require '../meetory-footer.php'; ?>
+<?php require '../../meetory-footer.php'; ?>

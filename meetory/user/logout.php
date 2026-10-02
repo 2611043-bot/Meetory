@@ -1,4 +1,4 @@
-<?php require '../meetory-header.php'; ?>
+<?php require '../../meetory-header.php'; ?>
 
 <?php
 
@@ -13,4 +13,4 @@ header('Location: ../user/login.php');
 exit;
 ?>
 
-<?php require '../meetory-footer.php'; ?>
+<?php require '../../meetory-footer.php'; ?>

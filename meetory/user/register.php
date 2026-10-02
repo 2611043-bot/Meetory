@@ -1,4 +1,4 @@
-<?php require '../meetory-header.php'; ?>
+<?php require '../../meetory-header.php'; ?>
 
 <h1>会員登録</h1>
 
@@ -34,4 +34,4 @@ value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
 
 <a href="login.php">ログインはこちら</a>
 
-<?php require '../meetory-footer.php'; ?>
+<?php require '../../meetory-footer.php'; ?>

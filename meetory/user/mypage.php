@@ -14,7 +14,7 @@ if (!isset($_SESSION['user_id'])) {
 
 ?>
 
-<?php require '../meetory-header.php'; ?>
+<?php require '../../meetory-header.php'; ?>
 
 <h1>マイページ</h1>
 
@@ -24,4 +24,4 @@ if (!isset($_SESSION['user_id'])) {
 
 <a href="logout.php">ログアウト</a>
 
-<?php require '../meetory-footer.php'; ?>
+<?php require '../../meetory-footer.php'; ?>

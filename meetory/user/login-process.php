@@ -1,6 +1,6 @@
 <?php
 
-require_once '../meetory-functions.php';
+require_once '../../meetory-functions.php';
 
 session_set_cookie_params([
     'httponly' => true,
