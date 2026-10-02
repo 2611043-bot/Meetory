@@ -162,7 +162,7 @@ try {
 unset($_SESSION['csrf_token']);
 
 // 登録完了後、ログイン画面へ移動
-header('Location: login.php');
+header('Location: ../user/login.php');
 exit;
 ?>
 
