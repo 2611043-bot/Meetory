@@ -21,16 +21,62 @@ $description = $_POST['description'] ?? '';
 $price = $_POST['price'] ?? '';
 $goods_condition = $_POST['goods_condition'] ?? '';
 $category_id = $_POST['category_id'] ?? '';
+$confirm = $_POST['confirm'] ?? '';
+
+// 確認画面に表示するときのXSS対策
+$display_goods_name = htmlspecialchars($goods_name, ENT_QUOTES, 'UTF-8');
+
+$display_description = htmlspecialchars($description, ENT_QUOTES, 'UTF-8');
+
+$display_price = htmlspecialchars($price, ENT_QUOTES, 'UTF-8');
+
+$display_goods_condition = htmlspecialchars($goods_condition, ENT_QUOTES, 'UTF-8');
+
+$display_category_id = htmlspecialchars($category_id, ENT_QUOTES, 'UTF-8');
 
 // 受け取った情報を確認する
+if ($confirm !== '1') {
 echo <<<HTML
 <h2>商品情報の受け取り確認</h2>
-<p>商品名：{$goods_name}</p>
-<p>商品説明：{$description}</p>
-<p>価格：{$price}円</p>
-<p>商品状態：{$goods_condition}</p>
-<p>カテゴリID：{$category_id}</p>
+
+<p>商品名：{$display_goods_name}</p>
+
+<p>商品説明：{$display_description}</p>
+
+<p>価格：{$display_price}円</p>
+
+<p>商品状態：{$display_goods_condition}</p>
+
+<p>カテゴリID：{$display_category_id}</p>
+
+<form action="goods-register-process.php" method="post">
+
+    <input type="hidden" name="confirm" value="1">
+
+    <input type="hidden" name="goods_name"
+        value="{$display_goods_name}">
+
+    <input type="hidden" name="description"
+        value="{$display_description}">
+
+    <input type="hidden" name="price"
+        value="{$display_price}">
+
+    <input type="hidden" name="goods_condition"
+        value="{$display_goods_condition}">
+
+    <input type="hidden" name="category_id"
+        value="{$display_category_id}">
+
+    <input type="submit" value="この内容で登録する">
+
+</form>
+
+<a href="goods-register.php">修正する</a>
 HTML;
+
+exit;
+}
 
 // 入力内容のチェック
 
@@ -66,6 +112,82 @@ if ($stmt->fetchColumn() == 0) {
     exit('正しいカテゴリを選択してください。');
 }
 
+// ==============================
+// 画像のチェック
+// ==============================
+
+$image_uploaded = isset($_FILES['goods_image'])
+    && $_FILES['goods_image']['error'] !== UPLOAD_ERR_NO_FILE;
+
+if ($image_uploaded) {
+
+    // アップロードエラー
+    if ($_FILES['goods_image']['error'] !== UPLOAD_ERR_OK) {
+        exit('画像のアップロードに失敗しました。');
+    }
+
+    // ファイルサイズ
+    $max_size = 5 * 1024 * 1024; // 5MB
+
+    if ($_FILES['goods_image']['size'] > $max_size) {
+        exit('画像は5MB以下にしてください。');
+    }
+
+    // MIMEタイプを確認
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime_type = $finfo->file($_FILES['goods_image']['tmp_name']);
+
+    $allowed_mime_types = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/gif'  => 'gif',
+        'image/webp' => 'webp'
+    ];
+
+    if (!isset($allowed_mime_types[$mime_type])) {
+        exit('JPG、PNG、GIF、WebPの画像を使用してください。');
+    }
+
+    // 保存する拡張子
+    $extension = $allowed_mime_types[$mime_type];
+
+    // ランダムなファイル名を作成
+    $file_name = bin2hex(random_bytes(16)) . '.' . $extension;
+
+    // 保存先
+    $upload_dir = __DIR__ . '/../uploads/goods/';
+
+    // フォルダがなければ作成
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0755, true);
+    }
+
+    // 保存先のフルパス
+    $upload_path = $upload_dir . $file_name;
+
+    // 画像を保存
+    if (!move_uploaded_file(
+        $_FILES['goods_image']['tmp_name'],
+        $upload_path
+    )) {
+        exit('画像の保存に失敗しました。');
+    }
+
+    // DBに保存する画像パス
+    $image_path = 'uploads/goods/' . $file_name;
+}
+
+
+// ==============================
+// DB登録
+// ==============================
+
+try {
+
+    // トランザクション開始
+    $pdo->beginTransaction();
+
+
 // 商品情報を登録するSQL
 $sql = <<<SQL
 INSERT INTO goods
@@ -86,6 +208,56 @@ $stmt->execute([
     ':goods_condition' => $goods_condition,
     ':category_id' => $category_id
 ]);
+
+    // 登録した商品のgoods_idを取得
+    $goods_id = $pdo->lastInsertId();
+
+
+    // ==============================
+    // 画像情報をgoods_imagesに登録
+    // ==============================
+
+    if ($image_uploaded) {
+
+        $sql = <<<SQL
+INSERT INTO goods_images
+(goods_id, image_path, display_order)
+VALUES
+(:goods_id, :image_path, :display_order)
+SQL;
+
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->execute([
+            ':goods_id' => $goods_id,
+            ':image_path' => $image_path,
+            ':display_order' => 1
+        ]);
+    }
+
+
+    // DBへの登録を確定
+    $pdo->commit();
+
+} catch (Exception $e) {
+
+    // DB登録を取り消す
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+
+    // 画像が保存されていたら削除
+    if (
+        $image_uploaded
+        && isset($upload_path)
+        && file_exists($upload_path)
+    ) {
+        unlink($upload_path);
+    }
+
+    exit('商品登録に失敗しました。');
+}
+
 echo '商品情報を登録しました！';
 
 ?>
