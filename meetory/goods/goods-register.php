@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // 共通処理を読み込む
-require_once '../meetory-functions.php';
+require_once '../../meetory-functions.php';
 
 // DB接続
 $pdo = getPDO();
@@ -26,7 +26,7 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 
-<?php require_once '../meetory-header.php'; ?>
+<?php require_once '../../meetory-header.php'; ?>
 
 <h1>商品出品</h1>
 
@@ -91,4 +91,4 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 </form>
 
-<?php require '../meetory-footer.php'; ?>
+<?php require '../../meetory-footer.php'; ?>
