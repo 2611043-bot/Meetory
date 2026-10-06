@@ -44,9 +44,21 @@ if ($confirm !== '1') {
         $category['category_name'],
         ENT_QUOTES,
         'UTF-8'
+);
+
+if (isset($_SESSION['goods_image'])) {
+
+    $display_image_path = htmlspecialchars(
+        $_SESSION['goods_image']['image_path'],
+        ENT_QUOTES,
+        'UTF-8'
     );
+
+    echo '<p>商品画像：</p>';
+    echo '<img src="../../' . $display_image_path . '" width="200">';
+}
     
-    echo <<<HTML
+echo <<<HTML
 
 <h2>商品情報の確認</h2>
 
@@ -59,6 +71,8 @@ if ($confirm !== '1') {
 <p>商品状態：{$display_goods_condition}</p>
 
 <p>カテゴリ：{$display_category_name}</p>
+
+{$display_image}
 
 <form action="goods-register-process.php" method="post">
 
@@ -87,7 +101,7 @@ if ($confirm !== '1') {
 
 HTML;
 
-    exit;
+exit;
 }
 
 // 入力内容のチェック
@@ -166,7 +180,7 @@ if ($image_uploaded) {
     $file_name = bin2hex(random_bytes(16)) . '.' . $extension;
 
     // 保存先
-    $upload_dir = __DIR__ . '/../../uploads/goods/';
+    $upload_dir = __DIR__ . '/../../uploads/temp/';
 
     // フォルダがなければ作成
     if (!is_dir($upload_dir)) {
@@ -185,7 +199,12 @@ if ($image_uploaded) {
     }
 
     // DBに保存する画像パス
-    $image_path = 'uploads/goods/' . $file_name;
+    $image_path = 'uploads/temp/' . $file_name;
+
+    $_SESSION['goods_image'] = [
+        'file_name' => $file_name,
+        'image_path' => $image_path
+    ];
 }
 
 
@@ -199,26 +218,26 @@ try {
     $pdo->beginTransaction();
 
 
-// 商品情報を登録するSQL
-$sql = <<<SQL
-INSERT INTO goods
-(seller_id, goods_name, description, price, `condition`, category_id, listed_at)
-VALUES
-(:seller_id, :goods_name, :description, :price, :goods_condition, :category_id, NOW())
-SQL;
+    // 商品情報を登録するSQL
+    $sql = <<<SQL
+    INSERT INTO goods
+    (seller_id, goods_name, description, price, `condition`, category_id, listed_at)
+    VALUES
+    (:seller_id, :goods_name, :description, :price, :goods_condition, :category_id, NOW())
+    SQL;
 
-// SQLを準備
-$stmt = $pdo->prepare($sql);
+    // SQLを準備
+    $stmt = $pdo->prepare($sql);
 
-// SQLを実行
-$stmt->execute([
-    ':seller_id' => $_SESSION['user_id'],
-    ':goods_name' => $goods_name,
-    ':description' => $description,
-    ':price' => $price,
-    ':goods_condition' => $goods_condition,
-    ':category_id' => $category_id
-]);
+    // SQLを実行
+    $stmt->execute([
+        ':seller_id' => $_SESSION['user_id'],
+        ':goods_name' => $goods_name,
+        ':description' => $description,
+        ':price' => $price,
+        ':goods_condition' => $goods_condition,
+        ':category_id' => $category_id
+    ]);
 
     // 登録した商品のgoods_idを取得
     $goods_id = $pdo->lastInsertId();
@@ -230,12 +249,12 @@ $stmt->execute([
 
     if ($image_uploaded) {
 
-        $sql = <<<SQL
-INSERT INTO goods_images
-(goods_id, image_path, display_order)
-VALUES
-(:goods_id, :image_path, :display_order)
-SQL;
+    $sql = <<<SQL
+    INSERT INTO goods_images
+    (goods_id, image_path, display_order)
+    VALUES
+    (:goods_id, :image_path, :display_order)
+    SQL;
 
         $stmt = $pdo->prepare($sql);
 
@@ -257,7 +276,7 @@ SQL;
         $pdo->rollBack();
     }
 
-    // 画像が保存されていたら削除
+        // 画像が保存されていたら削除
     if (
         $image_uploaded
         && isset($upload_path)
