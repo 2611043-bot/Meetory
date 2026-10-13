@@ -23,86 +23,7 @@ $goods_condition = $_POST['goods_condition'] ?? '';
 $category_id = $_POST['category_id'] ?? '';
 $confirm = $_POST['confirm'] ?? '';
 
-// 確認画面を表示する
-// confirm=1 が送られてきていない場合だけ表示
-if ($confirm !== '1') {
 
-    // 確認画面に表示するときのXSS対策
-    $display_goods_name = htmlspecialchars($goods_name, ENT_QUOTES, 'UTF-8');
-    $display_description = htmlspecialchars($description, ENT_QUOTES, 'UTF-8');
-    $display_price = htmlspecialchars($price, ENT_QUOTES, 'UTF-8');
-    $display_goods_condition = htmlspecialchars($goods_condition, ENT_QUOTES, 'UTF-8');
-
-    // カテゴリ名を取得
-    $sql = "SELECT category_name FROM categories WHERE category_id = ?";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$category_id]);
-
-    $category = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    $display_category_name = htmlspecialchars(
-        $category['category_name'],
-        ENT_QUOTES,
-        'UTF-8'
-);
-
-if (isset($_SESSION['goods_image'])) {
-
-    $display_image_path = htmlspecialchars(
-        $_SESSION['goods_image']['image_path'],
-        ENT_QUOTES,
-        'UTF-8'
-    );
-
-    echo '<p>商品画像：</p>';
-    echo '<img src="../../' . $display_image_path . '" width="200">';
-}
-    
-echo <<<HTML
-
-<h2>商品情報の確認</h2>
-
-<p>商品名：{$display_goods_name}</p>
-
-<p>商品説明：{$display_description}</p>
-
-<p>価格：{$display_price}円</p>
-
-<p>商品状態：{$display_goods_condition}</p>
-
-<p>カテゴリ：{$display_category_name}</p>
-
-{$display_image}
-
-<form action="goods-register-process.php" method="post">
-
-    <input type="hidden" name="confirm" value="1">
-
-    <input type="hidden" name="goods_name"
-        value="{$display_goods_name}">
-
-    <input type="hidden" name="description"
-        value="{$display_description}">
-
-    <input type="hidden" name="price"
-        value="{$display_price}">
-
-    <input type="hidden" name="goods_condition"
-        value="{$display_goods_condition}">
-
-    <input type="hidden" name="category_id"
-        value="{$category_id}">
-
-    <input type="submit" value="この内容で登録する">
-
-</form>
-
-<a href="goods-register.php">修正する</a>
-
-HTML;
-
-exit;
-}
 
 // 入力内容のチェック
 // 商品名・説明の空欄チェック
@@ -184,7 +105,9 @@ if ($image_uploaded) {
 
     // フォルダがなければ作成
     if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0755, true);
+        if (!mkdir($upload_dir, 0755, true) && !is_dir($upload_dir)) {
+            exit('画像保存フォルダを作成できません。');
+        }
     }
 
     // 保存先のフルパス
@@ -208,9 +131,117 @@ if ($image_uploaded) {
 }
 
 
+ // 確認画面からの2回目の送信なら、SESSIONの画像情報を使う
+if ($confirm === '1' && isset($_SESSION['goods_image'])) {
+
+    $file_name = $_SESSION['goods_image']['file_name'];
+    $image_path = $_SESSION['goods_image']['image_path'];
+
+    $upload_dir = __DIR__ . '/../../uploads/temp/';
+    $upload_path = $upload_dir . $file_name;
+
+    // 一時保存した画像が存在するか確認
+    if (!is_file($upload_path)) {
+        exit('一時保存した画像が見つかりません。もう一度出品してください。');
+    }
+
+    $image_uploaded = true;
+}
+
+
+// 確認画面を表示する
+// confirm=1 が送られてきていない場合だけ表示
+if ($confirm !== '1') {
+
+    // 確認画面に表示するときのXSS対策
+    $display_goods_name = htmlspecialchars($goods_name, ENT_QUOTES, 'UTF-8');
+    $display_description = htmlspecialchars($description, ENT_QUOTES, 'UTF-8');
+    $display_price = htmlspecialchars($price, ENT_QUOTES, 'UTF-8');
+    $display_goods_condition = htmlspecialchars($goods_condition, ENT_QUOTES, 'UTF-8');
+
+    // カテゴリ名を取得
+    $sql = "SELECT category_name FROM categories WHERE category_id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$category_id]);
+
+    $category = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $display_category_name = htmlspecialchars(
+        $category['category_name'],
+        ENT_QUOTES,
+        'UTF-8'
+);
+
+$display_image = '';
+
+if (isset($_SESSION['goods_image'])) {
+
+    $display_image_path = htmlspecialchars(
+        $_SESSION['goods_image']['image_path'],
+        ENT_QUOTES,
+        'UTF-8'
+    );
+
+    $display_image = '<p>商品画像：</p>';
+    $display_image .= '<img src="../../' . $display_image_path . '" width="200">';
+}
+
+$form_goods_name = htmlspecialchars($goods_name, ENT_QUOTES, 'UTF-8');
+$form_description = htmlspecialchars($description, ENT_QUOTES, 'UTF-8');
+$form_price = htmlspecialchars($price, ENT_QUOTES, 'UTF-8');
+$form_goods_condition = htmlspecialchars($goods_condition, ENT_QUOTES, 'UTF-8');
+$form_category_id = htmlspecialchars((string)$category_id, ENT_QUOTES, 'UTF-8');
+
+echo <<<HTML
+
+<h2>商品情報の確認</h2>
+
+<p>商品名：{$display_goods_name}</p>
+
+<p>商品説明：{$display_description}</p>
+
+<p>価格：{$display_price}円</p>
+
+<p>商品状態：{$display_goods_condition}</p>
+
+<p>カテゴリ：{$display_category_name}</p>
+
+{$display_image}
+
+<form action="goods-register-process.php" method="post">
+
+    <input type="hidden" name="goods_name"
+        value="{$form_goods_name}">
+
+    <input type="hidden" name="description"
+        value="{$form_description}">
+
+    <input type="hidden" name="price"
+        value="{$form_price}">
+
+    <input type="hidden" name="goods_condition"
+        value="{$form_goods_condition}">
+
+    <input type="hidden" name="category_id"
+        value="{$form_category_id}">
+
+    <input type="submit" value="この内容で登録する">
+
+</form>
+
+<a href="goods-register.php">修正する</a>
+
+HTML;
+
+exit;
+}
+
 // ==============================
 // DB登録
 // ==============================
+
+// 本保存先へ画像を移動したかどうか
+$image_moved = false;
 
 try {
 
@@ -247,14 +278,41 @@ try {
     // 画像情報をgoods_imagesに登録
     // ==============================
 
+
+    // 画像を一時保存先から本保存先へ移動
     if ($image_uploaded) {
 
-    $sql = <<<SQL
-    INSERT INTO goods_images
-    (goods_id, image_path, display_order)
-    VALUES
-    (:goods_id, :image_path, :display_order)
-    SQL;
+        // 本保存先のフォルダ
+        $goods_dir = __DIR__ . '/../../uploads/goods/';
+
+        // フォルダがなければ作成
+        if (!is_dir($goods_dir)) {
+            if (!mkdir($goods_dir, 0755, true) && !is_dir($goods_dir)) {
+                throw new Exception('画像保存フォルダを作成できません。');
+            }
+        }
+
+        // 移動先のフルパス
+        $goods_path = $goods_dir . $file_name;
+
+        // 一時保存先から本保存先へ移動
+        if (!rename($upload_path, $goods_path)) {
+            throw new Exception('画像の移動に失敗しました。');
+        }
+
+        // 画像の移動に成功した
+        $image_moved = true;
+
+        // DBに保存する画像パス
+        $image_path = 'uploads/goods/' . $file_name;
+
+        // 画像情報をDBに登録
+        $sql = <<<SQL
+        INSERT INTO goods_images
+        (goods_id, image_path, display_order)
+        VALUES
+        (:goods_id, :image_path, :display_order)
+        SQL;
 
         $stmt = $pdo->prepare($sql);
 
@@ -269,6 +327,7 @@ try {
     // DBへの登録を確定
     $pdo->commit();
 
+
 } catch (Exception $e) {
 
     // DB登録を取り消す
@@ -276,17 +335,28 @@ try {
         $pdo->rollBack();
     }
 
-        // 画像が保存されていたら削除
+    // 本保存先へ移動済みの画像があれば削除
     if (
-        $image_uploaded
-        && isset($upload_path)
-        && file_exists($upload_path)
+        $image_moved
+        && isset($goods_path)
+        && is_file($goods_path)
+    ) {
+        unlink($goods_path);
+    }
+
+    // 一時保存先に画像が残っていれば削除
+    if (
+        isset($upload_path)
+        && is_file($upload_path)
     ) {
         unlink($upload_path);
     }
 
     exit('商品登録に失敗しました。');
 }
+
+// SESSIONに保存した画像情報を削除
+unset($_SESSION['goods_image']);
 
 echo '商品情報を登録しました！';
 
