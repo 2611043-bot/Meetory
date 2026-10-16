@@ -8,6 +8,11 @@
 パスワード
 <input type="password" name="password" required>
 <input type="submit" value="ログイン">
+<p>
+<a href="password-reset.php">パスワードを忘れた場合</a>
+</p>
+<p>
 <a href="register.php">新規登録はこちら</a>
+</p>
 </form>
 <?php require '../../meetory-footer.php'; ?>
