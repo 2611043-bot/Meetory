@@ -84,9 +84,40 @@ unset($_SESSION['register_errors'], $_SESSION['register_old']);
         font-weight: bold;
     }
 
+    /* パスワード切り替え用スタイル */
+    .password-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .password-wrapper input {
+        padding-right: 45px; /* アイコンがかぶらないよう右余白を調整 */
+    }
+
+    .toggle-password-btn {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #888;
+        cursor: pointer;
+        padding: 6px;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s;
+    }
+
+    .toggle-password-btn:hover {
+        color: #1976d2;
+    }
+
     /* パスワード強度表示用のコンパクトスタイル */
     .strength-wrapper {
-        margin-top: 6px;
+        margin-top: 8px;
         display: none; /* 初期状態では非表示 */
     }
 
@@ -196,14 +227,19 @@ unset($_SESSION['register_errors'], $_SESSION['register_old']);
             <!-- パスワード -->
             <div class="form-group">
                 <label for="password">パスワード</label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    class="<?= isset($errors['password']) ? 'is-invalid' : '' ?>"
-                    placeholder="パスワードを入力"
-                    required
-                >
+                <div class="password-wrapper">
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="<?= isset($errors['password']) ? 'is-invalid' : '' ?>"
+                        placeholder="パスワードを入力"
+                        required
+                    >
+                    <button type="button" class="toggle-password-btn" data-target="password" aria-label="パスワードの表示切り替え">
+                        <i class="fa-solid fa-eye-slash"></i>
+                    </button>
+                </div>
                 <?php if (isset($errors['password'])): ?>
                     <p class="field-error"><?= htmlspecialchars($errors['password'], ENT_QUOTES, 'UTF-8') ?></p>
                 <?php endif; ?>
@@ -220,14 +256,19 @@ unset($_SESSION['register_errors'], $_SESSION['register_old']);
             <!-- パスワード（確認） -->
             <div class="form-group">
                 <label for="password_confirm">パスワード（確認）</label>
-                <input
-                    type="password"
-                    id="password_confirm"
-                    name="password_confirm"
-                    class="<?= isset($errors['password_confirm']) ? 'is-invalid' : '' ?>"
-                    placeholder="もう一度パスワードを入力"
-                    required
-                >
+                <div class="password-wrapper">
+                    <input
+                        type="password"
+                        id="password_confirm"
+                        name="password_confirm"
+                        class="<?= isset($errors['password_confirm']) ? 'is-invalid' : '' ?>"
+                        placeholder="もう一度パスワードを入力"
+                        required
+                    >
+                    <button type="button" class="toggle-password-btn" data-target="password_confirm" aria-label="パスワードの表示切り替え">
+                        <i class="fa-solid fa-eye-slash"></i>
+                    </button>
+                </div>
                 <?php if (isset($errors['password_confirm'])): ?>
                     <p class="field-error"><?= htmlspecialchars($errors['password_confirm'], ENT_QUOTES, 'UTF-8') ?></p>
                 <?php endif; ?>
@@ -250,9 +291,34 @@ unset($_SESSION['register_errors'], $_SESSION['register_old']);
 
 </div>
 
-<!-- パスワード強度判定用JavaScript（安全性チェック＋文字数） -->
+<!-- パスワード表示切替＆強度判定用JavaScript -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // --- 1. パスワード表示・非表示の切り替え処理 ---
+    const toggleBtns = document.querySelectorAll('.toggle-password-btn');
+
+    toggleBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const targetInput = document.getElementById(targetId);
+            const eyeIcon = this.querySelector('i');
+
+            if (targetInput && eyeIcon) {
+                const isPassword = targetInput.getAttribute('type') === 'password';
+                targetInput.setAttribute('type', isPassword ? 'text' : 'password');
+
+                if (isPassword) {
+                    eyeIcon.classList.remove('fa-eye-slash');
+                    eyeIcon.classList.add('fa-eye');
+                } else {
+                    eyeIcon.classList.remove('fa-eye');
+                    eyeIcon.classList.add('fa-eye-slash');
+                }
+            }
+        });
+    });
+
+    // --- 2. パスワード強度判定処理 ---
     const passwordInput = document.getElementById('password');
     const wrapper = document.getElementById('strength-wrapper');
     const bar = document.getElementById('strength-bar');
@@ -288,7 +354,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const lowerPass = password.toLowerCase();
         const weakPatterns = ['1234', 'password', 'qwerty', 'abc', '0000', '1111', 'admin'];
         const isWeakWord = weakPatterns.some(pattern => lowerPass.includes(pattern));
-        const hasRepeatingChar = /(.)\1\1/.test(password); // 3回以上の同じ文字の連続（例: aaa, 111）
+        const hasRepeatingChar = /(.)\1\1/.test(password); // 3回以上の同じ文字の連続
 
         if (isWeakWord) score -= 2;
         if (hasRepeatingChar) score -= 1;

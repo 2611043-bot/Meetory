@@ -61,6 +61,37 @@
     box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.12);
 }
 
+/* パスワード切り替え用スタイル追加 */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-wrapper input {
+    padding-right: 45px; /* アイコンがかぶらないよう右余白を調整 */
+}
+
+.toggle-password-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    padding: 6px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.toggle-password-btn:hover {
+    color: #1976d2;
+}
+
 .login-button {
     width: 100%;
     padding: 14px;
@@ -122,13 +153,18 @@
 
             <div class="form-group">
                 <label for="password">パスワード</label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="パスワードを入力"
-                    required
-                >
+                <div class="password-wrapper">
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="パスワードを入力"
+                        required
+                    >
+                    <button type="button" id="togglePasswordBtn" class="toggle-password-btn" aria-label="パスワードの表示切り替え">
+                        <i class="fa-solid fa-eye-slash" id="eyeIcon"></i>
+                    </button>
+                </div>
             </div>
 
             <input
@@ -139,7 +175,7 @@
 
         </form>
 
-        <!-- パスワード再設定リンク（追加部分） -->
+        <!-- パスワード再設定リンク -->
         <p class="register-link">
             <a href="password-reset.php">パスワードをお忘れの方はこちら</a>
         </p>
@@ -153,5 +189,30 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const passwordInput = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+    const eyeIcon = document.getElementById('eyeIcon');
+
+    if (togglePasswordBtn && passwordInput && eyeIcon) {
+        togglePasswordBtn.addEventListener('click', () => {
+            // パスワードの入力タイプ切り替え
+            const isPassword = passwordInput.getAttribute('type') === 'password';
+            passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+            
+            // アイコンの見た目を切り替え (斜め線あり ⇄ 目のみ)
+            if (isPassword) {
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            } else {
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            }
+        });
+    }
+});
+</script>
 
 <?php require '../../meetory-footer.php'; ?>
