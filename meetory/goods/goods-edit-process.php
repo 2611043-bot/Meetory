@@ -60,8 +60,8 @@ if (
 $category_id = (int)$category_id_input;
 
 $conditions = [
-    '新品・未使用',
-    '未使用に近い',
+    '新品',
+    '未使用',
     '目立った傷や汚れなし',
     'やや傷や汚れあり',
     '傷や汚れあり'

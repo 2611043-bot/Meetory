@@ -1,6 +1,8 @@
+<?php require_once '../../meetory-functions.php';
 
-<?php
-require_once '../../meetory-functions.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // 商品IDをURLから取得
 $goods_id = filter_input(INPUT_GET, 'goods_id', FILTER_VALIDATE_INT);
@@ -65,11 +67,24 @@ if ($goods === false) {
         <a href="goods-list.php">商品一覧に戻る</a>
     </p>
 
+<?php
+if (
+    isset($_SESSION['user_id']) &&
+    (int)$_SESSION['user_id'] === (int)$goods['seller_id']
+):
+?>
     <p>
         <a href="goods-edit.php?goods_id=<?= (int)$goods['goods_id'] ?>">
             商品を編集する
         </a>
     </p>
+
+    <p>
+        <a href="goods-delete.php?goods_id=<?= (int)$goods['goods_id'] ?>">
+            商品を削除する
+        </a>
+    </p>
+<?php endif; ?>
 </main>
 
 <?php require '../../meetory-footer.php'; ?>
