@@ -65,6 +65,7 @@ if ($stmt->fetchColumn() == 0) {
 $image_uploaded = isset($_FILES['goods_image'])
     && $_FILES['goods_image']['error'] !== UPLOAD_ERR_NO_FILE;
 
+/*
 if ($image_uploaded) {
 
     // アップロードエラー
@@ -80,8 +81,8 @@ if ($image_uploaded) {
     }
 
     // MIMEタイプを確認
-    $finfo = new finfo(FILEINFO_MIME_TYPE);
-    $mime_type = $finfo->file($_FILES['goods_image']['tmp_name']);
+    // $finfo = new finfo(FILEINFO_MIME_TYPE);
+    // $mime_type = $finfo->file($_FILES['goods_image']['tmp_name']);
 
     $allowed_mime_types = [
         'image/jpeg' => 'jpg',
@@ -90,12 +91,12 @@ if ($image_uploaded) {
         'image/webp' => 'webp'
     ];
 
-    if (!isset($allowed_mime_types[$mime_type])) {
-        exit('JPG、PNG、GIF、WebPの画像を使用してください。');
-    }
+    // if (!isset($allowed_mime_types[$mime_type])) {
+    //     exit('JPG、PNG、GIF、WebPの画像を使用してください。');
+    // }
 
     // 保存する拡張子
-    $extension = $allowed_mime_types[$mime_type];
+    // $extension = $allowed_mime_types[$mime_type];
 
     // ランダムなファイル名を作成
     $file_name = bin2hex(random_bytes(16)) . '.' . $extension;
@@ -129,7 +130,7 @@ if ($image_uploaded) {
         'image_path' => $image_path
     ];
 }
-
+*/
 
  // 確認画面からの2回目の送信なら、SESSIONの画像情報を使う
 if ($confirm === '1' && isset($_SESSION['goods_image'])) {
@@ -225,6 +226,8 @@ echo <<<HTML
     <input type="hidden" name="category_id"
         value="{$form_category_id}">
 
+        <input type="hidden" name="confirm" value="1">
+
     <input type="submit" value="この内容で登録する">
 
 </form>
@@ -252,7 +255,7 @@ try {
     // 商品情報を登録するSQL
     $sql = <<<SQL
     INSERT INTO goods
-    (seller_id, goods_name, description, price, condition, category_id, listed_at)
+    (seller_id, goods_name, description, price, `condition`, category_id, listed_at)
     VALUES
     (:seller_id, :goods_name, :description, :price, :goods_condition, :category_id, NOW())
     SQL;
@@ -278,7 +281,7 @@ try {
     // 画像情報をgoods_imagesに登録
     // ==============================
 
-
+/*
     // 画像を一時保存先から本保存先へ移動
     if ($image_uploaded) {
 
@@ -322,7 +325,7 @@ try {
             ':display_order' => 1
         ]);
     }
-
+*/
 
     // DBへの登録を確定
     $pdo->commit();
