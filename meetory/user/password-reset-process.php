@@ -50,7 +50,7 @@ $stmt->execute(['user_id' => $user['user_id']]);
 $stmt = $pdo->prepare(
     'INSERT INTO password_resets
         (user_id, token, expires_at)
-     VALUES
+    VALUES
         (:user_id, :token, :expires_at)'
 );
 
