@@ -14,8 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit('不正なアクセスです。');
 }
 
-var_dump($_POST);
-exit;
 // 商品ID確認
 if (
     !isset($_POST['goods_id']) ||

@@ -14,7 +14,8 @@ if ($goods_id === false || $goods_id === null || $goods_id <= 0) {
 $pdo = getPDO();
 
 // 指定された商品を取得
-$sql = 'SELECT goods_id, goods_name, description, price, `condition`, listed_at
+$sql = 'SELECT goods_id, seller_id, goods_name, description,
+                price, `condition`, listed_at
         FROM goods
         WHERE goods_id = ?';
 
@@ -65,7 +66,9 @@ if ($goods === false) {
     </p>
 
     <p>
-        <a href="goods-edit.php">商品の編集</a>
+        <a href="goods-edit.php?goods_id=<?= (int)$goods['goods_id'] ?>">
+            商品を編集する
+        </a>
     </p>
 </main>
 
