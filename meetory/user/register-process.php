@@ -1,22 +1,34 @@
-<?php require '../../meetory-header.php'; ?>
+
 
 <?php
-$pdo = getPDO();
-
-// CSRF対策
+// セッションを先に開始する
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
+// 一時的な確認用コード
+echo '登録処理：トークンあり=' .
+    (isset($_SESSION['csrf_token']) ? 'YES' : 'NO');
+
+require '../../meetory-header.php';
+
+$pdo = getPDO();
+
+
+ // CSRF対策
 $csrf_token = $_POST['csrf_token'] ?? '';
 
-if (
-    empty($_SESSION['csrf_token']) ||
-    !hash_equals($_SESSION['csrf_token'], $csrf_token)
-) {
-    exit('不正なリクエストです。');
+if (empty($_SESSION['csrf_token'])) {
+    exit('セッションにCSRFトークンがありません。');
 }
 
+if ($csrf_token === '') {
+    exit('フォームからCSRFトークンが送信されていません。');
+}
+
+if (!hash_equals($_SESSION['csrf_token'], $csrf_token)) {
+    exit('CSRFトークンが一致しません。');
+}
 // 新規登録画面から送られてきた情報を受け取る
 $user_name = trim($_POST['user_name'] ?? '');
 $email = trim($_POST['email'] ?? '');
