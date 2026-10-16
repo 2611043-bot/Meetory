@@ -252,7 +252,7 @@ try {
     // 商品情報を登録するSQL
     $sql = <<<SQL
     INSERT INTO goods
-    (seller_id, goods_name, description, price, `condition`, category_id, listed_at)
+    (seller_id, goods_name, description, price, condition, category_id, listed_at)
     VALUES
     (:seller_id, :goods_name, :description, :price, :goods_condition, :category_id, NOW())
     SQL;
