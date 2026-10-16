@@ -25,17 +25,52 @@ $confirm = $_POST['confirm'] ?? '';
 
 
 
-// 入力内容のチェック
-// 商品名・説明の空欄チェック
-if (trim($goods_name) === '' || trim($description) === '') {
+
+ // 入力内容のチェック
+
+// 商品名・商品説明が文字列か確認
+if (!is_string($goods_name) || !is_string($description)) {
+    exit('商品名と商品説明を正しく入力してください。');
+}
+
+// 前後の空白を取り除く
+$goods_name = trim($goods_name);
+$description = trim($description);
+
+// 空欄チェック
+if ($goods_name === '' || $description === '') {
     exit('商品名と商品説明を入力してください。');
 }
 
-// 価格のチェック
+// 商品名の文字数チェック（2～100文字）
+if (mb_strlen($goods_name, 'UTF-8') < 2 ||
+    mb_strlen($goods_name, 'UTF-8') > 100) {
+    exit('商品名は2～100文字で入力してください。');
+}
+
+// 商品説明の文字数チェック（10～2000文字）
+if (mb_strlen($description, 'UTF-8') < 10 ||
+    mb_strlen($description, 'UTF-8') > 2000) {
+    exit('商品説明は10～2000文字で入力してください。');
+}
+
+
+ // 価格のチェック
+
+// 配列などの不正な入力を拒否
+if (!is_string($price) && !is_int($price)) {
+    exit('価格を正しく入力してください。');
+}
+
+// 整数以外や1円未満を拒否
 if (!ctype_digit((string)$price) || (int)$price < 1) {
     exit('価格は1円以上の整数で入力してください。');
 }
 
+// 最大価格（仮に100万円）
+if ((int)$price > 1000000) {
+    exit('価格は100万円以下で入力してください。');
+}
 // 商品状態のチェック
 $allowed_conditions = [
     '新品',
