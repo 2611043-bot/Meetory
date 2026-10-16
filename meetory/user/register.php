@@ -1,5 +1,11 @@
-<?php 
+<?php
 session_start();
+error_log('register.php session: ' . session_id());
+// CSRFトークンを作成
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+echo '登録画面：トークンあり=' . (isset($_SESSION['csrf_token']) ? 'YES' : 'NO');
 require '../../meetory-header.php';
 
 // セッションからエラー情報と入力データを取得
@@ -189,6 +195,11 @@ unset($_SESSION['register_errors'], $_SESSION['register_old']);
         </p>
 
         <form action="register-process.php" method="post">
+            <input
+    type="hidden"
+    name="csrf_token"
+    value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
+>
 
             <!-- ユーザー名 -->
             <div class="form-group">

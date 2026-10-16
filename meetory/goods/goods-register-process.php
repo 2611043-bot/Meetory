@@ -25,15 +25,50 @@ $confirm = $_POST['confirm'] ?? '';
 
 
 
+
+
+ // ==============================
 // 入力内容のチェック
-// 商品名・説明の空欄チェック
-if (trim($goods_name) === '' || trim($description) === '') {
-    exit('商品名と商品説明を入力してください。');
+// ==============================
+
+$errors = [];
+
+// 商品名・商品説明の型を確認
+if (!is_string($goods_name) || !is_string($description)) {
+    $errors[] = '商品名と商品説明を正しく入力してください。';
+} else {
+    // 前後の空白を削除
+    $goods_name = trim($goods_name);
+    $description = trim($description);
+
+    // 商品名のチェック
+    if ($goods_name === '') {
+        $errors[] = '商品名を入力してください。';
+    } elseif (mb_strlen($goods_name, 'UTF-8') < 2) {
+        $errors[] = '商品名は2文字以上で入力してください。';
+    } elseif (mb_strlen($goods_name, 'UTF-8') > 100) {
+        $errors[] = '商品名は100文字以内で入力してください。';
+    }
+
+    // 商品説明のチェック
+    if ($description === '') {
+        $errors[] = '商品説明を入力してください。';
+    } elseif (mb_strlen($description, 'UTF-8') < 10) {
+        $errors[] = '商品説明は10文字以上で入力してください。';
+    } elseif (mb_strlen($description, 'UTF-8') > 2000) {
+        $errors[] = '商品説明は2000文字以内で入力してください。';
+    }
 }
 
 // 価格のチェック
-if (!ctype_digit((string)$price) || (int)$price < 1) {
-    exit('価格は1円以上の整数で入力してください。');
+if (
+    (!is_string($price) && !is_int($price))
+    || !ctype_digit((string)$price)
+    || (int)$price < 1
+) {
+    $errors[] = '価格は1円以上の整数で入力してください。';
+} elseif ((int)$price > 1000000) {
+    $errors[] = '価格は100万円以下で入力してください。';
 }
 
 // 商品状態のチェック
@@ -45,17 +80,45 @@ $allowed_conditions = [
     '傷や汚れあり'
 ];
 
-if (!in_array($goods_condition, $allowed_conditions, true)) {
-    exit('正しい商品状態を選択してください。');
+if (
+    !is_string($goods_condition)
+    || !in_array($goods_condition, $allowed_conditions, true)
+) {
+    $errors[] = '正しい商品状態を選択してください。';
 }
 
-// カテゴリIDがDBに存在するか確認
-$sql = "SELECT COUNT(*) FROM categories WHERE category_id = ?";
-$stmt = $pdo->prepare($sql);
-$stmt->execute([$category_id]);
+// カテゴリーのチェック
+if (
+    !is_string($category_id)
+    || !ctype_digit($category_id)
+    || (int)$category_id < 1
+) {
+    $errors[] = 'カテゴリーを選択してください。';
+} else {
+    // カテゴリーがDBに存在するか確認
+    $sql = "SELECT COUNT(*) FROM categories WHERE category_id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$category_id]);
 
-if ($stmt->fetchColumn() == 0) {
-    exit('正しいカテゴリを選択してください。');
+    if ((int)$stmt->fetchColumn() === 0) {
+        $errors[] = '正しいカテゴリーを選択してください。';
+    }
+}
+
+// エラーがある場合は入力内容を保存してフォームに戻る
+if (!empty($errors)) {
+    $_SESSION['goods_register_errors'] = $errors;
+
+    $_SESSION['goods_register_old'] = [
+        'goods_name' => is_string($goods_name) ? $goods_name : '',
+        'description' => is_string($description) ? $description : '',
+        'price' => is_scalar($price) ? (string)$price : '',
+        'goods_condition' => is_string($goods_condition) ? $goods_condition : '',
+        'category_id' => is_scalar($category_id) ? (string)$category_id : ''
+    ];
+
+    header('Location: goods-register.php');
+    exit;
 }
 
 // ==============================
