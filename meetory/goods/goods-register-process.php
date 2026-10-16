@@ -398,4 +398,11 @@ unset($_SESSION['goods_image']);
 
 echo '商品情報を登録しました！';
 
+echo <<< HTML
+
+    <p>
+        <a href="goods-list.php">商品一覧を見る</a>
+    </p>
+
+HTML;
 ?>

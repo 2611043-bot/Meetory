@@ -1,7 +1,7 @@
 <?php require '../../meetory-header.php'; ?>
 
 <style>
-    .login-page {
+.login-page {
     min-height: 70vh;
     display: flex;
     justify-content: center;
@@ -10,20 +10,6 @@
     background: linear-gradient(135deg, #eef8ff, #f8fbff);
 }
 
-<form action="login-process.php" method="post">
-ユーザー名
-<input type="text" name="user_name" required>
-パスワード
-<input type="password" name="password" required>
-<input type="submit" value="ログイン">
-<p>
-<a href="password-reset.php">パスワードを忘れた場合</a>
-</p>
-<p>
-<a href="register.php">新規登録はこちら</a>
-</p>
-</form>
-<?php require '../../meetory-footer.php'; ?>
 .login-card {
     width: 100%;
     max-width: 420px;
@@ -94,7 +80,7 @@
 
 .register-link {
     text-align: center;
-    margin-top: 25px;
+    margin-top: 15px;
     font-size: 14px;
     color: #6b7c8f;
 }
@@ -153,13 +139,19 @@
 
         </form>
 
+        <!-- パスワード再設定リンク（追加部分） -->
         <p class="register-link">
-    アカウントをお持ちでない方
-    <a href="register.php">新規登録</a>
-</p>
+            <a href="password-reset.php">パスワードをお忘れの方はこちら</a>
+        </p>
+
+        <!-- 新規登録リンク -->
+        <p class="register-link">
+            アカウントをお持ちでない方
+            <a href="register.php">新規登録</a>
+        </p>
+
     </div>
 
 </div>
 
 <?php require '../../meetory-footer.php'; ?>
-```
