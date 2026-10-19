@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 
@@ -24,6 +25,16 @@ if (
 
 $goods_id = (int)$_POST['goods_id'];
 $user_id = $_SESSION['user_id'];
+
+// 管理者かどうか確認
+$is_admin = isset($_SESSION['role'])
+    && $_SESSION['role'] === 'admin';
+
+    // ★ デバッグ用コードをここに追加
+echo '<pre>';
+var_dump($_SESSION['role'] ?? null);
+var_dump($is_admin);
+exit;
 
 $goods_name = trim($_POST['goods_name'] ?? '');
 $description = trim($_POST['description'] ?? '');
@@ -67,14 +78,43 @@ $conditions = [
     '傷や汚れあり'
 ];
 
-if (!is_string($condition) || !in_array($condition, $conditions, true)) {
+if (
+    !is_string($condition) ||
+    !in_array($condition, $conditions, true)
+) {
     exit('商品の状態が正しくありません。');
 }
 
 $pdo = getPDO();
 
+// 商品の出品者を確認
+$sql = 'SELECT seller_id
+        FROM goods
+        WHERE goods_id = ?';
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute([$goods_id]);
+
+$product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// 商品が存在するか確認
+if (!$product) {
+    exit('商品が見つかりません。');
+}
+
+// 管理者でなく、出品者本人でもない場合は拒否
+if (
+    !$is_admin &&
+    (string)$product['seller_id'] !== (string)$user_id
+) {
+    exit('この商品を編集する権限がありません。');
+}
+
 // カテゴリーが存在するか確認
-$sql = 'SELECT COUNT(*) FROM categories WHERE category_id = ?';
+$sql = 'SELECT COUNT(*)
+        FROM categories
+        WHERE category_id = ?';
+
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$category_id]);
 
@@ -82,14 +122,14 @@ if ((int)$stmt->fetchColumn() === 0) {
     exit('カテゴリーが存在しません。');
 }
 
-// 商品を更新（自分が出品した商品だけ）
+// 商品を更新
 $sql = 'UPDATE goods
         SET goods_name = ?,
             description = ?,
             price = ?,
             `condition` = ?,
             category_id = ?
-        WHERE goods_id = ? AND seller_id = ?';
+        WHERE goods_id = ?';
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute([
@@ -98,22 +138,10 @@ $stmt->execute([
     $price,
     $condition,
     $category_id,
-    $goods_id,
-    $user_id
+    $goods_id
 ]);
-
-// 更新対象の商品が存在するか再確認
-$sql = 'SELECT COUNT(*)
-        FROM goods
-        WHERE goods_id = ? AND seller_id = ?';
-
-$stmt = $pdo->prepare($sql);
-$stmt->execute([$goods_id, $user_id]);
-
-if ((int)$stmt->fetchColumn() === 0) {
-    exit('商品が見つからないか、編集する権限がありません。');
-}
 
 // 商品詳細画面へ戻る
 header('Location: goods-detail.php?goods_id=' . $goods_id);
 exit;
+?>

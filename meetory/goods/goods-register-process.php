@@ -53,10 +53,6 @@ if (!is_string($goods_name) || !is_string($description)) {
     // 商品説明のチェック
     if ($description === '') {
         $errors[] = '商品説明を入力してください。';
-    } elseif (mb_strlen($description, 'UTF-8') < 10) {
-        $errors[] = '商品説明は10文字以上で入力してください。';
-    } elseif (mb_strlen($description, 'UTF-8') > 2000) {
-        $errors[] = '商品説明は2000文字以内で入力してください。';
     }
 }
 
@@ -67,8 +63,6 @@ if (
     || (int)$price < 1
 ) {
     $errors[] = '価格は1円以上の整数で入力してください。';
-} elseif ((int)$price > 1000000) {
-    $errors[] = '価格は100万円以下で入力してください。';
 }
 
 // 商品状態のチェック
