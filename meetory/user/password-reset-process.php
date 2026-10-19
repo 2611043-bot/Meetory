@@ -62,7 +62,7 @@ $stmt->execute([
 
 // テスト用リセットURLを生成
 $resetUrl = 'http://' . $_SERVER['HTTP_HOST']
-    . '/Meetory/meetory/user/password-new.php?token='
+    . '/meetory_php/meetory/user/password-new.php?token='
     . urlencode($token);
 ?>
 
