@@ -67,6 +67,10 @@ if ($goods === false) {
         <a href="goods-list.php">商品一覧に戻る</a>
     </p>
 
+    <p>
+        <a href="../purchase/buy.php">この商品を購入</a>
+    </p>
+
 
 <?php
 $is_admin = isset($_SESSION['role'])
