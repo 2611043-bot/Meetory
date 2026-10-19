@@ -19,19 +19,33 @@ if ($goods_id === false || $goods_id === null || $goods_id <= 0) {
 
 $pdo = getPDO();
 
-// 自分が出品した商品だけ取得
+
+$is_admin = isset($_SESSION['role'])
+    && $_SESSION['role'] === 'admin';
+
+// 商品情報を取得
 $sql = 'SELECT goods_id, seller_id, goods_name, price
         FROM goods
-        WHERE goods_id = ? AND seller_id = ?';
+        WHERE goods_id = ?';
 
 $stmt = $pdo->prepare($sql);
-$stmt->execute([$goods_id, $_SESSION['user_id']]);
+$stmt->execute([$goods_id]);
 
 $goods = $stmt->fetch(PDO::FETCH_ASSOC);
 
+// 商品が存在するか確認
 if (!$goods) {
-    exit('商品が見つからないか、削除する権限がありません。');
+    exit('商品が見つかりません。');
 }
+
+// 管理者でなく、出品者本人でもない場合は拒否
+if (
+    !$is_admin &&
+    (string)$goods['seller_id'] !== (string)$_SESSION['user_id']
+) {
+    exit('この商品を削除する権限がありません。');
+}
+
 
 require '../../meetory-header.php';
 ?>

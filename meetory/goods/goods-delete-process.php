@@ -1,4 +1,6 @@
-<?php require_once '../../meetory-functions.php';
+
+<?php
+require_once '../../meetory-functions.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -23,25 +25,37 @@ if ($goods_id === false || $goods_id === null || $goods_id <= 0) {
 }
 
 $user_id = (int)$_SESSION['user_id'];
+$is_admin = isset($_SESSION['role'])
+    && $_SESSION['role'] === 'admin';
 
 $pdo = getPDO();
 
 try {
-    // 削除処理をまとめて実行
     $pdo->beginTransaction();
 
-    // 自分が出品した商品か確認
-    $sql = 'SELECT goods_id
+    // 商品を取得してロック
+    $sql = 'SELECT goods_id, seller_id
             FROM goods
-            WHERE goods_id = ? AND seller_id = ?
+            WHERE goods_id = ?
             FOR UPDATE';
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([$goods_id, $user_id]);
+    $stmt->execute([$goods_id]);
 
-    if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+    $goods = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$goods) {
         $pdo->rollBack();
-        exit('商品が見つからないか、削除する権限がありません。');
+        exit('商品が見つかりません。');
+    }
+
+    // 管理者でなく、出品者本人でもない場合は拒否
+    if (
+        !$is_admin &&
+        (int)$goods['seller_id'] !== $user_id
+    ) {
+        $pdo->rollBack();
+        exit('この商品を削除する権限がありません。');
     }
 
     // 商品画像のデータを先に削除
@@ -50,17 +64,15 @@ try {
     $stmt->execute([$goods_id]);
 
     // 商品本体を削除
-    $sql = 'DELETE FROM goods
-            WHERE goods_id = ? AND seller_id = ?';
-
+    // 権限は上で確認済み
+    $sql = 'DELETE FROM goods WHERE goods_id = ?';
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([$goods_id, $user_id]);
+    $stmt->execute([$goods_id]);
 
     if ($stmt->rowCount() !== 1) {
         throw new RuntimeException('商品を削除できませんでした。');
     }
 
-    // すべて成功したら確定
     $pdo->commit();
 
 } catch (Throwable $e) {
@@ -68,9 +80,7 @@ try {
         $pdo->rollBack();
     }
 
-    // 詳細なエラーはログに記録
     error_log($e->getMessage());
-
     exit('商品を削除できませんでした。データベースの設定を確認してください。');
 }
 
