@@ -14,17 +14,31 @@ if (!isset($_GET['goods_id']) || !ctype_digit((string)$_GET['goods_id'])) {
 
 $pdo = getPDO();
 
-$sql = 'SELECT goods_id, goods_name, description, price, `condition`, category_id
+$is_admin = isset($_SESSION['role'])
+    && $_SESSION['role'] === 'admin';
+
+// 商品情報を取得
+$sql = 'SELECT goods_id, seller_id, goods_name, description, price, `condition`, category_id
         FROM goods
-        WHERE goods_id = ? AND seller_id = ?';
+        WHERE goods_id = ?';
 
 $stmt = $pdo->prepare($sql);
-$stmt->execute([
-    (int)$_GET['goods_id'],
-    $_SESSION['user_id']
-]);
+$stmt->execute([(int)$_GET['goods_id']]);
 
 $goods = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$goods) {
+    exit('商品が見つかりません。');
+}
+
+// 管理者でなく、出品者本人でもない場合は拒否
+if (
+    !$is_admin &&
+    (string)$goods['seller_id'] !== (string)$_SESSION['user_id']
+) {
+    exit('この商品を編集する権限がありません。');
+}
+
 
 if (!$goods) {
     exit('商品が見つからないか、編集する権限がありません。');

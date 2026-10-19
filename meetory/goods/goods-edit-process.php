@@ -30,12 +30,6 @@ $user_id = $_SESSION['user_id'];
 $is_admin = isset($_SESSION['role'])
     && $_SESSION['role'] === 'admin';
 
-    // ★ デバッグ用コードをここに追加
-echo '<pre>';
-var_dump($_SESSION['role'] ?? null);
-var_dump($is_admin);
-exit;
-
 $goods_name = trim($_POST['goods_name'] ?? '');
 $description = trim($_POST['description'] ?? '');
 $price_input = $_POST['price'] ?? '';

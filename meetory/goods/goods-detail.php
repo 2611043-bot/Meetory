@@ -67,12 +67,16 @@ if ($goods === false) {
         <a href="goods-list.php">商品一覧に戻る</a>
     </p>
 
+
 <?php
-if (
-    isset($_SESSION['user_id']) &&
-    (int)$_SESSION['user_id'] === (int)$goods['seller_id']
-):
+$is_admin = isset($_SESSION['role'])
+    && $_SESSION['role'] === 'admin';
+
+$is_owner = isset($_SESSION['user_id'])
+    && (int)$_SESSION['user_id'] === (int)$goods['seller_id'];
 ?>
+
+<?php if ($is_admin || $is_owner): ?>
     <p>
         <a href="goods-edit.php?goods_id=<?= (int)$goods['goods_id'] ?>">
             商品を編集する
@@ -85,6 +89,7 @@ if (
         </a>
     </p>
 <?php endif; ?>
+
 </main>
 
 <?php require '../../meetory-footer.php'; ?>
