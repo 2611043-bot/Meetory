@@ -92,10 +92,7 @@ $forbidden_words = [
     'staff',
     'support',
     'サポート',
-    'system',
-    'システム',
-    'moderator',
-    'モデレーター',
+    'meetory',
     // システム関連
     'system',
     'システム',
