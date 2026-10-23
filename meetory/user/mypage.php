@@ -41,6 +41,7 @@ if (!$user) {
 }
 
 // 購入履歴を取得
+// 購入履歴を取得
 $sql = '
     SELECT
         b.transaction_id,
@@ -49,7 +50,15 @@ $sql = '
         b.transaction_status,
         bi.buy_item_id,
         bi.purchase_price,
-        g.goods_name
+        g.goods_id,
+        g.goods_name,
+        (
+            SELECT gi.image_path
+            FROM goods_images AS gi
+            WHERE gi.goods_id = g.goods_id
+            ORDER BY gi.display_order ASC, gi.image_id ASC
+            LIMIT 1
+        ) AS image_path
     FROM buy AS b
     LEFT JOIN buy_items AS bi
         ON b.transaction_id = bi.transaction_id
@@ -86,7 +95,8 @@ foreach ($purchase_rows as $row) {
     if ($row['buy_item_id'] !== null) {
         $purchase_history[$transaction_id]['items'][] = [
             'goods_name' => $row['goods_name'],
-            'purchase_price' => $row['purchase_price']
+            'purchase_price' => $row['purchase_price'],
+            'image_path' => $row['image_path']
         ];
     }
 }
@@ -160,21 +170,49 @@ require '../../meetory-header.php';
             <?php else: ?>
 
                 <ul>
-                    <?php foreach ($purchase['items'] as $item): ?>
+                <?php foreach ($purchase['items'] as $item): ?>
 
-                        <li>
+                    <li>
+                        <!-- 商品画像 -->
+                        <?php if (!empty($item['image_path'])): ?>
+                            <div class="goods-image">
+                                <img
+                                    src="/meetory_php/<?= htmlspecialchars(
+                                        ltrim($item['image_path'], '/'),
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                    alt="<?= htmlspecialchars(
+                                        $item['goods_name'] ?? '商品画像',
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                    width="200"
+                                    loading="lazy"
+                                >
+                            </div>
+                        <?php else: ?>
+                            <p>画像はありません</p>
+                        <?php endif; ?>
+
+                        <!-- 商品名 -->
+                        <p>
                             商品名：
                             <?= htmlspecialchars(
                                 $item['goods_name'] ?? '商品情報なし',
                                 ENT_QUOTES,
                                 'UTF-8'
                             ) ?>
+                        </p>
 
-                            // 購入時の価格：
+                        <!-- 購入時の価格 -->
+                        <p>
+                            購入時の価格：
                             <?= number_format((int) $item['purchase_price']) ?>円
-                        </li>
+                        </p>
+                    </li>
 
-                    <?php endforeach; ?>
+                <?php endforeach; ?>
                 </ul>
 
             <?php endif; ?>

@@ -36,7 +36,14 @@ $sql = '
         g.price,
         g.seller_id,
         g.is_sold,
-        u.user_name AS seller_name
+        u.user_name AS seller_name,
+        (
+            SELECT gi.image_path
+            FROM goods_images AS gi
+            WHERE gi.goods_id = g.goods_id
+            ORDER BY gi.display_order ASC, gi.image_id ASC
+            LIMIT 1
+        ) AS image_path
     FROM cart AS c
     INNER JOIN goods AS g
         ON c.goods_id = g.goods_id
@@ -91,6 +98,31 @@ foreach ($cart_items as $item) {
         <?php foreach ($cart_items as $item): ?>
 
             <article>
+
+            <?php if (!empty($item['image_path'])): ?>
+
+                <div class="goods-image">
+                    <img
+                        src="/meetory_php/<?= htmlspecialchars(
+                            ltrim($item['image_path'], '/'),
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>"
+                        alt="<?= htmlspecialchars(
+                            $item['goods_name'],
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>"
+                        width="200"
+                        loading="lazy"
+                    >
+                </div>
+
+            <?php else: ?>
+
+                <p>画像はありません</p>
+
+            <?php endif; ?>
 
                 <h2>
                     <?= htmlspecialchars(
@@ -187,6 +219,12 @@ foreach ($cart_items as $item) {
             <?php endif; ?>
 
         </section>
+
+    <p>
+        <a href="cart-checkout.php">
+            購入手続きへ進む
+        </a>
+    </p>
 
         <p>
             <a href="../goods/goods-list.php">
