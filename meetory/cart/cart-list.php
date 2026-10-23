@@ -188,6 +188,12 @@ foreach ($cart_items as $item) {
 
         </section>
 
+    <p>
+        <a href="cart-checkout.php">
+            購入手続きへ進む
+        </a>
+    </p>
+
         <p>
             <a href="../goods/goods-list.php">
                 商品一覧に戻る
