@@ -68,7 +68,9 @@ if ($goods === false) {
     </p>
 
     <p>
-        <a href="../purchase/buy.php">この商品を購入</a>
+        <a href="../purchase/buy.php?goods_id=<?= (int) $goods['goods_id'] ?>">
+        この商品を購入する
+        </a>
     </p>
 
 

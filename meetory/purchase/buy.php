@@ -95,6 +95,29 @@ $csrf_token = $_SESSION['csrf_token'];
         value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>"
     >
 
+    <h3>配送先住所</h3>
+
+    <label for="address">住所を入力してください</label><br>
+    <input
+        type="text"
+        id="address"
+        name="address"
+        maxlength="255"
+        required
+    >
+
+    <h3>支払い方法</h3>
+
+    <label for="payment_method">支払い方法を選択してください</label><br>
+
+    <select id="payment_method" name="payment_method" required>
+        <option value="">選択してください</option>
+        <option value="銀行振込（テスト）">銀行振込（テスト）</option>
+        <option value="その他（テスト）">その他（テスト）</option>
+    </select>
+
+    <p>※現在はテスト用のため、実際の決済や送金は行いません。</p>
+
     <button type="submit">購入を確定する</button>
 </form>
 
