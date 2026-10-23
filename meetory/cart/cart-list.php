@@ -220,11 +220,19 @@ foreach ($cart_items as $item) {
 
         </section>
 
-    <p>
-        <a href="cart-checkout.php">
-            購入手続きへ進む
-        </a>
-    </p>
+        <?php if ($available_count > 0): ?>
+
+            <p>
+                <a href="cart-checkout.php">
+                    購入手続きへ進む
+                </a>
+            </p>
+
+        <?php else: ?>
+
+            <p>購入できる商品がないため、購入手続きに進めません。</p>
+
+        <?php endif; ?>
 
         <p>
             <a href="../goods/goods-list.php">

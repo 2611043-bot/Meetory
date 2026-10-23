@@ -55,6 +55,16 @@ $stmt->execute([
     'user_id' => $user_id
 ]);
 
-// カート一覧に戻る
+// 削除できたか確認する
+if ($stmt->rowCount() !== 1) {
+    http_response_code(404);
+
+    exit(
+        '削除対象の商品が見つからないか、削除できませんでした。'
+        . '<br><a href="cart-list.php">カートに戻る</a>'
+    );
+}
+
+// 削除に成功した場合はカート一覧に戻る
 header('Location: cart-list.php');
 exit;

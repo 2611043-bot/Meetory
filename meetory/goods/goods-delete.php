@@ -6,8 +6,13 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // ログイン確認
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../login.php');
+    header('Location: ../user/login.php');
     exit;
+}
+
+// CSRFトークンを生成
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 // 商品IDを取得
@@ -66,10 +71,26 @@ require '../../meetory-header.php';
     <p>削除すると元に戻せません。</p>
 
     <form action="goods-delete-process.php" method="post">
-        <input type="hidden" name="goods_id"
-                value="<?= (int)$goods['goods_id'] ?>">
+
+        <input
+            type="hidden"
+            name="goods_id"
+            value="<?= (int)$goods['goods_id'] ?>"
+        >
+
+        <!-- CSRFトークン -->
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="<?= htmlspecialchars(
+                $_SESSION['csrf_token'],
+                ENT_QUOTES,
+                'UTF-8'
+            ) ?>"
+        >
 
         <button type="submit">削除する</button>
+
     </form>
 
     <p>

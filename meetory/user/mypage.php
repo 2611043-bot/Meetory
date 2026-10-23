@@ -2,7 +2,9 @@
 <?php
 
 // セッションを開始
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 
 // ログインしているか確認
 if (!isset($_SESSION['user_id'])) {

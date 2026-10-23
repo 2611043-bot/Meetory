@@ -15,6 +15,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit('不正なアクセスです。');
 }
 
+// CSRF対策
+$csrf_token = $_POST['csrf_token'] ?? '';
+
+if (
+    empty($_SESSION['csrf_token']) ||
+    !is_string($csrf_token) ||
+    !hash_equals($_SESSION['csrf_token'], $csrf_token)
+) {
+    exit('不正なリクエストです。商品編集画面を開き直してください。');
+}
+
 // 商品ID確認
 if (
     !isset($_POST['goods_id']) ||

@@ -209,9 +209,21 @@ try {
     );
     exit;
 
+} catch (PDOException $e) {
+
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+
+    error_log($e->getMessage());
+
+    exit(
+        '購入処理中にエラーが発生しました。'
+        . '<br><a href="cart-list.php">カートに戻る</a>'
+    );
+
 } catch (RuntimeException $e) {
 
-    // 途中で失敗した場合は取り消す
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
@@ -227,12 +239,10 @@ try {
 
 } catch (Throwable $e) {
 
-    // 予期しないエラーの場合も取り消す
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
 
-    // 詳細はログに記録し、画面には表示しない
     error_log($e->getMessage());
 
     exit(

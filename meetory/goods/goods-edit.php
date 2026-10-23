@@ -1,6 +1,11 @@
 <?php
 session_start();
 
+// CSRFトークンを生成
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 require '../../meetory-functions.php';
 
 if (!isset($_SESSION['user_id'])) {
@@ -39,11 +44,6 @@ if (
     exit('この商品を編集する権限がありません。');
 }
 
-
-if (!$goods) {
-    exit('商品が見つからないか、編集する権限がありません。');
-}
-
 // カテゴリー一覧を取得
 $sql = 'SELECT category_id, category_name FROM categories';
 $stmt = $pdo->query($sql);
@@ -55,8 +55,16 @@ require '../../meetory-header.php';
 <h2>商品編集</h2>
 
 <form action="goods-edit-process.php" method="post">
+
     <input type="hidden" name="goods_id"
             value="<?= htmlspecialchars((string)$goods['goods_id'], ENT_QUOTES, 'UTF-8') ?>">
+            
+    <!-- CSRFトークンを送信 -->
+    <input
+        type="hidden"
+        name="csrf_token"
+        value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
+    >
 
     <p>
         <label for="goods_name">商品名</label><br>

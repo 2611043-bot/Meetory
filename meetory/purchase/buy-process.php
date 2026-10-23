@@ -165,26 +165,42 @@ try {
     );
     exit;
 
-} catch (Throwable $e) {
+} catch (PDOException $e) {
 
-    // エラーが起きたら取り消す
+    // データベースの詳しいエラーはログに記録
+    error_log($e->getMessage());
+
+    // 購入処理を取り消す
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
 
-    // 想定したエラーはメッセージを表示
-    if ($e instanceof RuntimeException) {
-        exit(
-            htmlspecialchars(
-                $e->getMessage(),
-                ENT_QUOTES,
-                'UTF-8'
-            )
-        );
+    // 画面には一般的なメッセージだけ表示
+    exit('購入処理に失敗しました。時間をおいて再度お試しください。');
+
+} catch (RuntimeException $e) {
+
+    // 自分の商品や売却済み商品などのエラー
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
     }
 
-    // 詳細なエラーは画面に表示せず、ログに記録
+    exit(
+        htmlspecialchars(
+            $e->getMessage(),
+            ENT_QUOTES,
+            'UTF-8'
+        )
+    );
+
+} catch (Throwable $e) {
+
+    // 予期しないエラー
     error_log($e->getMessage());
+
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
 
     exit('購入処理に失敗しました。時間をおいて再度お試しください。');
 }
