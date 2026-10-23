@@ -1,1 +1,4 @@
-db_config.php
+db-config.php
+mail-config.php
+
+meetory/vendor
