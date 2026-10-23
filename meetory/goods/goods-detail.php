@@ -42,6 +42,19 @@ if ($goods === false) {
     exit('商品が見つかりません。');
 }
 
+// 商品画像を取得
+$image_sql = '
+    SELECT image_path
+    FROM goods_images
+    WHERE goods_id = ?
+    ORDER BY display_order ASC, image_id ASC
+';
+
+$image_stmt = $pdo->prepare($image_sql);
+$image_stmt->execute([$goods_id]);
+
+$goods_images = $image_stmt->fetchAll(PDO::FETCH_ASSOC);
+
 // CSRFトークンを作成
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -71,6 +84,38 @@ $can_add_cart = isset($_SESSION['user_id'])
     <h1>商品詳細</h1>
 
     <article>
+
+    <!-- 商品画像 -->
+    <div class="goods-images">
+
+        <?php if (!empty($goods_images)): ?>
+
+            <?php foreach ($goods_images as $image): ?>
+
+                <img
+                    src="/meetory_php/<?= htmlspecialchars(
+                        ltrim($image['image_path'], '/'),
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                    alt="<?= htmlspecialchars(
+                        $goods['goods_name'],
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                    width="300"
+                    loading="lazy"
+                >
+
+            <?php endforeach; ?>
+
+        <?php else: ?>
+
+            <p>画像はありません</p>
+
+        <?php endif; ?>
+
+    </div>
 
         <h2>
             <?= htmlspecialchars($goods['goods_name'], ENT_QUOTES, 'UTF-8') ?>

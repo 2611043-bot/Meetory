@@ -10,9 +10,24 @@ $min_price = trim($_GET['min_price'] ?? '');
 $max_price = trim($_GET['max_price'] ?? '');
 $condition = trim($_GET['condition'] ?? '');
 
-// 商品一覧を取得
-$sql = 'SELECT goods_id, goods_name, description, price, `condition`, listed_at
-        FROM goods';
+// 商品一覧を取得（各商品の先頭画像も取得）
+$sql = '
+    SELECT
+        g.goods_id,
+        g.goods_name,
+        g.description,
+        g.price,
+        g.`condition`,
+        g.listed_at,
+        (
+            SELECT gi.image_path
+            FROM goods_images AS gi
+            WHERE gi.goods_id = g.goods_id
+            ORDER BY gi.display_order ASC, gi.image_id ASC
+            LIMIT 1
+        ) AS image_path
+    FROM goods AS g
+';
 
 $conditions = [];
 $params = [];
@@ -154,7 +169,34 @@ $goods_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php foreach ($goods_list as $goods): ?>
 
                 <article class="goods-item">
+                
+                <!-- 商品画像 -->
+                <?php if (!empty($goods['image_path'])): ?>
 
+                    <div class="goods-image">
+                        <img
+                            src="/meetory_php/<?= htmlspecialchars(
+                                ltrim($goods['image_path'], '/'),
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>"
+                            alt="<?= htmlspecialchars(
+                                $goods['goods_name'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>"
+                            width="200"
+                            loading="lazy"
+                        >
+                    </div>
+
+                <?php else: ?>
+
+                    <p>画像はありません</p>
+
+                <?php endif; ?>
+
+                <!-- 商品名 -->
                     <h2>
                         <?= htmlspecialchars($goods['goods_name'], ENT_QUOTES, 'UTF-8') ?>
                     </h2>
