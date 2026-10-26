@@ -6,7 +6,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 
 // ログイン確認
-if (!isset($_SESSION['user_id'])) {
+if (
+    !isset($_SESSION['user_id']) ||
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false ||
+    (int) $_SESSION['user_id'] <= 0
+) {
     header('Location: ../user/login.php');
     exit;
 }
@@ -19,7 +23,11 @@ $pdo = getPDO();
 $user_id = (int) $_SESSION['user_id'];
 
 // CSRFトークンを作成
-if (empty($_SESSION['csrf_token'])) {
+if (
+    !isset($_SESSION['csrf_token']) ||
+    !is_string($_SESSION['csrf_token']) ||
+    $_SESSION['csrf_token'] === ''
+) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 

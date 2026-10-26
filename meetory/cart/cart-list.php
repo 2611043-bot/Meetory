@@ -6,7 +6,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 
 // ログイン確認
-if (!isset($_SESSION['user_id'])) {
+if (
+    !isset($_SESSION['user_id']) ||
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false ||
+    (int) $_SESSION['user_id'] <= 0
+) {
     header('Location: ../user/login.php');
     exit;
 }
@@ -21,7 +25,11 @@ $pdo = getPDO();
 $user_id = (int) $_SESSION['user_id'];
 
 // CSRFトークンを作成
-if (empty($_SESSION['csrf_token'])) {
+if (
+    !isset($_SESSION['csrf_token']) ||
+    !is_string($_SESSION['csrf_token']) ||
+    $_SESSION['csrf_token'] === ''
+) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
@@ -96,6 +104,20 @@ foreach ($cart_items as $item) {
     <?php else: ?>
 
         <?php foreach ($cart_items as $item): ?>
+
+        <?php
+        $image_path = $item['image_path'] ?? '';
+
+        if (
+            !is_string($image_path) ||
+            !preg_match(
+                '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
+                $image_path
+            )
+        ) {
+            $image_path = '';
+        }
+        ?>
 
             <article>
 

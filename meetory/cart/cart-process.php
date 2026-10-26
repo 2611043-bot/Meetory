@@ -11,7 +11,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // ログイン確認
-if (!isset($_SESSION['user_id'])) {
+if (
+    !isset($_SESSION['user_id']) ||
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false ||
+    (int) $_SESSION['user_id'] <= 0
+) {
     header('Location: ../user/login.php');
     exit;
 }
@@ -27,7 +31,9 @@ $user_id = (int) $_SESSION['user_id'];
 $csrf_token = $_POST['csrf_token'] ?? '';
 
 if (
-    empty($_SESSION['csrf_token']) ||
+    !isset($_SESSION['csrf_token']) ||
+    !is_string($_SESSION['csrf_token']) ||
+    $_SESSION['csrf_token'] === '' ||
     !is_string($csrf_token) ||
     !hash_equals($_SESSION['csrf_token'], $csrf_token)
 ) {
@@ -35,10 +41,20 @@ if (
 }
 
 // 配送先を取得
-$address = trim($_POST['address'] ?? '');
+$address_input = $_POST['address'] ?? '';
+
+if (!is_string($address_input)) {
+    exit('配送先住所を正しく入力してください。');
+}
+
+$address = trim($address_input);
 
 // 支払い方法を取得
 $payment_method = $_POST['payment_method'] ?? '';
+
+if (!is_string($payment_method)) {
+    exit('支払い方法が正しくありません。');
+}
 
 // 入力チェック
 if ($address === '' || mb_strlen($address) > 255) {

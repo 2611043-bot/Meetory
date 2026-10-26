@@ -11,7 +11,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // ログイン確認
-if (!isset($_SESSION['user_id'])) {
+if (
+    !isset($_SESSION['user_id']) ||
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false ||
+    (int) $_SESSION['user_id'] <= 0
+) {
     header('Location: ../user/login.php');
     exit;
 }
@@ -26,7 +30,9 @@ $pdo = getPDO();
 $csrf_token = $_POST['csrf_token'] ?? '';
 
 if (
-    empty($_SESSION['csrf_token']) ||
+    !isset($_SESSION['csrf_token']) ||
+    !is_string($_SESSION['csrf_token']) ||
+    $_SESSION['csrf_token'] === '' ||
     !is_string($csrf_token) ||
     !hash_equals($_SESSION['csrf_token'], $csrf_token)
 ) {
