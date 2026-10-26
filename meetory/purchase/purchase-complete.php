@@ -4,7 +4,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
-if (!isset($_SESSION['user_id'])) {
+if (
+    !isset($_SESSION['user_id']) ||
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false ||
+    (int) $_SESSION['user_id'] <= 0
+) {
     header('Location: ../user/login.php');
     exit;
 }
@@ -20,7 +24,11 @@ $transaction_id = filter_input(
     FILTER_VALIDATE_INT
 );
 
-if (!$transaction_id || $transaction_id <= 0) {
+if (
+    $transaction_id === false ||
+    $transaction_id === null ||
+    $transaction_id <= 0
+) {
     exit('取引IDが正しくありません。');
 }
 

@@ -121,12 +121,12 @@ foreach ($cart_items as $item) {
 
             <article>
 
-            <?php if (!empty($item['image_path'])): ?>
+            <?php if ($image_path !== ''): ?>
 
                 <div class="goods-image">
                     <img
                         src="/meetory_php/<?= htmlspecialchars(
-                            ltrim($item['image_path'], '/'),
+                            $image_path,
                             ENT_QUOTES,
                             'UTF-8'
                         ) ?>"

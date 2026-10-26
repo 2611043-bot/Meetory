@@ -42,10 +42,13 @@ if (
 // 商品IDを取得
 $goods_id = filter_input(INPUT_POST, 'goods_id', FILTER_VALIDATE_INT);
 
-if (!$goods_id || $goods_id <= 0) {
+if (
+    $goods_id === false ||
+    $goods_id === null ||
+    $goods_id <= 0
+) {
     exit('商品IDが正しくありません。');
 }
-
 // ユーザーID
 $user_id = (int) $_SESSION['user_id'];
 

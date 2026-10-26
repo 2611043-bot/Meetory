@@ -1,4 +1,3 @@
-
 <?php
 // セッション開始
 if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -11,7 +10,11 @@ require_once '../../meetory-functions.php';
 $pdo = getPDO();
 
 // ログイン確認
-if (!isset($_SESSION['user_id'])) {
+if (
+    !isset($_SESSION['user_id']) ||
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false ||
+    (int) $_SESSION['user_id'] <= 0
+) {
     header('Location: ../user/login.php');
     exit;
 }
@@ -31,6 +34,7 @@ $stmt = $pdo->prepare(
         g.description,
         g.price,
         g.seller_id,
+        g.is_sold,
         u.user_name AS seller_name
     FROM goods AS g
     INNER JOIN users AS u
@@ -52,7 +56,11 @@ if ((int) $_SESSION['user_id'] === (int) $goods['seller_id']) {
 }
 
 // CSRF対策用トークンを作成
-if (empty($_SESSION['csrf_token'])) {
+if (
+    !isset($_SESSION['csrf_token']) ||
+    !is_string($_SESSION['csrf_token']) ||
+    $_SESSION['csrf_token'] === ''
+) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 

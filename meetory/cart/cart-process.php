@@ -213,6 +213,13 @@ try {
             $cart_id,
             $user_id
         ]);
+
+        // 削除できなかった場合は処理を中止する
+        if ($delete_cart_stmt->rowCount() !== 1) {
+            throw new RuntimeException(
+                'カートの更新に失敗しました。'
+            );
+        }
     }
 
     // すべて成功したら確定

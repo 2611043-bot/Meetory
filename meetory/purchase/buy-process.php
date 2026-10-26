@@ -11,7 +11,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // ログイン確認
-if (!isset($_SESSION['user_id'])) {
+if (
+    !isset($_SESSION['user_id']) ||
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false ||
+    (int) $_SESSION['user_id'] <= 0
+) {
     header('Location: ../user/login.php');
     exit;
 }
@@ -25,7 +29,9 @@ $pdo = getPDO();
 $csrf_token = $_POST['csrf_token'] ?? '';
 
 if (
-    empty($_SESSION['csrf_token']) ||
+    !isset($_SESSION['csrf_token']) ||
+    !is_string($_SESSION['csrf_token']) ||
+    $_SESSION['csrf_token'] === '' ||
     !is_string($csrf_token) ||
     !hash_equals($_SESSION['csrf_token'], $csrf_token)
 ) {
@@ -34,7 +40,15 @@ if (
 
 // フォームから値を取得
 $goods_id = filter_input(INPUT_POST, 'goods_id', FILTER_VALIDATE_INT);
-$address = trim($_POST['address'] ?? '');
+
+$address_input = $_POST['address'] ?? '';
+
+if (!is_string($address_input)) {
+    exit('配送先住所を正しく入力してください。');
+}
+
+$address = trim($address_input);
+
 $payment_method = $_POST['payment_method'] ?? '';
 
 // 入力チェック

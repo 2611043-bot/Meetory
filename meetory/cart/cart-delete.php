@@ -42,7 +42,11 @@ if (
 // カートIDを取得
 $cart_id = filter_input(INPUT_POST, 'cart_id', FILTER_VALIDATE_INT);
 
-if (!$cart_id || $cart_id <= 0) {
+if (
+    $cart_id === false ||
+    $cart_id === null ||
+    $cart_id <= 0
+) {
     exit('カートIDが正しくありません。');
 }
 
