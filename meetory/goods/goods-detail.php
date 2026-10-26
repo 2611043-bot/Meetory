@@ -176,6 +176,24 @@ $can_add_cart = isset($_SESSION['user_id'])
 
     <hr>
 
+    <!-- 出品者にDMを送る -->
+    <?php if (
+        isset($_SESSION['user_id']) &&
+        (int) $_SESSION['user_id'] !== (int) $goods['seller_id']
+    ): ?>
+
+        <h2>出品者へのお問い合わせ</h2>
+
+        <p>
+            <a href="../messages/message-start.php?goods_id=<?= (int) $goods['goods_id'] ?>">
+                出品者にDMを送る
+            </a>
+        </p>
+
+    <?php endif; ?>
+
+    <hr>
+
     <h2>購入・カート</h2>
 
     <?php if ($can_add_cart): ?>
