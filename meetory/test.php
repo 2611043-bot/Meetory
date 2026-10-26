@@ -3,3 +3,4 @@
 <p><a href="goods/my-goods.php">マイ商品リスト</a></p>
 <P><a href="user/mypage.php">マイページ</a></p>
 <P><a href="cart/cart-list.php">ショッピングカート</a></p>
+<P><a href="messages/message-list.php">取引メッセージ</a></p>
