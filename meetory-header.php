@@ -245,6 +245,9 @@ $is_auth_page = in_array($current_page, ['login.php', 'register.php', 'password-
                     <a href="#" class="icon-btn" title="お知らせ">
                         <i class="fa-solid fa-bell"></i>
                     </a>
+                    <a href="../messages/message-inbox.php" class="nav-link">
+                        <i class="fa-solid fa-envelope"></i> メッセージ
+                    </a>
                     <a href="../goods/goods-register.php" class="btn-sell">
                         <i class="fa-solid fa-plus"></i> 出品
                     </a>
