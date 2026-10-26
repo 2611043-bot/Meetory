@@ -1,11 +1,9 @@
 <?php
 session_start();
-error_log('register.php session: ' . session_id());
 // CSRFトークンを作成
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
-echo '登録画面：トークンあり=' . (isset($_SESSION['csrf_token']) ? 'YES' : 'NO');
 require '../../meetory-header.php';
 
 // セッションからエラー情報と入力データを取得
