@@ -44,6 +44,19 @@ $partner_id = filter_input(
     FILTER_VALIDATE_INT
 );
 
+// IDの入力チェック
+if (
+    $transaction_id !== false &&
+    $transaction_id !== null &&
+    $transaction_id > 0 &&
+    $goods_id !== false &&
+    $goods_id !== null &&
+    $goods_id > 0
+) {
+    http_response_code(400);
+    exit('取引IDと商品IDを同時に指定することはできません。');
+}
+
 // 購入前DMか、購入後の取引メッセージか判定
 $is_pre_purchase = (
     $goods_id !== false &&
