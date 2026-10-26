@@ -1,12 +1,40 @@
 <?php
 
 // セッション開始
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // ログイン確認
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../user/login.php');
     exit;
+}
+
+// POST送信確認
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    exit('不正なアクセスです。');
+}
+
+// CSRF対策
+$csrf_token = $_POST['csrf_token'] ?? '';
+
+if (
+    !is_string($csrf_token) ||
+    empty($_SESSION['csrf_token']) ||
+    !is_string($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], $csrf_token)
+) {
+    exit('不正なリクエストです。フォームを開き直してください。');
+}
+
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 // 共通処理を読み込む
@@ -22,10 +50,6 @@ $price = $_POST['price'] ?? '';
 $goods_condition = $_POST['goods_condition'] ?? '';
 $category_id = $_POST['category_id'] ?? '';
 $confirm = $_POST['confirm'] ?? '';
-
-
-
-
 
  // ==============================
 // 入力内容のチェック
@@ -53,6 +77,8 @@ if (!is_string($goods_name) || !is_string($description)) {
     // 商品説明のチェック
     if ($description === '') {
         $errors[] = '商品説明を入力してください。';
+    } elseif (mb_strlen($description, 'UTF-8') > 5000) {
+        $errors[] = '商品説明は5000文字以内で入力してください。';
     }
 }
 
@@ -119,9 +145,15 @@ if (!empty($errors)) {
 // 画像のチェック
 // ==============================
 
+// 今回、画像が送信されたか確認
 $image_uploaded = isset($_FILES['goods_image'])
     && $_FILES['goods_image']['error'] !== UPLOAD_ERR_NO_FILE;
 
+// 新しい出品フォームから送信された場合
+// 前回の画像情報を削除する
+if ($confirm !== '1') {
+    unset($_SESSION['goods_image']);
+}
 
 if ($image_uploaded) {
 
@@ -133,13 +165,49 @@ if ($image_uploaded) {
     // ファイルサイズ
     $max_size = 5 * 1024 * 1024; // 5MB
 
-    if ($_FILES['goods_image']['size'] > $max_size) {
-        exit('画像は5MB以下にしてください。');
+    $file_size = $_FILES['goods_image']['size'];
+
+    if (
+        !is_int($file_size) ||
+        $file_size <= 0 ||
+        $file_size > $max_size
+    ) {
+        exit('画像は1バイト以上、5MB以下にしてください。');
+    }
+
+    $tmp_name = $_FILES['goods_image']['tmp_name'];
+
+    if (
+        !is_string($tmp_name) ||
+        $tmp_name === '' ||
+        !is_uploaded_file($tmp_name)
+    ) {
+        exit('正しい画像ファイルをアップロードしてください。');
     }
 
     // MIMEタイプを確認
+    if (!class_exists('finfo')) {
+        exit('画像の確認機能が利用できません。管理者に連絡してください。');
+    }
+
     $finfo = new finfo(FILEINFO_MIME_TYPE);
-    $mime_type = $finfo->file($_FILES['goods_image']['tmp_name']);
+
+    $mime_type = $finfo->file($tmp_name);
+
+    if (!is_string($mime_type)) {
+        exit('画像ファイルの種類を確認できませんでした。');
+    }
+
+    $allowed_mime_types = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/gif'  => 'gif',
+        'image/webp' => 'webp'
+    ];
+
+    if (!isset($allowed_mime_types[$mime_type])) {
+        exit('JPG、PNG、GIF、WebPの画像を使用してください。');
+    }
 
     $allowed_mime_types = [
         'image/jpeg' => 'jpg',
@@ -224,11 +292,15 @@ if ($confirm !== '1') {
 
     $category = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    if ($category === false) {
+        exit('カテゴリーが見つかりません。');
+    }
+
     $display_category_name = htmlspecialchars(
         $category['category_name'],
         ENT_QUOTES,
         'UTF-8'
-);
+    );
 
 $display_image = '';
 
@@ -250,6 +322,12 @@ $form_price = htmlspecialchars($price, ENT_QUOTES, 'UTF-8');
 $form_goods_condition = htmlspecialchars($goods_condition, ENT_QUOTES, 'UTF-8');
 $form_category_id = htmlspecialchars((string)$category_id, ENT_QUOTES, 'UTF-8');
 
+$form_csrf_token = htmlspecialchars(
+    $_SESSION['csrf_token'],
+    ENT_QUOTES,
+    'UTF-8'
+);
+
 echo <<<HTML
 
 <h2>商品情報の確認</h2>
@@ -267,6 +345,9 @@ echo <<<HTML
 {$display_image}
 
 <form action="goods-register-process.php" method="post">
+
+    <input type="hidden" name="csrf_token"
+        value="{$form_csrf_token}">
 
     <input type="hidden" name="goods_name"
         value="{$form_goods_name}">
@@ -388,7 +469,7 @@ try {
     $pdo->commit();
 
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
 
     // DB登録を取り消す
     if ($pdo->inTransaction()) {

@@ -19,22 +19,27 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $csrf_token = $_POST['csrf_token'] ?? '';
 
 if (
-    empty($_SESSION['csrf_token']) ||
     !is_string($csrf_token) ||
+    !isset($_SESSION['csrf_token']) ||
+    !is_string($_SESSION['csrf_token']) ||
+    $_SESSION['csrf_token'] === '' ||
     !hash_equals($_SESSION['csrf_token'], $csrf_token)
 ) {
     exit('不正なリクエストです。商品編集画面を開き直してください。');
 }
 
 // 商品ID確認
+$goods_id_input = $_POST['goods_id'] ?? '';
+
 if (
-    !isset($_POST['goods_id']) ||
-    !ctype_digit((string)$_POST['goods_id'])
+    !is_string($goods_id_input) ||
+    !ctype_digit($goods_id_input) ||
+    (int)$goods_id_input < 1
 ) {
     exit('商品IDが正しくありません。');
 }
 
-$goods_id = (int)$_POST['goods_id'];
+$goods_id = (int)$goods_id_input;
 $user_id = $_SESSION['user_id'];
 
 // 管理者かどうか確認

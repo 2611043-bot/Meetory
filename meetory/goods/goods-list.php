@@ -5,10 +5,16 @@ require_once '../../meetory-functions.php';
 $pdo = getPDO();
 
 // 検索条件を取得
-$keyword = trim($_GET['keyword'] ?? '');
-$min_price = trim($_GET['min_price'] ?? '');
-$max_price = trim($_GET['max_price'] ?? '');
-$condition = trim($_GET['condition'] ?? '');
+$keyword = $_GET['keyword'] ?? '';
+$min_price = $_GET['min_price'] ?? '';
+$max_price = $_GET['max_price'] ?? '';
+$condition = $_GET['condition'] ?? '';
+
+// 文字列以外が送信された場合は空文字にする
+$keyword = is_string($keyword) ? trim($keyword) : '';
+$min_price = is_string($min_price) ? trim($min_price) : '';
+$max_price = is_string($max_price) ? trim($max_price) : '';
+$condition = is_string($condition) ? trim($condition) : '';
 
 // 商品一覧を取得（各商品の先頭画像も取得）
 $sql = '
@@ -162,76 +168,91 @@ $goods_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 </form>
 
-    <?php if (count($goods_list) > 0): ?>
+<?php if (count($goods_list) > 0): ?>
 
-        <div class="goods-list">
+    <div class="goods-list">
 
-            <?php foreach ($goods_list as $goods): ?>
+<?php foreach ($goods_list as $goods): ?>
 
-                <article class="goods-item">
-                
-                <!-- 商品画像 -->
-                <?php if (!empty($goods['image_path'])): ?>
+    <?php
+    // 商品画像のパスを取得
+    $image_path = $goods['image_path'] ?? '';
 
-                    <div class="goods-image">
-                        <img
-                            src="/meetory_php/<?= htmlspecialchars(
-                                ltrim($goods['image_path'], '/'),
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>"
-                            alt="<?= htmlspecialchars(
-                                $goods['goods_name'],
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>"
-                            width="200"
-                            loading="lazy"
-                        >
-                    </div>
+    // 想定した保存先・ファイル名か確認
+    if (
+        !is_string($image_path) ||
+        !preg_match(
+            '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
+            $image_path
+        )
+    ) {
+        $image_path = '';
+    }
+    ?>
 
-                <?php else: ?>
+    <article class="goods-item">
 
-                    <p>画像はありません</p>
+        <!-- 商品画像 -->
+        <?php if ($image_path !== ''): ?>
 
-                <?php endif; ?>
+            <div class="goods-image">
+                <img
+                    src="/meetory_php/<?= htmlspecialchars(
+                        $image_path,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                    alt="<?= htmlspecialchars(
+                        $goods['goods_name'],
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                    width="200"
+                    loading="lazy"
+                >
+            </div>
 
-                <!-- 商品名 -->
-                    <h2>
-                        <?= htmlspecialchars($goods['goods_name'], ENT_QUOTES, 'UTF-8') ?>
-                    </h2>
+        <?php else: ?>
 
-                    <p>
-                        価格：
-                        <?= number_format((int)$goods['price']) ?>円
-                    </p>
+            <p>画像はありません</p>
 
-                    <p>
-                        商品の状態：
-                        <?= htmlspecialchars($goods['condition'], ENT_QUOTES, 'UTF-8') ?>
-                    </p>
+        <?php endif; ?>
+            <!-- 商品名 -->
+                <h2>
+                    <?= htmlspecialchars($goods['goods_name'], ENT_QUOTES, 'UTF-8') ?>
+                </h2>
 
-                    <p>
-                        <?= nl2br(htmlspecialchars($goods['description'], ENT_QUOTES, 'UTF-8')) ?>
-                    </p>
+                <p>
+                    価格：
+                    <?= number_format((int)$goods['price']) ?>円
+                </p>
 
-                    <a href="goods-detail.php?goods_id=<?= (int)$goods['goods_id'] ?>">
-                        商品詳細を見る
-                    </a>
+                <p>
+                    商品の状態：
+                    <?= htmlspecialchars($goods['condition'], ENT_QUOTES, 'UTF-8') ?>
+                </p>
 
-                </article>
+                <p>
+                    <?= nl2br(htmlspecialchars($goods['description'], ENT_QUOTES, 'UTF-8')) ?>
+                </p>
 
-                <hr>
+                <a href="goods-detail.php?goods_id=<?= (int)$goods['goods_id'] ?>">
+                    商品詳細を見る
+                </a>
 
-            <?php endforeach; ?>
+            </article>
 
-        </div>
+            <hr>
 
-    <?php else: ?>
+        <?php endforeach; ?>
 
-        <p>現在、出品されている商品はありません。</p>
+    </div>
 
-    <?php endif; ?>
+<?php else: ?>
+
+    <p>現在、出品されている商品はありません。</p>
+
+<?php endif; ?>
 
 </main>
 

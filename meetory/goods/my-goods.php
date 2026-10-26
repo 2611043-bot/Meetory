@@ -1,4 +1,3 @@
-
 <?php require_once '../../meetory-functions.php';
 
 // セッションを開始
@@ -7,7 +6,12 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // ログインしていなければ表示させない
-if (!isset($_SESSION['user_id'])) {
+if (
+    !isset($_SESSION['user_id']) ||
+    !is_scalar($_SESSION['user_id']) ||
+    !ctype_digit((string)$_SESSION['user_id']) ||
+    (int)$_SESSION['user_id'] <= 0
+) {
     exit('ログインしてください。');
 }
 

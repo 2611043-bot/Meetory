@@ -11,7 +11,11 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // CSRFトークンを生成
-if (empty($_SESSION['csrf_token'])) {
+if (
+    !isset($_SESSION['csrf_token']) ||
+    !is_string($_SESSION['csrf_token']) ||
+    $_SESSION['csrf_token'] === ''
+) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 

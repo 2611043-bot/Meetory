@@ -21,8 +21,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $csrf_token = $_POST['csrf_token'] ?? '';
 
 if (
-    empty($_SESSION['csrf_token']) ||
     !is_string($csrf_token) ||
+    !isset($_SESSION['csrf_token']) ||
+    !is_string($_SESSION['csrf_token']) ||
+    $_SESSION['csrf_token'] === '' ||
     !hash_equals($_SESSION['csrf_token'], $csrf_token)
 ) {
     exit('不正なリクエストです。削除確認画面を開き直してください。');
@@ -92,17 +94,28 @@ $stmt->execute([$goods_id]);
 
 $image_paths = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-    // 商品画像のデータを先に削除
+    // ==================================
+    // 1. カート内の商品情報を削除
+    // ==================================
+    $sql = 'DELETE FROM cart WHERE goods_id = ?';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$goods_id]);
+
+    // ==================================
+    // 2. 商品画像のDB情報を削除
+    // ==================================
     $sql = 'DELETE FROM goods_images WHERE goods_id = ?';
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$goods_id]);
 
-    // 商品本体を削除
-    // 権限は上で確認済み
+    // ==================================
+    // 3. 商品本体を削除
+    // ==================================
     $sql = 'DELETE FROM goods WHERE goods_id = ?';
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$goods_id]);
 
+    // 商品本体が1件削除されたか確認
     if ($stmt->rowCount() !== 1) {
         throw new RuntimeException('商品を削除できませんでした。');
     }
@@ -114,13 +127,16 @@ $image_paths = $stmt->fetchAll(PDO::FETCH_COLUMN);
         $pdo->rollBack();
     }
 
+} catch (Throwable $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+
+    // 詳細なエラーはサーバーのログに記録する
     error_log($e->getMessage());
 
-    // 原因調査用（ローカル環境のみ）
-    exit(
-        '削除エラー：' .
-        htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8')
-    );
+    // 画面には内部情報を表示しない
+    exit('商品の削除に失敗しました。時間をおいて再度お試しください。');
 }
 
 // ==================================

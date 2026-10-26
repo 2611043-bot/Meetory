@@ -1,7 +1,14 @@
 <?php
 
 // ログイン状態を確認するためSESSIONを開始
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// CSRFトークンを生成
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
 // ログインしていない場合
 if (!isset($_SESSION['user_id'])) {
@@ -32,6 +39,13 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <form action="goods-register-process.php" method="post" enctype="multipart/form-data">
 
+    <!-- CSRF対策：トークンを送信 -->
+    <input
+        type="hidden"
+        name="csrf_token"
+        value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
+    >
+
     <p>
         商品名
         <input type="text" name="goods_name" required>
@@ -59,17 +73,17 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </select>
     </p>
 
-<p>
-    カテゴリ
-    <select name="category_id" required>
-        <option value="">選択してください</option>
-        <?php foreach ($categories as $category): ?>
-            <option value="<?= htmlspecialchars($category['category_id'], ENT_QUOTES, 'UTF-8') ?>">
-                <?= htmlspecialchars($category['category_name'], ENT_QUOTES, 'UTF-8') ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
-</p>
+    <p>
+        カテゴリ
+        <select name="category_id" required>
+            <option value="">選択してください</option>
+            <?php foreach ($categories as $category): ?>
+                <option value="<?= htmlspecialchars($category['category_id'], ENT_QUOTES, 'UTF-8') ?>">
+                    <?= htmlspecialchars($category['category_name'], ENT_QUOTES, 'UTF-8') ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </p>
 
     <p>
     <label for="goods_image">商品画像</label>
@@ -90,16 +104,6 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <input type="submit" value="出品する">
 
 </form>
-
-<?php
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
-
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-?>
 
 <form action="../user/logout.php" method="post">
 

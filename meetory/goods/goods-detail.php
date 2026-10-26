@@ -55,10 +55,32 @@ $image_stmt->execute([$goods_id]);
 
 $goods_images = $image_stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// 商品画像のパスを検証
+foreach ($goods_images as &$image) {
+    $image_path = $image['image_path'] ?? '';
+
+    if (
+        !is_string($image_path) ||
+        !preg_match(
+            '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
+            $image_path
+        )
+    ) {
+        $image['image_path'] = '';
+    }
+}
+unset($image);
+
 // CSRFトークンを作成
-if (empty($_SESSION['csrf_token'])) {
+if (
+    !isset($_SESSION['csrf_token']) ||
+    !is_string($_SESSION['csrf_token']) ||
+    $_SESSION['csrf_token'] === ''
+) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
+
+$csrf_token = $_SESSION['csrf_token'];
 
 $csrf_token = $_SESSION['csrf_token'];
 
@@ -90,26 +112,28 @@ $can_add_cart = isset($_SESSION['user_id'])
 
         <?php if (!empty($goods_images)): ?>
 
-            <?php foreach ($goods_images as $image): ?>
+    <?php foreach ($goods_images as $image): ?>
 
-                <img
-                    src="/meetory_php/<?= htmlspecialchars(
-                        ltrim($image['image_path'], '/'),
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) ?>"
-                    alt="<?= htmlspecialchars(
-                        $goods['goods_name'],
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) ?>"
-                    width="300"
-                    loading="lazy"
-                >
+        <?php if ($image['image_path'] !== ''): ?>
 
-            <?php endforeach; ?>
+            <img
+                src="/meetory_php/<?= htmlspecialchars(
+                    $image['image_path'],
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) ?>"
+                alt="<?= htmlspecialchars(
+                    $goods['goods_name'],
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) ?>"
+                width="300"
+                loading="lazy"
+            >
 
-        <?php else: ?>
+        <?php endif; ?>
+
+    <?php endforeach; ?>
 
             <p>画像はありません</p>
 
