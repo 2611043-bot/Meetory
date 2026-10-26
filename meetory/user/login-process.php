@@ -48,7 +48,7 @@ if ($user && password_verify($password, $user['password'])) {
     $_SESSION['role'] = $user['role'] ?? 'user';
 
     // ログイン後のページへ移動
-    header('Location: ../test.php');
+    header('Location: ../goods/goods-list.php');
     exit;
 
 } else {

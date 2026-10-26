@@ -1,4 +1,9 @@
 <?php
+// セッション開始
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
 require_once '../../meetory-functions.php';
 
 // データベースに接続

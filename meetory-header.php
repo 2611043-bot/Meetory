@@ -1,5 +1,4 @@
-<?php 
-require_once 'meetory-functions.php'; 
+<?php require_once 'meetory-functions.php'; 
 
 // 現在アクセスしているファイル名を取得してログイン関連画面か判定
 $current_page = basename($_SERVER['SCRIPT_NAME']);
