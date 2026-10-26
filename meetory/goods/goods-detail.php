@@ -107,39 +107,53 @@ $can_add_cart = isset($_SESSION['user_id'])
 
     <article>
 
-    <!-- 商品画像 -->
-    <div class="goods-images">
+<!-- 商品画像 -->
+<div class="goods-images">
 
-        <?php if (!empty($goods_images)): ?>
+    <?php if (!empty($goods_images)): ?>
 
-    <?php foreach ($goods_images as $image): ?>
+        <?php
+        $has_valid_image = false;
+        ?>
 
-        <?php if ($image['image_path'] !== ''): ?>
+        <?php foreach ($goods_images as $image): ?>
 
-            <img
-                src="/meetory_php/<?= htmlspecialchars(
-                    $image['image_path'],
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?>"
-                alt="<?= htmlspecialchars(
-                    $goods['goods_name'],
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?>"
-                width="300"
-                loading="lazy"
-            >
+            <?php if ($image['image_path'] !== ''): ?>
 
-        <?php endif; ?>
+                <?php $has_valid_image = true; ?>
 
-    <?php endforeach; ?>
+                <img
+                    src="/meetory_php/<?= htmlspecialchars(
+                        $image['image_path'],
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                    alt="<?= htmlspecialchars(
+                        $goods['goods_name'],
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                    width="300"
+                    loading="lazy"
+                >
+
+            <?php endif; ?>
+
+        <?php endforeach; ?>
+
+        <?php if (!$has_valid_image): ?>
 
             <p>画像はありません</p>
 
         <?php endif; ?>
 
-    </div>
+    <?php else: ?>
+
+        <p>画像はありません</p>
+
+    <?php endif; ?>
+
+</div>
 
         <h2>
             <?= htmlspecialchars($goods['goods_name'], ENT_QUOTES, 'UTF-8') ?>
