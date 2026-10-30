@@ -1,7 +1,10 @@
 
 <?php
 
-// 1. APIキーを環境変数から取得
+// 1. APIキー専用ファイルを読み込む
+require_once __DIR__ . '/gemini-secret.php';
+
+// APIキーを取得
 $api_key = getenv("GEMINI_API_KEY");
 
 // APIキーが取得できているか確認
@@ -10,7 +13,7 @@ if (!$api_key) {
 }
 
 // 2. 使用するGeminiモデル
-$model = 'gemini-3.8-flash';
+$model = 'gemini-3.5-flash';
 
 // 3. APIの接続先
 $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/'
@@ -23,7 +26,7 @@ $data = [
         [
             'parts' => [
                 [
-                    'text' => '今の日本の総理大臣は？'
+                    'text' => '君はモデル何？'
                 ]
             ]
         ]
