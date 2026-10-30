@@ -95,7 +95,6 @@ $sql = '
         ON r.reviewer_id = reviewer.user_id
     WHERE r.reviewee_id = :user_id
     ORDER BY r.created_at DESC, r.review_id DESC
-    LIMIT 3
 ';
 
 $stmt = $pdo->prepare($sql);
@@ -132,88 +131,9 @@ $rating_colors = [
 
 // 共通ヘッダー
 require '../../meetory-header.php';
-
 ?>
 
-<style>
-    .profile-container {
-        max-width: 760px;
-        margin: 24px auto;
-        padding: 16px;
-    }
-
-    .profile-header {
-        padding: 20px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        margin-bottom: 24px;
-    }
-
-    .rating-summary {
-        display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 8px;
-        margin: 16px 0 24px;
-    }
-
-    .rating-item {
-        text-align: center;
-        padding: 12px 4px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-    }
-
-    .rating-face {
-        display: block;
-        font-size: 28px;
-    }
-
-    .rating-count {
-        display: block;
-        font-size: 22px;
-        font-weight: bold;
-        margin: 4px 0;
-    }
-
-    .rating-label {
-        font-size: 12px;
-        overflow-wrap: anywhere;
-    }
-
-    .review-card {
-        background: #f1f1f1;
-        padding: 12px;
-        margin-bottom: 10px;
-        border-radius: 4px;
-    }
-
-    .review-heading {
-        font-weight: bold;
-        margin-bottom: 6px;
-    }
-
-    .review-comment {
-        white-space: pre-wrap;
-        overflow-wrap: anywhere;
-        margin: 0;
-    }
-
-    .review-date {
-        color: #666;
-        font-size: 12px;
-        margin-top: 8px;
-    }
-
-    .review-more {
-        text-align: right;
-    }
-
-    @media (max-width: 480px) {
-        .rating-summary {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-    }
-</style>
+<link rel="stylesheet" href="../assets/css/profile.css">
 
 <main class="profile-container">
 
@@ -352,11 +272,17 @@ require '../../meetory-header.php';
 
             <?php if ($total_reviews > 3): ?>
 
-                <p class="review-more">
-                    <a href="profile-reviews.php?user_id=<?= (int) $profile_user_id ?>">
-                        レビューをもっと見る
-                    </a>
-                </p>
+                <div class="review-more">
+
+                    <button type="button" id="show-more-button">
+                        もっと見る
+                    </button>
+
+                    <button type="button" id="collapse-button" hidden>
+                        非表示にする
+                    </button>
+
+                </div>
 
             <?php endif; ?>
 
@@ -521,85 +447,5 @@ $display_goods = ($active_tab === 'selling')
 
 </section>
 
-<style>
-
-    .profile-products {
-        margin: 30px 0;
-    }
-
-    .profile-tabs {
-        display: flex;
-        gap: 10px;
-        margin: 16px 0;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .profile-tabs a {
-        flex: 1;
-        padding: 12px;
-        text-align: center;
-        text-decoration: none;
-        color: #555;
-        border-bottom: 3px solid transparent;
-    }
-
-    .profile-tabs a.active {
-        color: #222;
-        font-weight: bold;
-        border-bottom-color: #333;
-    }
-
-    .profile-goods-list {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
-    }
-
-    .profile-goods-card {
-        min-width: 0;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-    }
-
-    .profile-goods-card img {
-        display: block;
-        width: 100%;
-        height: 180px;
-        object-fit: contain;
-    }
-
-    .profile-goods-card a {
-        color: inherit;
-        text-decoration: none;
-    }
-
-    .profile-goods-card h3 {
-        overflow-wrap: anywhere;
-    }
-
-    .profile-goods-price {
-        font-weight: bold;
-    }
-
-    .sold-out-label {
-        display: inline-block;
-        padding: 5px 10px;
-        background: #555;
-        color: white;
-        font-size: 12px;
-        font-weight: bold;
-        border-radius: 4px;
-    }
-
-    @media (max-width: 480px) {
-
-        .profile-goods-list {
-            grid-template-columns: 1fr;
-        }
-
-    }
-
-</style>
-
 <?php require '../../meetory-footer.php'; ?>
+<script src="../assets/js/profile.js"></script>
