@@ -211,7 +211,6 @@ require_once '../../meetory-header.php';
 
 <?php endif; ?>
 
-
 <?php if ($is_buyer): ?>
 
     <p>あなたはこの取引の購入者です。</p>
@@ -250,8 +249,40 @@ require_once '../../meetory-header.php';
 
     <?php endif; ?>
 
-<?php endif; ?>
+    <?php if ($transaction['transaction_status'] === '取引完了'): ?>
 
+        <?php
+        $review_sql = '
+            SELECT COUNT(*)
+            FROM reviews
+            WHERE transaction_id = :transaction_id
+        ';
+
+        $review_stmt = $pdo->prepare($review_sql);
+        $review_stmt->execute([
+            'transaction_id' => $transaction['transaction_id']
+        ]);
+
+        $has_review = (int) $review_stmt->fetchColumn() > 0;
+        ?>
+
+        <?php if ($has_review): ?>
+
+            <p>この取引は評価済みです。</p>
+
+        <?php else: ?>
+
+            <p>
+                <a href="../reviews/review-form.php?transaction_id=<?= (int) $transaction['transaction_id'] ?>">
+                    販売者を評価する
+                </a>
+            </p>
+
+        <?php endif; ?>
+
+    <?php endif; ?>
+
+<?php endif; ?>
 
 <?php if ($is_seller): ?>
 
