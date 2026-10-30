@@ -1,0 +1,74 @@
+/* フッターの下部ナビゲーション */
+.footer-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    width: 100%;
+    min-height: 68px;
+    padding: 8px 10px;
+
+    background: #ffffff;
+    border-top: 1px solid #e1e8ed;
+    box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* 各ナビゲーションボタン */
+.footer-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    flex: 1;
+    min-width: 0;
+    padding: 5px 2px;
+
+    color: #666666;
+    font-size: 12px;
+    text-decoration: none;
+
+    transition: color 0.2s ease;
+}
+
+/* アイコン */
+.footer-nav a i {
+    font-size: 20px;
+}
+
+/* マウスを乗せたとき */
+.footer-nav a:hover {
+    color: #1a73e8;
+}
+
+/* 選択中のページ */
+.footer-nav a.active {
+    color: #1a73e8;
+    font-weight: bold;
+}
+
+/* スマートフォン対応 */
+@media (max-width: 400px) {
+    .footer-nav {
+        padding: 6px 4px;
+    }
+
+    .footer-nav a {
+        font-size: 10px;
+    }
+
+    .footer-nav a i {
+        font-size: 18px;
+    }
+}
+
+/* 固定フッターにコンテンツが隠れないようにする */
+body {
+    padding-bottom: 80px;
+}
