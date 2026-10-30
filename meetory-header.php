@@ -61,17 +61,17 @@ $is_auth_page = in_array(
                     <a href="#" class="icon-btn" title="お知らせ">
                         <i class="fa-solid fa-bell"></i>
                     </a>
-                    <a href="../messages/message-inbox.php" class="nav-link">
+                    <a href="messages/message-inbox.php" class="nav-link">
                         <i class="fa-solid fa-envelope"></i> メッセージ
                     </a>
-                    <a href="../goods/goods-register.php" class="btn-sell">
+                    <a href="goods/goods-register.php" class="btn-sell">
                         <i class="fa-solid fa-plus"></i> 出品
                     </a>
-                    <a href="../user/mypage.php" class="nav-link">マイページ</a>
-                    <a href="../user/logout.php" class="nav-link">ログアウト</a>
+                    <a href="user/mypage.php" class="nav-link">マイページ</a>
+                    <a href="user/logout.php" class="nav-link">ログアウト</a>
                 <?php else: ?>
-                    <a href="../user/register.php" class="nav-link">会員登録</a>
-                    <a href="../user/login.php" class="nav-link">ログイン</a>
+                    <a href="user/register.php" class="nav-link">会員登録</a>
+                    <a href="user/login.php" class="nav-link">ログイン</a>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
