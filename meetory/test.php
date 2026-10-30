@@ -4,3 +4,4 @@
 <P><a href="user/mypage.php">マイページ</a></p>
 <P><a href="cart/cart-list.php">ショッピングカート</a></p>
 <P><a href="messages/message-inbox.php">取引メッセージ</a></p>
+<P><a href="user/profile.php">プロフィール</a></p>
