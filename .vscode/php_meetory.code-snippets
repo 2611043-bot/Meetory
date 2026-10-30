@@ -1,0 +1,15 @@
+{
+    "Meetory PHP Template": {
+        "prefix": "meetory",
+        "body": [
+            "<?php require '../meetory-header.php'; ?>",
+            "",
+            "<?php",
+            "",
+            "?>",
+            "",
+            "<?php require '../meetory-footer.php'; ?>"
+        ],
+        "description": "Meetory PHP page template"
+    }
+}
