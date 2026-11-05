@@ -35,6 +35,8 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <?php require_once '../../meetory-header.php'; ?>
 
+<link rel="stylesheet" href="../assets/css/goods-register.css">
+
 <h1>商品出品</h1>
 
 <form action="goods-register-process.php" method="post" enctype="multipart/form-data">
@@ -88,7 +90,7 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <p>
     <label for="goods_image">商品画像</label>
     <input type="file" id="goods_image" name="goods_image" accept="image/*">
-    <img id="preview" style="width: 200px; display: none;">
+    <img id="preview">
         <script>
             document.getElementById('goods_image').addEventListener('change', function() {
             const file = this.files[0];

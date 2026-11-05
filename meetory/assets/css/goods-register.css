@@ -1,0 +1,7 @@
+/* 移行元: meetory/goods/goods-register.php (91行目) */
+
+/* #preview - 商品画像プレビュー */
+#preview {
+    width: 200px;
+    display: none;
+}
