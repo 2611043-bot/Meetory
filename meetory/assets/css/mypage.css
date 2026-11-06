@@ -1,0 +1,19 @@
+/* ==============================
+   マイページ専用スタイルシート
+   mypage.php で class="goods-image" を使用
+   他ページ（goods-list.php, cart-list.php 等）とクラス名が重複するため、
+   ここでは mypage.php のHTML構造に最小限のスタイルのみを定義
+   ============================== */
+
+/* 商品画像のラッパー */
+.goods-image {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+/* 商品画像（200pxに幅を制限し、レイアウト崩れを防止） */
+.goods-image img {
+    max-width: 200px;
+    height: auto;
+    border-radius: 4px;
+}

@@ -1,0 +1,237 @@
+/* メッセージ一覧全体 */
+.message-center {
+    width: 100%;
+    color: #333;
+}
+
+.message-heading {
+    margin-bottom: 20px;
+}
+
+.message-heading h1 {
+    font-size: 25px;
+    margin-bottom: 6px;
+}
+
+.message-heading p {
+    color: #777;
+    font-size: 14px;
+}
+
+/* 2カラムレイアウト */
+.message-layout {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    height: 650px;
+    min-height: 500px;
+    background: #fff;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* 左側：トーク一覧 */
+.talk-sidebar {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-right: 1px solid #e1e8ed;
+    background: #fff;
+}
+
+.talk-sidebar-header {
+    padding: 20px 18px 12px;
+}
+
+.talk-sidebar-header h2 {
+    font-size: 18px;
+}
+
+/* 検索欄 */
+.talk-search {
+    padding: 8px 14px 14px;
+}
+
+.talk-search input {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    background: #f4f7fb;
+    font-size: 13px;
+    outline: none;
+}
+
+.talk-search input:focus {
+    border-color: #1a73e8;
+    background: #fff;
+}
+
+/* トーク一覧 */
+.talk-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.talk-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    color: #333;
+    text-decoration: none;
+    border-top: 1px solid #f0f2f5;
+    transition: background 0.2s;
+}
+
+.talk-item:hover {
+    background: #f4f7fb;
+}
+
+/* プロフィール画像の代わりのアイコン */
+.talk-avatar {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #e5efff;
+    color: #1a73e8;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+/* トーク情報 */
+.talk-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.talk-name-row,
+.talk-message-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.talk-name-row {
+    margin-bottom: 7px;
+}
+
+.talk-user-name {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.talk-time {
+    flex-shrink: 0;
+    color: #999;
+    font-size: 11px;
+}
+
+.talk-last-message {
+    overflow: hidden;
+    color: #777;
+    font-size: 12px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* 未読バッジ */
+.unread-badge {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 5px;
+    border-radius: 20px;
+    background: #1a73e8;
+    color: #fff;
+    font-size: 11px;
+}
+
+/* 検索結果なし */
+.talk-empty {
+    padding: 25px 10px;
+    color: #999;
+    font-size: 13px;
+    text-align: center;
+}
+
+/* 右側：未選択時の表示 */
+.talk-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    text-align: center;
+}
+
+.welcome-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 75px;
+    height: 75px;
+    margin-bottom: 20px;
+    border-radius: 50%;
+    background: #eaf2ff;
+    color: #1a73e8;
+    font-size: 30px;
+}
+
+.talk-welcome h2 {
+    margin-bottom: 10px;
+    font-size: 20px;
+}
+
+.talk-welcome p {
+    max-width: 320px;
+    color: #888;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+/* スマートフォン */
+@media (max-width: 700px) {
+
+    .message-heading {
+        margin-bottom: 15px;
+    }
+
+    .message-heading h1 {
+        font-size: 21px;
+    }
+
+    .message-layout {
+        display: block;
+        height: auto;
+        min-height: 0;
+        border-radius: 10px;
+    }
+
+    .talk-sidebar {
+        border-right: none;
+    }
+
+    .talk-item {
+        padding: 15px 13px;
+    }
+
+    .talk-avatar {
+        width: 44px;
+        height: 44px;
+    }
+
+    /* スマホでは未選択時の右側表示を隠す */
+    .talk-welcome {
+        display: none;
+    }
+}

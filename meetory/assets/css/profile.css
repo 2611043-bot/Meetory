@@ -169,3 +169,32 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ==============================
+   プロフィール: もっと見る / 非表示 ボタン
+   profile.php の id="show-more-button" と id="collapse-button" に対応
+   profile.js で表示/非表示を制御し、CSS は見た目と hidden 属性対応のみを担当
+   ============================== */
+#show-more-button,
+#collapse-button {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 8px 4px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    color: #555;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+#show-more-button:hover,
+#collapse-button:hover {
+    background: #f5f5f5;
+    border-color: #bbb;
+}
+
+/* JavaScript の hidden 属性で非表示にする際のスタイル */
+#collapse-button[hidden] {
+    display: none;
+}

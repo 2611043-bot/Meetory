@@ -105,3 +105,16 @@
         padding: 30px 15px;
     }
 }
+
+/* ==============================
+   ホーム: 新着商品セクション
+   home.php の class="new-goods" に対応
+   既存の .goods-grid / .goods-card などと競合しないよう、
+   セクション固有のラッパースタイルのみを定義
+   ============================== */
+.new-goods {
+    margin-top: 40px;
+    padding: 20px;
+    background: #fafafa;
+    border-radius: 8px;
+}

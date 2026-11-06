@@ -87,6 +87,9 @@ foreach ($cart_items as $item) {
 
 <?php require '../../meetory-header.php'; ?>
 
+<!-- ページ固有のスタイルシートを読み込む（ショッピングカート専用） -->
+<link rel="stylesheet" href="../assets/css/cart-list.css">
+
 <main>
 
     <h1>ショッピングカート</h1>
@@ -125,7 +128,7 @@ foreach ($cart_items as $item) {
 
                 <div class="goods-image">
                     <img
-                        src="/meetory_php/<?= htmlspecialchars(
+                        src="/Meetory/<?= htmlspecialchars(
                             $image_path,
                             ENT_QUOTES,
                             'UTF-8'

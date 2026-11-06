@@ -65,5 +65,3 @@
 </div>
 
 <script src="../assets/js/login.js"></script>
-
-<?php require '../../meetory-footer.php'; ?>

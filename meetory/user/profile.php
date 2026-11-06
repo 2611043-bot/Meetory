@@ -398,7 +398,7 @@ $display_goods = ($active_tab === 'selling')
                         <?php if (!empty($goods['image_path'])): ?>
 
                             <img
-                                src="/meetory_php/<?= htmlspecialchars(
+                                src="/Meetory/<?= htmlspecialchars(
                                     ltrim($goods['image_path'], '/'),
                                     ENT_QUOTES,
                                     'UTF-8'

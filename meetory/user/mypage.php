@@ -108,6 +108,9 @@ require '../../meetory-header.php';
 
 ?>
 
+<!-- ページ固有のスタイルシートを読み込む（マイページ専用） -->
+<link rel="stylesheet" href="../assets/css/mypage.css">
+
 <h1>マイページ</h1>
 
 <h2>ユーザー情報</h2>
@@ -179,7 +182,7 @@ require '../../meetory-header.php';
                         <?php if (!empty($item['image_path'])): ?>
                             <div class="goods-image">
                                 <img
-                                    src="/meetory_php/<?= htmlspecialchars(
+                                    src="/Meetory/<?= htmlspecialchars(
                                         ltrim($item['image_path'], '/'),
                                         ENT_QUOTES,
                                         'UTF-8'
