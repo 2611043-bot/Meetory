@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>Meetory</title>
 
-    <!-- <style>
+    <style>
         * {
             box-sizing: border-box;
         }
@@ -82,9 +82,7 @@
             color: #90a4ae;
             font-size: 12px;
         }
-    </style> -->
-
-    <link rel="stylesheet" href="login-home.css">
+    </style>
 </head>
 
 <body>

@@ -1,0 +1,187 @@
+/* 移行元: meetory/user/register.php (17行目〜183行目) */
+
+/* .register-page - registerページのメインコンテナ */
+.register-page {
+    min-height: 70vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #eef8ff, #f8fbff);
+}
+
+/* .register-card - 登録カード */
+.register-card {
+    width: 100%;
+    max-width: 420px;
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(30, 136, 229, 0.12);
+    border: 1px solid #e1f0fa;
+}
+
+/* .register-title - タイトル */
+.register-title {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 32px;
+    color: #1976d2;
+}
+
+/* .register-description - 説明文 */
+.register-description {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #6b7c8f;
+    font-size: 14px;
+}
+
+/* .form-group - フォームグループ */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* .form-group label - ラベル */
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #34495e;
+}
+
+/* .form-group input - 入力欄 */
+.form-group input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 15px;
+    border: 1px solid #cddfea;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    transition: 0.2s;
+}
+
+/* .form-group input:focus - フォーカス時 */
+.form-group input:focus {
+    border-color: #2196f3;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.12);
+}
+
+/* .form-group input.is-invalid - エラー時 */
+.form-group input.is-invalid {
+    border-color: #e53935;
+    background-color: #fff8f8;
+}
+
+/* .field-error - エラーメッセージ */
+.field-error {
+    color: #e53935;
+    font-size: 13px;
+    margin-top: 6px;
+    font-weight: bold;
+}
+
+/* .password-wrapper - パスワード入力ラッパー */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* .password-wrapper input - パスワード入力欄 */
+.password-wrapper input {
+    padding-right: 45px;
+}
+
+/* .toggle-password-btn - パスワード表示切り替えボタン */
+.toggle-password-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    padding: 6px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+/* .toggle-password-btn:hover - ホバー時 */
+.toggle-password-btn:hover {
+    color: #1976d2;
+}
+
+/* .strength-wrapper - パスワード強度ラッパー */
+.strength-wrapper {
+    margin-top: 8px;
+    display: none;
+}
+
+/* .strength-bar-bg - 強度バー背景 */
+.strength-bar-bg {
+    width: 100%;
+    height: 3px;
+    background-color: #e0e0e0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+/* .strength-bar - 強度バー */
+.strength-bar {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* .strength-text - 強度テキスト */
+.strength-text {
+    font-size: 11px;
+    margin-top: 3px;
+    font-weight: bold;
+    color: #6b7c8f;
+}
+
+/* .register-button - 登録ボタン */
+.register-button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+/* .register-button:hover - ホバー時 */
+.register-button:hover {
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+}
+
+/* .login-link - ログインリンク */
+.login-link {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 14px;
+    color: #6b7c8f;
+}
+
+/* .login-link a - リンク */
+.login-link a {
+    color: #1976d2;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    font-weight: bold;
+}
+
+/* .login-link a:hover - ホバー時 */
+.login-link a:hover {
+    color: #1565c0;
+}
