@@ -108,6 +108,9 @@ require '../../meetory-header.php';
 
 ?>
 
+<!-- ページ固有のスタイルシートを読み込む（マイページ専用） -->
+<link rel="stylesheet" href="../assets/css/mypage.css">
+
 <h1>マイページ</h1>
 
 <h2>ユーザー情報</h2>

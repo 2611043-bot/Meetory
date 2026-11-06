@@ -87,6 +87,9 @@ foreach ($cart_items as $item) {
 
 <?php require '../../meetory-header.php'; ?>
 
+<!-- ページ固有のスタイルシートを読み込む（ショッピングカート専用） -->
+<link rel="stylesheet" href="../assets/css/cart-list.css">
+
 <main>
 
     <h1>ショッピングカート</h1>

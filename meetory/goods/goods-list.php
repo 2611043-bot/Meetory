@@ -91,6 +91,9 @@ $goods_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <?php require '../../meetory-header.php'; ?>
 
+<!-- ページ固有のスタイルシートを読み込む（商品一覧専用） -->
+<link rel="stylesheet" href="../assets/css/goods-list.css">
+
 <main>
     <h1>商品一覧</h1>
 
