@@ -1,19 +1,338 @@
-/* ==============================
-   マイページ専用スタイルシート
-   mypage.php で class="goods-image" を使用
-   他ページ（goods-list.php, cart-list.php 等）とクラス名が重複するため、
-   ここでは mypage.php のHTML構造に最小限のスタイルのみを定義
-   ============================== */
+@charset "UTF-8";
 
-/* 商品画像のラッパー */
-.goods-image {
-    text-align: center;
-    margin-bottom: 12px;
+/* ==========================================================================
+   全体ベース（背景カラーはログイン画面と統一）
+   ========================================================================== */
+body {
+    background-color: #f4f8fa;
+    margin: 0;
 }
 
-/* 商品画像（200pxに幅を制限し、レイアウト崩れを防止） */
-.goods-image img {
-    max-width: 200px;
-    height: auto;
+.mypage-container {
+    max-width: 840px;
+    margin: 40px auto 90px;
+    padding: 0 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #1e293b;
+}
+
+/* ページタイトル（立体バーアクセント） */
+.mypage-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: -0.3px;
+}
+
+.mypage-title::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 24px;
+    background: linear-gradient(180deg, #1a85ea 0%, #005bb5 100%);
     border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(26, 133, 234, 0.4);
+}
+
+/* ==========================================================================
+   ユーザー情報カード（重厚感のある2層シャドウ＋立体インナー行）
+   ========================================================================== */
+.user-info-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 32px;
+    /* 2層のグラデーションシャドウでくっきり浮き上がらせる */
+    box-shadow: 
+        0 20px 40px -15px rgba(15, 23, 42, 0.08),
+        0 4px 12px 0 rgba(26, 133, 234, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    margin-bottom: 32px;
+}
+
+.user-info-card h2 {
+    font-size: 17px;
+    font-weight: 800;
+    color: #1a85ea;
+    margin-top: 0;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #eef6fc;
+    letter-spacing: 0.5px;
+}
+
+.info-row {
+    font-size: 15px;
+    margin: 14px 0;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    padding: 14px 20px;
+    border-radius: 12px;
+    /* 内側に凹み感・外側に少し影を付けてカード化 */
+    border: 1px solid #e2eaf0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+}
+
+.info-row:hover {
+    border-color: #bcd9f5;
+    box-shadow: 0 4px 12px rgba(26, 133, 234, 0.08);
+    transform: translateY(-1px);
+}
+
+.info-label {
+    color: #64748b;
+    width: 140px;
+    flex-shrink: 0;
+    font-weight: 600;
+    font-size: 13.5px;
+}
+
+.info-value {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.section-divider {
+    display: none;
+}
+
+/* ==========================================================================
+   購入履歴カード（浮遊感シャドウ）
+   ========================================================================== */
+.purchase-history-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 
+        0 20px 40px -15px rgba(15, 23, 42, 0.08),
+        0 4px 12px 0 rgba(26, 133, 234, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.purchase-history-card h2 {
+    font-size: 17px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-top: 0;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #eef6fc;
+}
+
+/* 履歴なし表示（内側に窪んだインセットシャドウ） */
+.empty-message {
+    color: #64748b;
+    text-align: center;
+    padding: 56px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    background: #f8fafc;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03);
+    margin: 10px 0;
+}
+
+/* ==========================================================================
+   取引カード（カード自体が立体的に持ち上がる）
+   ========================================================================== */
+.transaction-box {
+    background: #ffffff;
+    border: 1px solid #e1ebf3;
+    border-radius: 16px;
+    padding: 22px 26px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transaction-box:hover {
+    transform: translateY(-4px);
+    border-color: #1a85ea;
+    box-shadow: 0 12px 28px rgba(26, 133, 234, 0.15);
+}
+
+.transaction-box h3 {
+    font-size: 15px;
+    color: #1a85ea;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-weight: 800;
+}
+
+.meta-row {
+    font-size: 13px;
+    color: #64748b;
+    margin: 5px 0;
+}
+
+.status-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #eaf4fd 0%, #d5e9fa 100%);
+    color: #1a85ea;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(26, 133, 234, 0.12);
+}
+
+.transaction-box h4 {
+    font-size: 13.5px;
+    color: #334155;
+    margin-top: 18px;
+    margin-bottom: 12px;
+    padding-top: 14px;
+    border-top: 1px dashed #e2e8f0;
+    font-weight: 700;
+}
+
+.item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 14px 0;
+}
+
+.item-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    border: 1px solid #edf2f7;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.goods-image {
+    width: 68px;
+    height: 68px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #e2e8f0;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.goods-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-image-text {
+    width: 68px;
+    height: 68px;
+    background: #f1f5f9;
+    color: #94a3b8;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.item-details {
+    flex-grow: 1;
+}
+
+.item-name {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+}
+
+.item-price {
+    font-size: 13.5px;
+    color: #64748b;
+    margin: 0;
+}
+
+.item-price span {
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.total-price-row {
+    text-align: right;
+    font-size: 14px;
+    color: #475569;
+    margin-top: 16px;
+    margin-bottom: 0;
+    font-weight: 600;
+}
+
+.total-price-value {
+    font-size: 20px;
+    color: #ef4444;
+    font-weight: 900;
+    margin-left: 6px;
+}
+
+.transaction-divider {
+    display: none;
+}
+
+/* ==========================================================================
+   ログアウトボタン（3D押し込みシャドウ付きボタン）
+   ========================================================================== */
+/* ==========================================================================
+   ログアウトボタン（デフォルトで存在感のある赤スタイル）
+   ========================================================================== */
+.logout-container {
+    margin-top: 40px;
+    text-align: center;
+}
+
+/* ==========================================================================
+   ログアウトボタン（洗練されたフラットカード・アイコンスタイル）
+   ========================================================================== */
+/* ==========================================================================
+   ログアウトボタン（クリーン＆洗練されたホバーリワーク）
+   ========================================================================== */
+.logout-container {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+}
+
+.btn-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 36px;
+    background: #ffffff;
+    color: #e53e3e;
+    border: 1.5px solid #fecaca;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(229, 62, 62, 0.08);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* カーソルを合わせた時のリワークエフェクト */
+.btn-logout:hover {
+    background: #e53e3e;
+    color: #ffffff;
+    border-color: #e53e3e;
+    box-shadow: 0 8px 22px rgba(229, 62, 62, 0.28);
+    transform: translateY(-2px);
+}
+
+/* クリックした時の打鍵感 */
+.btn-logout:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(229, 62, 62, 0.2);
 }
