@@ -35,7 +35,7 @@ $goods_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!-- CSSを読み込む -->
-<link rel="stylesheet" href="/meetory_php/meetory/assets/css/home.css">
+<link rel="stylesheet" href="/Meetory/meetory/assets/css/home.css">
 
 <?php require_once __DIR__ . '/../meetory-header.php'; ?>
 
@@ -43,7 +43,7 @@ $goods_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <section class="home-intro">
         <h1>Meetoryへようこそ！</h1>
         <p>あなたのお気に入りの商品を見つけよう。</p>
-        <a href="/meetory_php/meetory/goods/goods-list.php">
+        <a href="/Meetory/meetory/goods/goods-list.php">
             商品を探す
         </a>
     </section>
@@ -58,7 +58,7 @@ $goods_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <?php foreach ($goods_list as $goods): ?>
                     <a
                         class="goods-card"
-                        href="/meetory_php/meetory/goods/goods-detail.php?goods_id=<?= (int) $goods['goods_id'] ?>"
+                        href="/Meetory/meetory/goods/goods-detail.php?goods_id=<?= (int) $goods['goods_id'] ?>"
                     >
                         <?php
                         $image_path = $goods['image_path'] ?? '';
@@ -72,7 +72,7 @@ $goods_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                         <?php if ($is_valid_image): ?>
                             <img
-                                src="/meetory_php/<?= htmlspecialchars($image_path, ENT_QUOTES, 'UTF-8') ?>"
+                                src="/Meetory/<?= htmlspecialchars($image_path, ENT_QUOTES, 'UTF-8') ?>"
                                 alt="<?= htmlspecialchars($goods['goods_name'], ENT_QUOTES, 'UTF-8') ?>"
                             >
                         <?php else: ?>
@@ -92,7 +92,7 @@ $goods_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php endif; ?>
 
         <div class="more-goods">
-            <a href="/meetory_php/meetory/goods/goods-list.php">
+            <a href="/Meetory/meetory/goods/goods-list.php">
                 もっと見る
             </a>
         </div>
@@ -102,4 +102,4 @@ $goods_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <?php require_once __DIR__ . '/../meetory-footer.php'; ?>
 
 <!-- JavaScriptを読み込む -->
-<script src="/meetory_php/meetory/assets/js/home.js" defer></script>
+<script src="/Meetory/meetory/assets/js/home.js" defer></script>
