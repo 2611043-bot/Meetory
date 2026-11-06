@@ -123,7 +123,7 @@ $can_add_cart = isset($_SESSION['user_id'])
                 <?php $has_valid_image = true; ?>
 
                 <img
-                    src="/meetory_php/<?= htmlspecialchars(
+                    src="/Meetory/<?= htmlspecialchars(
                         $image['image_path'],
                         ENT_QUOTES,
                         'UTF-8'

@@ -128,7 +128,7 @@ foreach ($cart_items as $item) {
 
                 <div class="goods-image">
                     <img
-                        src="/meetory_php/<?= htmlspecialchars(
+                        src="/Meetory/<?= htmlspecialchars(
                             $image_path,
                             ENT_QUOTES,
                             'UTF-8'

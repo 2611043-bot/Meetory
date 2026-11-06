@@ -205,7 +205,7 @@ $goods_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             <div class="goods-image">
                 <img
-                    src="/meetory_php/<?= htmlspecialchars(
+                    src="/Meetory/<?= htmlspecialchars(
                         $image_path,
                         ENT_QUOTES,
                         'UTF-8'

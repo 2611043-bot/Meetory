@@ -182,7 +182,7 @@ require '../../meetory-header.php';
                         <?php if (!empty($item['image_path'])): ?>
                             <div class="goods-image">
                                 <img
-                                    src="/meetory_php/<?= htmlspecialchars(
+                                    src="/Meetory/<?= htmlspecialchars(
                                         ltrim($item['image_path'], '/'),
                                         ENT_QUOTES,
                                         'UTF-8'
