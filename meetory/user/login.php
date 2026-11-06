@@ -64,29 +64,6 @@
 
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const passwordInput = document.getElementById('password');
-    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
-    const eyeIcon = document.getElementById('eyeIcon');
-
-    if (togglePasswordBtn && passwordInput && eyeIcon) {
-        togglePasswordBtn.addEventListener('click', () => {
-            // パスワードの入力タイプ切り替え
-            const isPassword = passwordInput.getAttribute('type') === 'password';
-            passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
-            
-            // アイコンの見た目を切り替え (斜め線あり ⇄ 目のみ)
-            if (isPassword) {
-                eyeIcon.classList.remove('fa-eye-slash');
-                eyeIcon.classList.add('fa-eye');
-            } else {
-                eyeIcon.classList.remove('fa-eye');
-                eyeIcon.classList.add('fa-eye-slash');
-            }
-        });
-    }
-});
-</script>
+<script src="../assets/js/login.js"></script>
 
 <?php require '../../meetory-footer.php'; ?>
