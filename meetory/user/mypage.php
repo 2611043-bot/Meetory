@@ -236,4 +236,8 @@ require '../../meetory-header.php';
 
 <a href="logout.php">ログアウト</a>
 
+<p>
+    <a href="favorites.php">ほしいものリストを見る</a>
+</p>
+
 <?php require '../../meetory-footer.php'; ?>

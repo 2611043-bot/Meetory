@@ -1,0 +1,119 @@
+/* ==============================
+   ほしいものリスト専用スタイルシート
+   favorites.php で class="favorites-list", "favorite-item", "favorite-image", "favorite-info" を使用
+   他ページのスタイルと競合しないよう、セレクタはページ固有のクラス名に限定
+   ============================== */
+
+/* ほしいものリストの一覧コンテナ */
+.favorites-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* 個別のほしいものアイテム */
+.favorite-item {
+    flex: 1 1 calc(25% - 20px);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    box-sizing: border-box;
+    background: #fff;
+    position: relative;
+}
+
+/* 商品画像のラッパー */
+.favorite-image {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+/* 商品画像 */
+.favorite-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+/* 画像なしの場合 */
+.favorite-image.no-image {
+    padding: 40px 0;
+    background: #f5f5f5;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #666;
+}
+
+/* 情報エリア */
+.favorite-info h2 {
+    font-size: 16px;
+    margin: 0 0 8px 0;
+}
+
+.favorite-info h2 a {
+    color: #333;
+    text-decoration: none;
+}
+
+.favorite-info h2 a:hover {
+    text-decoration: underline;
+}
+
+.favorite-info p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+/* 売却済み・出品中のラベル */
+.favorite-sold {
+    color: #d00;
+    font-weight: bold;
+    font-size: 14px;
+    margin: 4px 0;
+}
+
+.favorite-active {
+    color: #28a745;
+    font-weight: bold;
+    font-size: 14px;
+    margin: 4px 0;
+}
+
+/* 削除ボタン */
+.favorite-delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 4px 8px;
+    font-size: 12px;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.favorite-delete-btn:hover {
+    background: #c82333;
+}
+
+/* 削除フォーム（インライン表示） */
+.favorite-delete-form {
+    margin: 0;
+}
+
+/* スマートフォン対応：カードを1列に */
+@media (max-width: 768px) {
+    .favorite-item {
+        flex: 1 1 calc(50% - 20px);
+    }
+}
+
+@media (max-width: 480px) {
+    .favorite-item {
+        flex: 1 1 100%;
+    }
+}

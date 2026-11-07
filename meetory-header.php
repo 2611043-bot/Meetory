@@ -109,6 +109,14 @@ $is_auth_page = in_array(
                     </a>
 
                     <a
+                        href="/Meetory/meetory/user/favorites.php"
+                        class="nav-link"
+                    >
+                        <i class="fa-solid fa-heart"></i>
+                        ほしいものリスト
+                    </a>
+
+                    <a
                         href="/Meetory/meetory/user/logout.php"
                         class="nav-link"
                     >

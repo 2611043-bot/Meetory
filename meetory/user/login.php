@@ -14,6 +14,11 @@
 
         <form action="login-process.php" method="post">
 
+            <?php $return_url = $_GET['return_url'] ?? ''; ?>
+            <?php if ($return_url !== ''): ?>
+                <input type="hidden" name="return_url" value="<?= htmlspecialchars($return_url, ENT_QUOTES, 'UTF-8') ?>">
+            <?php endif; ?>
+
             <div class="form-group">
                 <label for="user_name">ユーザー名</label>
                 <input

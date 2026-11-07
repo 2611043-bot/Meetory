@@ -97,9 +97,23 @@ $can_add_cart = isset($_SESSION['user_id'])
     && !$is_owner
     && (int) $goods['is_sold'] === 0;
 
+// ほしいものリストに保存済みか確認
+$is_favorited = false;
+if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $_SESSION['user_id'] > 0) {
+    $login_user_id = (int) $_SESSION['user_id'];
+    $fav_stmt = $pdo->prepare(
+        'SELECT favorite_id FROM favorites WHERE user_id = ? AND goods_id = ?'
+    );
+    $fav_stmt->execute([$login_user_id, $goods_id]);
+    $is_favorited = $fav_stmt->fetch(PDO::FETCH_ASSOC) !== false;
+}
+
 ?>
 
 <?php require '../../meetory-header.php'; ?>
+
+<!-- ページ固有のスタイルシートを読み込む（商品詳細専用） -->
+<link rel="stylesheet" href="../assets/css/favorites.css">
 
 <main>
 
@@ -163,6 +177,27 @@ $can_add_cart = isset($_SESSION['user_id'])
             価格：
             <?= number_format((int) $goods['price']) ?>円
         </p>
+
+        <!-- ほしいものリストボタン -->
+        <form
+            action="<?= $is_favorited ? '../goods/goods-favorite-delete.php' : '../goods/goods-favorite-add.php' ?>"
+            method="post"
+            class="favorite-form"
+        >
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="goods_id" value="<?= (int) $goods['goods_id'] ?>">
+            <input type="hidden" name="return_url" value="goods-detail.php?goods_id=<?= (int) $goods['goods_id'] ?>">
+            <button
+                type="submit"
+                class="js-favorite-btn favorite-btn-detail<?= $is_favorited ? ' is-favorited' : '' ?>"
+                data-goods-id="<?= (int) $goods['goods_id'] ?>"
+                data-is-logged-in="<?= isset($_SESSION['user_id']) ? '1' : '0' ?>"
+                data-csrf-token="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>"
+            >
+                <i class="fa-solid fa-heart<?= $is_favorited ? '' : '-o' ?>"></i>
+                <?= $is_favorited ? ' ほしいものリストから解除' : ' ほしいものリストに追加' ?>
+            </button>
+        </form>
 
         <h3>商品説明</h3>
 
@@ -279,5 +314,8 @@ $can_add_cart = isset($_SESSION['user_id'])
     <?php endif; ?>
 
 </main>
+
+<!-- ほしいものリスト用JavaScript -->
+<script src="../assets/js/favorites.js" defer></script>
 
 <?php require '../../meetory-footer.php'; ?>

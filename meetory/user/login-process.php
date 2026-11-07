@@ -48,7 +48,12 @@ if ($user && password_verify($password, $user['password'])) {
     $_SESSION['role'] = $user['role'] ?? 'user';
 
     // ログイン後のページへ移動
-    header('Location: ../home.php');
+    $return_url = $_POST['return_url'] ?? '';
+    if ($return_url !== '' && is_string($return_url) && preg_match('~\A/Meetory/meetory/.*\z~', $return_url)) {
+        header('Location: ' . $return_url);
+    } else {
+        header('Location: ../home.php');
+    }
     exit;
 
 } else {
