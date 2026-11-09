@@ -18,13 +18,18 @@ $profile_user_id = filter_input(
     FILTER_VALIDATE_INT
 );
 
+// user_idが指定されていない場合はログイン中のユーザーIDを使用
 if (
     $profile_user_id === false ||
     $profile_user_id === null ||
     $profile_user_id <= 0
 ) {
-    http_response_code(400);
-    exit('ユーザーIDが正しくありません。');
+    if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $_SESSION['user_id'] > 0) {
+        $profile_user_id = (int) $_SESSION['user_id'];
+    } else {
+        http_response_code(400);
+        exit('ユーザーIDが正しくありません。');
+    }
 }
 
 // ユーザー情報を取得

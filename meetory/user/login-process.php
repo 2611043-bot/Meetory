@@ -52,7 +52,7 @@ if ($user && password_verify($password, $user['password'])) {
     if ($return_url !== '' && is_string($return_url) && preg_match('~\A/Meetory/meetory/.*\z~', $return_url)) {
         header('Location: ' . $return_url);
     } else {
-        header('Location: ../home.php');
+        header('Location: ../index.php');
     }
     exit;
 
