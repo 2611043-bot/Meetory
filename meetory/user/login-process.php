@@ -58,8 +58,10 @@ if ($user && password_verify($password, $user['password'])) {
 
 } else {
 
-    // ログイン失敗
-    exit('ユーザー名またはパスワードが間違っています。');
+    // ログイン失敗：ログイン画面へ戻る（エラーフラグとユーザー名を保持）
+    $redirect_url = 'login.php?error=1&user_name=' . urlencode($user_name);
+    header('Location: ' . $redirect_url);
+    exit;
 
 }
 ?>

@@ -9,7 +9,6 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background-color: #f4f7fb;
     color: #333;
-    overflow-x: hidden;
 }
 
 /* ヘッダー全体 */
@@ -358,4 +357,124 @@ body {
 
 .sidebar-link.sidebar-logout:hover i {
     color: #d33;
+}
+
+/* アカウント削除リンク */
+.sidebar-link.sidebar-delete {
+    color: #b71c1c;
+}
+
+.sidebar-link.sidebar-delete:hover {
+    background-color: #ffebee;
+    color: #b71c1c;
+}
+
+.sidebar-link.sidebar-delete:hover i {
+    color: #b71c1c;
+}
+
+/* アカウント削除確認モーダル オーバーレイ */
+.delete-account-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1100;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.delete-account-modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* アカウント削除確認モーダル */
+.delete-account-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 100%;
+    max-width: 400px;
+    background-color: #ffffff;
+    z-index: 1110;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    padding: 0;
+    overflow: hidden;
+}
+
+.delete-account-modal.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* モーダルコンテンツ */
+.delete-account-modal-content {
+    padding: 32px 28px;
+    text-align: center;
+}
+
+/* モーダルタイトル */
+.delete-account-modal-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 12px 0;
+}
+
+/* モーダル警告文 */
+.delete-account-modal-warning {
+    font-size: 11px;
+    color: #d32f2f;
+    margin: 0 0 20px 0;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+/* モーダルボタン群 */
+.delete-account-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+/* モーダルボタン共通 */
+.delete-account-modal-btn {
+    flex: 1;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+/* キャンセルボタン */
+.delete-account-modal-cancel {
+    background-color: #f5f5f5;
+    color: #555;
+}
+
+.delete-account-modal-cancel:hover {
+    background-color: #e0e0e0;
+}
+
+/* 削除実行ボタン */
+.delete-account-modal-confirm {
+    background-color: #1a73e8;
+    color: #ffffff;
+}
+
+.delete-account-modal-confirm:hover {
+    background-color: #0d47a1;
 }

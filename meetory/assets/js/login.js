@@ -17,4 +17,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // エラー表示と赤枠を消す処理
+    const userNameInput = document.getElementById('user_name');
+    const errorMessage = document.querySelector('.error-message');
+
+    function clearError() {
+        if (userNameInput) {
+            userNameInput.classList.remove('input-error');
+        }
+        if (passwordInput) {
+            passwordInput.classList.remove('input-error');
+        }
+        if (errorMessage) {
+            errorMessage.remove();
+        }
+    }
+
+    if (userNameInput) {
+        userNameInput.addEventListener('input', clearError);
+    }
+    if (passwordInput) {
+        passwordInput.addEventListener('input', clearError);
+    }
 });

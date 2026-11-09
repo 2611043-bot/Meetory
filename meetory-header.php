@@ -5,6 +5,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
+// CSRFトークンを生成（全ページで利用可能にするため）
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // 共通関数を読み込む
 require_once __DIR__ . '/meetory-functions.php';
 
@@ -203,6 +208,14 @@ $is_auth_page = in_array(
                 <i class="fa-solid fa-sign-out-alt"></i>
                 ログアウト
             </a>
+            <a
+                href="/Meetory/meetory/user/account-delete.php"
+                class="sidebar-link sidebar-delete"
+                data-delete-account
+            >
+                <i class="fa-solid fa-user-minus"></i>
+                アカウント削除
+            </a>
             <?php else: ?>
             <a
                 href="/Meetory/meetory/user/login.php"
@@ -215,15 +228,45 @@ $is_auth_page = in_array(
         </nav>
     </div>
 
+    <!-- アカウント削除確認モーダル -->
+    <div class="delete-account-modal-overlay" id="deleteAccountModalOverlay"></div>
+    <div class="delete-account-modal" id="deleteAccountModal">
+        <div class="delete-account-modal-content">
+            <h2 class="delete-account-modal-title">アカウントを削除しますか？</h2>
+            <p class="delete-account-modal-warning">
+                削除するとアカウントを元に戻せなくなります。
+            </p>
+            <div class="delete-account-modal-actions">
+                <button
+                    type="button"
+                    class="delete-account-modal-btn delete-account-modal-cancel"
+                    id="deleteAccountCancel"
+                >
+                    いいえ
+                </button>
+                <button
+                    type="button"
+                    class="delete-account-modal-btn delete-account-modal-confirm"
+                    id="deleteAccountConfirm"
+                >
+                    はい
+                </button>
+            </div>
+        </div>
+    </div>
+
 </header>
 
 <!-- 検索時のオーバーレイ -->
 <div class="search-overlay" id="searchOverlay"></div>
 
-<!-- ヘッダー専用JavaScript -->
-<script
-    src="/Meetory/meetory/assets/js/header.js?v=2026110901"
-    defer
-></script>
+    <!-- ヘッダー専用JavaScript -->
+    <script
+        src="/Meetory/meetory/assets/js/header.js?v=2026110901"
+        defer
+    ></script>
+
+    <!-- CSRFトークン（全ページ共通、アカウント削除等で使用） -->
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
 
 <main class="main-container">

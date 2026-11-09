@@ -70,16 +70,32 @@
 
 /* .form-group input.is-invalid - エラー時 */
 .form-group input.is-invalid {
-    border-color: #e53935;
-    background-color: #fff8f8;
+    border-color: #d32f2f !important;
+    background-color: #fff8f8 !important;
+    animation: inputShake 0.6s ease-in-out;
 }
 
 /* .field-error - エラーメッセージ */
 .field-error {
-    color: #e53935;
+    color: #d32f2f;
     font-size: 13px;
     margin-top: 6px;
     font-weight: bold;
+    animation: shake 0.6s ease-in-out;
+}
+
+/* エラーアニメーション：左右に揺れる */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+
+/* 入力欄のエラーアニメーション */
+@keyframes inputShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
 }
 
 /* .password-wrapper - パスワード入力ラッパー */
