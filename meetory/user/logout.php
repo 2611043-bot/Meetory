@@ -9,7 +9,7 @@ session_start();
 session_destroy();
 
 // ログイン画面へ移動
-header('Location: login.php');
+header('Location: ../index.php');
 exit;
 ?>
 

@@ -111,20 +111,25 @@ $is_auth_page = in_array(
                         ログイン
                     </a>
 
+                    <!-- ハンバーガーメニューボタン（未ログイン時も表示） -->
+                    <button
+                        type="button"
+                        class="icon-btn"
+                        id="hamburgerBtn"
+                        aria-label="メニューを開く"
+                    >
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+
                 <?php endif; ?>
 
             </div>
-
-            <?php if (isset($_SESSION['user_id'])): ?>
-
-            <?php endif; ?>
 
         <?php endif; ?>
 
     </div>
 
     <!-- サイドメニューオーバーレイ（header-mainの外に配置） -->
-    <?php if (isset($_SESSION['user_id'])): ?>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- サイドメニュー（header-mainの外に配置） -->
@@ -163,6 +168,7 @@ $is_auth_page = in_array(
                     </a>
 
             <!-- アカウント -->
+            <?php if (isset($_SESSION['user_id'])): ?>
             <h2 class="sidebar-section-title">アカウント</h2>
             <a
                 href="/Meetory/meetory/user/mypage.php"
@@ -185,9 +191,11 @@ $is_auth_page = in_array(
                         <i class="fa-solid fa-user-gear"></i>
                         プロフィール・設定
                     </a>
+            <?php endif; ?>
 
             <!-- その他 -->
             <h2 class="sidebar-section-title">その他</h2>
+            <?php if (isset($_SESSION['user_id'])): ?>
             <a
                 href="/Meetory/meetory/user/logout.php"
                 class="sidebar-link sidebar-logout"
@@ -195,9 +203,17 @@ $is_auth_page = in_array(
                 <i class="fa-solid fa-sign-out-alt"></i>
                 ログアウト
             </a>
+            <?php else: ?>
+            <a
+                href="/Meetory/meetory/user/login.php"
+                class="sidebar-link sidebar-logout"
+            >
+                <i class="fa-solid fa-sign-in-alt"></i>
+                ログイン
+            </a>
+            <?php endif; ?>
         </nav>
     </div>
-    <?php endif; ?>
 
 </header>
 
