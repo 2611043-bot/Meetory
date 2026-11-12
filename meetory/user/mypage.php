@@ -43,7 +43,6 @@ if (!$user) {
 }
 
 // 購入履歴を取得
-// 購入履歴を取得
 $sql = '
     SELECT
         b.transaction_id,
@@ -100,6 +99,77 @@ foreach ($purchase_rows as $row) {
             'purchase_price' => $row['purchase_price'],
             'image_path' => $row['image_path']
         ];
+    }
+}
+
+// 出品管理 - 自身が出品した商品を取得
+$seller_goods_sql = '
+    SELECT
+        g.goods_id,
+        g.goods_name,
+        g.price,
+        g.is_sold,
+        g.listed_at,
+        a.auction_id,
+        a.current_price,
+        a.buyout_price,
+        a.start_at,
+        a.end_at,
+        a.auto_extend,
+        a.status,
+        a.winner_user_id,
+        a.winning_price,
+        (
+            SELECT gi.image_path
+            FROM goods_images AS gi
+            WHERE gi.goods_id = g.goods_id
+            ORDER BY gi.display_order ASC, gi.image_id ASC
+            LIMIT 1
+        ) AS image_path
+    FROM goods AS g
+    LEFT JOIN auctions AS a
+        ON a.goods_id = g.goods_id
+    WHERE g.seller_id = ?
+    ORDER BY g.listed_at DESC
+';
+
+$stmt = $pdo->prepare($seller_goods_sql);
+$stmt->execute([$user_id]);
+
+$seller_goods = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// 出品管理の分類
+$tz = new DateTimeZone('Asia/Tokyo');
+$now = new DateTimeImmutable('now', $tz);
+
+$normal_listing = [];
+$normal_sold = [];
+$auction_upcoming = [];
+$auction_active = [];
+$auction_ended = [];
+
+foreach ($seller_goods as $item) {
+    $is_auction = $item['auction_id'] !== null;
+
+    if (!$is_auction) {
+        // 通常出品
+        if ((int) $item['is_sold'] === 1) {
+            $normal_sold[] = $item;
+        } else {
+            $normal_listing[] = $item;
+        }
+    } else {
+        // オークション出品
+        $start_at = new DateTimeImmutable($item['start_at'], $tz);
+        $end_at = new DateTimeImmutable($item['end_at'], $tz);
+
+        if ($now < $start_at) {
+            $auction_upcoming[] = $item;
+        } elseif ($item['status'] === 'sold' || $now >= $end_at) {
+            $auction_ended[] = $item;
+        } else {
+            $auction_active[] = $item;
+        }
     }
 }
 
@@ -232,6 +302,162 @@ require '../../meetory-header.php';
 
     <?php endforeach; ?>
 
+<?php endif; ?>
+
+<hr>
+
+<!-- 出品管理 -->
+<h2>出品管理</h2>
+
+<p>
+    <a href="../goods/goods-register.php">商品を出品する</a>
+</p>
+
+<h3>通常出品</h3>
+
+<h4>出品中</h4>
+<?php if (empty($normal_listing)): ?>
+    <p>出品中の商品はありません。</p>
+<?php else: ?>
+    <ul class="seller-goods-list">
+    <?php foreach ($normal_listing as $item): ?>
+        <li class="seller-goods-item">
+            <?php if (!empty($item['image_path'])): ?>
+                <img
+                    src="/Meetory/<?= htmlspecialchars(ltrim($item['image_path'], '/'), ENT_QUOTES, 'UTF-8') ?>"
+                    alt="<?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?>"
+                    width="100"
+                    loading="lazy"
+                >
+            <?php else: ?>
+                <span class="no-image">画像なし</span>
+            <?php endif; ?>
+            <div class="seller-goods-info">
+                <p><a href="../goods/goods-detail.php?goods_id=<?= (int) $item['goods_id'] ?>"><?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?></a></p>
+                <p>価格：<?= number_format((int) $item['price']) ?>円</p>
+            </div>
+        </li>
+    <?php endforeach; ?>
+    </ul>
+<?php endif; ?>
+
+<h4>売却済み</h4>
+<?php if (empty($normal_sold)): ?>
+    <p>売却済みの商品はありません。</p>
+<?php else: ?>
+    <ul class="seller-goods-list">
+    <?php foreach ($normal_sold as $item): ?>
+        <li class="seller-goods-item">
+            <?php if (!empty($item['image_path'])): ?>
+                <img
+                    src="/Meetory/<?= htmlspecialchars(ltrim($item['image_path'], '/'), ENT_QUOTES, 'UTF-8') ?>"
+                    alt="<?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?>"
+                    width="100"
+                    loading="lazy"
+                >
+            <?php else: ?>
+                <span class="no-image">画像なし</span>
+            <?php endif; ?>
+            <div class="seller-goods-info">
+                <p><a href="../goods/goods-detail.php?goods_id=<?= (int) $item['goods_id'] ?>"><?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?></a></p>
+                <p>価格：<?= number_format((int) $item['price']) ?>円</p>
+                <p class="status-sold">売却済み</p>
+            </div>
+        </li>
+    <?php endforeach; ?>
+    </ul>
+<?php endif; ?>
+
+<h3>オークション出品</h3>
+
+<h4>開始予定</h4>
+<?php if (empty($auction_upcoming)): ?>
+    <p>開始予定のオークションはありません。</p>
+<?php else: ?>
+    <ul class="seller-goods-list">
+    <?php foreach ($auction_upcoming as $item): ?>
+        <li class="seller-goods-item">
+            <?php if (!empty($item['image_path'])): ?>
+                <img
+                    src="/Meetory/<?= htmlspecialchars(ltrim($item['image_path'], '/'), ENT_QUOTES, 'UTF-8') ?>"
+                    alt="<?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?>"
+                    width="100"
+                    loading="lazy"
+                >
+            <?php else: ?>
+                <span class="no-image">画像なし</span>
+            <?php endif; ?>
+            <div class="seller-goods-info">
+                <p><a href="../goods/goods-detail.php?goods_id=<?= (int) $item['goods_id'] ?>"><?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?></a></p>
+                <p>開始価格：<?= number_format((int) $item['price']) ?>円</p>
+                <p>開始日時：<?= htmlspecialchars(date('Y/m/d H:i', strtotime($item['start_at'])), ENT_QUOTES, 'UTF-8') ?></p>
+                <p class="status-upcoming">開始予定</p>
+            </div>
+        </li>
+    <?php endforeach; ?>
+    </ul>
+<?php endif; ?>
+
+<h4>開催中</h4>
+<?php if (empty($auction_active)): ?>
+    <p>開催中のオークションはありません。</p>
+<?php else: ?>
+    <ul class="seller-goods-list">
+    <?php foreach ($auction_active as $item): ?>
+        <li class="seller-goods-item">
+            <?php if (!empty($item['image_path'])): ?>
+                <img
+                    src="/Meetory/<?= htmlspecialchars(ltrim($item['image_path'], '/'), ENT_QUOTES, 'UTF-8') ?>"
+                    alt="<?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?>"
+                    width="100"
+                    loading="lazy"
+                >
+            <?php else: ?>
+                <span class="no-image">画像なし</span>
+            <?php endif; ?>
+            <div class="seller-goods-info">
+                <p><a href="../goods/goods-detail.php?goods_id=<?= (int) $item['goods_id'] ?>"><?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?></a></p>
+                <p>現在価格：<?= number_format((int) $item['current_price']) ?>円</p>
+                <p>終了日時：<?= htmlspecialchars(date('Y/m/d H:i', strtotime($item['end_at'])), ENT_QUOTES, 'UTF-8') ?></p>
+                <p class="status-active">開催中</p>
+            </div>
+        </li>
+    <?php endforeach; ?>
+    </ul>
+<?php endif; ?>
+
+<h4>終了</h4>
+<?php if (empty($auction_ended)): ?>
+    <p>終了したオークションはありません。</p>
+<?php else: ?>
+    <ul class="seller-goods-list">
+    <?php foreach ($auction_ended as $item): ?>
+        <li class="seller-goods-item">
+            <?php if (!empty($item['image_path'])): ?>
+                <img
+                    src="/Meetory/<?= htmlspecialchars(ltrim($item['image_path'], '/'), ENT_QUOTES, 'UTF-8') ?>"
+                    alt="<?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?>"
+                    width="100"
+                    loading="lazy"
+                >
+            <?php else: ?>
+                <span class="no-image">画像なし</span>
+            <?php endif; ?>
+            <div class="seller-goods-info">
+                <p><a href="../goods/goods-detail.php?goods_id=<?= (int) $item['goods_id'] ?>"><?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?></a></p>
+                <p>開始価格：<?= number_format((int) $item['price']) ?>円</p>
+                <p>現在価格：<?= number_format((int) $item['current_price']) ?>円</p>
+                <p>終了日時：<?= htmlspecialchars(date('Y/m/d H:i', strtotime($item['end_at'])), ENT_QUOTES, 'UTF-8') ?></p>
+                <?php if ($item['winner_user_id'] !== null && $item['winner_user_id'] !== ''): ?>
+                    <p>落札価格：<?= number_format((int) $item['winning_price']) ?>円</p>
+                <?php else: ?>
+                    <p>落札者なし</p>
+                <?php endif; ?>
+                <p class="status-ended">終了</p>
+            </div>
+        </li>
+    <?php endforeach; ?>
+    </ul>
 <?php endif; ?>
 
 <a href="logout.php">ログアウト</a>

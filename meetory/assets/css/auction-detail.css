@@ -1,0 +1,76 @@
+/* ==============================
+   オークション詳細専用スタイルシート
+   auction-detail.php で使用
+   ============================== */
+
+/* 入札フォーム */
+.bid-form {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group input[type="number"] {
+    width: 100%;
+    max-width: 200px;
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.bid-btn {
+    padding: 10px 24px;
+    font-size: 16px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.bid-btn:hover {
+    background: #0056b3;
+}
+
+/* 入札履歴 */
+.bid-history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.bid-history-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+/* 価格表示 */
+.price-info {
+    font-size: 16px;
+    color: #555;
+}
+
+.price-info .current {
+    color: #d00;
+    font-weight: bold;
+}
+
+.price-info .start {
+    color: #666;
+}

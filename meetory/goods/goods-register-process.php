@@ -28,7 +28,6 @@ if (
     exit('不正なリクエストです。フォームを開き直してください。');
 }
 
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -50,8 +49,13 @@ $price = $_POST['price'] ?? '';
 $goods_condition = $_POST['goods_condition'] ?? '';
 $category_id = $_POST['category_id'] ?? '';
 $confirm = $_POST['confirm'] ?? '';
+$listing_type = $_POST['listing_type'] ?? 'normal';
+$start_price = $_POST['start_price'] ?? '';
+$buyout_price = $_POST['buyout_price'] ?? '';
+$end_at = $_POST['end_at'] ?? '';
+$auto_extend = $_POST['auto_extend'] ?? '1';
 
- // ==============================
+// ==============================
 // 入力内容のチェック
 // ==============================
 
@@ -80,15 +84,6 @@ if (!is_string($goods_name) || !is_string($description)) {
     } elseif (mb_strlen($description, 'UTF-8') > 5000) {
         $errors[] = '商品説明は5000文字以内で入力してください。';
     }
-}
-
-// 価格のチェック
-if (
-    (!is_string($price) && !is_int($price))
-    || !ctype_digit((string)$price)
-    || (int)$price < 1
-) {
-    $errors[] = '価格は1円以上の整数で入力してください。';
 }
 
 // 商品状態のチェック
@@ -125,6 +120,59 @@ if (
     }
 }
 
+// 出品タイプのチェック
+if ($listing_type !== 'normal' && $listing_type !== 'auction') {
+    $errors[] = '正しい出品方法を選択してください。';
+}
+
+// オークション出品の場合の追加チェック
+if ($listing_type === 'auction') {
+
+    // 開始価格のチェック
+    if (
+        (!is_string($start_price) && !is_int($start_price))
+        || !ctype_digit((string)$start_price)
+        || (int)$start_price < 1
+    ) {
+        $errors[] = '開始価格は1円以上の整数で入力してください。';
+    }
+
+    // 即決価格のチェック（任意入力）
+    if ($buyout_price !== '' && $buyout_price !== null) {
+        if (!ctype_digit((string)$buyout_price) || (int)$buyout_price < 1) {
+            $errors[] = '即決価格は1円以上の整数で入力してください。';
+        } elseif ((int)$start_price >= 1 && (int)$buyout_price <= (int)$start_price) {
+            $errors[] = '即決価格は開始価格より高い金額を入力してください。';
+        }
+    }
+
+    // 終了日時のチェック
+    if (!is_string($end_at) || $end_at === '') {
+        $errors[] = '終了日時を入力してください。';
+    } else {
+        $tz = new DateTimeZone('Asia/Tokyo');
+        $now = new DateTimeImmutable('now', $tz);
+        $input_end_at = new DateTimeImmutable($end_at, $tz);
+        if ($input_end_at <= $now) {
+            $errors[] = '終了日時は現在より未来の日時を入力してください。';
+        }
+    }
+
+    // 自動延長のチェック
+    if ($auto_extend !== '0' && $auto_extend !== '1') {
+        $errors[] = '正しい自動延長設定を選択してください。';
+    }
+} else {
+    // 通常出品の場合の価格チェック
+    if (
+        (!is_string($price) && !is_int($price))
+        || !ctype_digit((string)$price)
+        || (int)$price < 1
+    ) {
+        $errors[] = '価格は1円以上の整数で入力してください。';
+    }
+}
+
 // エラーがある場合は入力内容を保存してフォームに戻る
 if (!empty($errors)) {
     $_SESSION['goods_register_errors'] = $errors;
@@ -134,7 +182,12 @@ if (!empty($errors)) {
         'description' => is_string($description) ? $description : '',
         'price' => is_scalar($price) ? (string)$price : '',
         'goods_condition' => is_string($goods_condition) ? $goods_condition : '',
-        'category_id' => is_scalar($category_id) ? (string)$category_id : ''
+        'category_id' => is_scalar($category_id) ? (string)$category_id : '',
+        'listing_type' => $listing_type,
+        'start_price' => is_scalar($start_price) ? (string)$start_price : '',
+        'buyout_price' => is_scalar($buyout_price) ? (string)$buyout_price : '',
+        'end_at' => is_string($end_at) ? $end_at : '',
+        'auto_extend' => $auto_extend
     ];
 
     header('Location: goods-register.php');
@@ -257,7 +310,7 @@ if ($image_uploaded) {
 }
 
 
- // 確認画面からの2回目の送信なら、SESSIONの画像情報を使う
+// 確認画面からの2回目の送信なら、SESSIONの画像情報を使う
 if ($confirm === '1' && isset($_SESSION['goods_image'])) {
 
     $file_name = $_SESSION['goods_image']['file_name'];
@@ -282,7 +335,6 @@ if ($confirm !== '1') {
     // 確認画面に表示するときのXSS対策
     $display_goods_name = htmlspecialchars($goods_name, ENT_QUOTES, 'UTF-8');
     $display_description = htmlspecialchars($description, ENT_QUOTES, 'UTF-8');
-    $display_price = htmlspecialchars($price, ENT_QUOTES, 'UTF-8');
     $display_goods_condition = htmlspecialchars($goods_condition, ENT_QUOTES, 'UTF-8');
 
     // カテゴリ名を取得
@@ -302,33 +354,55 @@ if ($confirm !== '1') {
         'UTF-8'
     );
 
-$display_image = '';
+    // 出品タイプ表示
+    $display_listing_type = $listing_type === 'auction' ? 'オークション出品' : '通常出品';
 
-if (isset($_SESSION['goods_image'])) {
+    // 価格表示
+    if ($listing_type === 'auction') {
+        $display_price_label = '開始価格';
+        $display_price = htmlspecialchars($start_price, ENT_QUOTES, 'UTF-8') . '円';
+        $display_buyout_price = $buyout_price !== '' && $buyout_price !== null
+            ? htmlspecialchars($buyout_price, ENT_QUOTES, 'UTF-8') . '円'
+            : 'なし';
+        $display_end_at = htmlspecialchars($end_at, ENT_QUOTES, 'UTF-8');
+        $display_auto_extend = $auto_extend === '1' ? 'ON' : 'OFF';
+    } else {
+        $display_price_label = '販売価格';
+        $display_price = htmlspecialchars($price, ENT_QUOTES, 'UTF-8') . '円';
+    }
 
-    $display_image_path = htmlspecialchars(
-        $_SESSION['goods_image']['image_path'],
+    $display_image = '';
+
+    if (isset($_SESSION['goods_image'])) {
+
+        $display_image_path = htmlspecialchars(
+            $_SESSION['goods_image']['image_path'],
+            ENT_QUOTES,
+            'UTF-8'
+        );
+
+        $display_image = '<p>商品画像：</p>';
+        $display_image .= '<img src="../../' . $display_image_path . '" width="200">';
+    }
+
+    $form_goods_name = htmlspecialchars($goods_name, ENT_QUOTES, 'UTF-8');
+    $form_description = htmlspecialchars($description, ENT_QUOTES, 'UTF-8');
+    $form_price = htmlspecialchars($price, ENT_QUOTES, 'UTF-8');
+    $form_goods_condition = htmlspecialchars($goods_condition, ENT_QUOTES, 'UTF-8');
+    $form_category_id = htmlspecialchars((string)$category_id, ENT_QUOTES, 'UTF-8');
+    $form_listing_type = htmlspecialchars($listing_type, ENT_QUOTES, 'UTF-8');
+    $form_start_price = htmlspecialchars($start_price, ENT_QUOTES, 'UTF-8');
+    $form_buyout_price = htmlspecialchars($buyout_price ?? '', ENT_QUOTES, 'UTF-8');
+    $form_end_at = htmlspecialchars($end_at, ENT_QUOTES, 'UTF-8');
+    $form_auto_extend = htmlspecialchars($auto_extend, ENT_QUOTES, 'UTF-8');
+
+    $form_csrf_token = htmlspecialchars(
+        $_SESSION['csrf_token'],
         ENT_QUOTES,
         'UTF-8'
     );
 
-    $display_image = '<p>商品画像：</p>';
-    $display_image .= '<img src="../../' . $display_image_path . '" width="200">';
-}
-
-$form_goods_name = htmlspecialchars($goods_name, ENT_QUOTES, 'UTF-8');
-$form_description = htmlspecialchars($description, ENT_QUOTES, 'UTF-8');
-$form_price = htmlspecialchars($price, ENT_QUOTES, 'UTF-8');
-$form_goods_condition = htmlspecialchars($goods_condition, ENT_QUOTES, 'UTF-8');
-$form_category_id = htmlspecialchars((string)$category_id, ENT_QUOTES, 'UTF-8');
-
-$form_csrf_token = htmlspecialchars(
-    $_SESSION['csrf_token'],
-    ENT_QUOTES,
-    'UTF-8'
-);
-
-echo <<<HTML
+    echo <<<HTML
 
 <h2>商品情報の確認</h2>
 
@@ -336,7 +410,25 @@ echo <<<HTML
 
 <p>商品説明：{$display_description}</p>
 
-<p>価格：{$display_price}円</p>
+<p>出品方法：{$display_listing_type}</p>
+
+<p>{$display_price_label}：{$display_price}</p>
+
+HTML;
+
+    if ($listing_type === 'auction') {
+        echo <<<HTML
+
+<p>即決価格：{$display_buyout_price}</p>
+
+<p>終了日時：{$display_end_at}</p>
+
+<p>自動延長：{$display_auto_extend}</p>
+
+HTML;
+    }
+
+    echo <<<HTML
 
 <p>商品状態：{$display_goods_condition}</p>
 
@@ -364,6 +456,21 @@ echo <<<HTML
     <input type="hidden" name="category_id"
         value="{$form_category_id}">
 
+    <input type="hidden" name="listing_type"
+        value="{$form_listing_type}">
+
+    <input type="hidden" name="start_price"
+        value="{$form_start_price}">
+
+    <input type="hidden" name="buyout_price"
+        value="{$form_buyout_price}">
+
+    <input type="hidden" name="end_at"
+        value="{$form_end_at}">
+
+    <input type="hidden" name="auto_extend"
+        value="{$form_auto_extend}">
+
         <input type="hidden" name="confirm" value="1">
 
     <input type="submit" value="この内容で登録する">
@@ -374,7 +481,7 @@ echo <<<HTML
 
 HTML;
 
-exit;
+    exit;
 }
 
 // ==============================
@@ -391,6 +498,9 @@ try {
 
 
     // 商品情報を登録するSQL
+    // オークションの場合、priceには開始価格を保存
+    $register_price = $listing_type === 'auction' ? $start_price : $price;
+
     $sql = <<<SQL
     INSERT INTO goods
     (seller_id, goods_name, description, price, `condition`, category_id, listed_at)
@@ -406,13 +516,37 @@ try {
         ':seller_id' => $_SESSION['user_id'],
         ':goods_name' => $goods_name,
         ':description' => $description,
-        ':price' => $price,
+        ':price' => $register_price,
         ':goods_condition' => $goods_condition,
         ':category_id' => $category_id
     ]);
 
     // 登録した商品のgoods_idを取得
     $goods_id = $pdo->lastInsertId();
+
+    // オークション出品の場合、auctionsテーブルにも登録
+    if ($listing_type === 'auction') {
+        $sql_auction = <<<SQL
+        INSERT INTO auctions
+        (goods_id, seller_id, start_price, current_price, buyout_price, start_at, end_at, auto_extend, status)
+        VALUES
+        (:goods_id, :seller_id, :start_price, :current_price, :buyout_price, NOW(), :end_at, :auto_extend, 'active')
+        SQL;
+
+        $stmt_auction = $pdo->prepare($sql_auction);
+
+        $buyout_value = ($buyout_price !== '' && $buyout_price !== null) ? (int)$buyout_price : null;
+
+        $stmt_auction->execute([
+            ':goods_id' => $goods_id,
+            ':seller_id' => $_SESSION['user_id'],
+            ':start_price' => (int)$start_price,
+            ':current_price' => (int)$start_price,
+            ':buyout_price' => $buyout_value,
+            ':end_at' => $end_at,
+            ':auto_extend' => (int)$auto_extend
+        ]);
+    }
 
 
     // ==============================

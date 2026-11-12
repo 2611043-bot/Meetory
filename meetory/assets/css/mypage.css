@@ -1,8 +1,8 @@
 /* ==============================
-   マイページ専用スタイルシート
-   mypage.php で class="goods-image" を使用
-   他ページ（goods-list.php, cart-list.php 等）とクラス名が重複するため、
-   ここでは mypage.php のHTML構造に最小限のスタイルのみを定義
+    マイページ専用スタイルシート
+    mypage.php で class="goods-image" を使用
+    他ページ（goods-list.php, cart-list.php 等）とクラス名が重複するため、
+    ここでは mypage.php のHTML構造に最小限のスタイルのみを定義
    ============================== */
 
 /* 商品画像のラッパー */
@@ -16,4 +16,112 @@
     max-width: 200px;
     height: auto;
     border-radius: 4px;
+}
+
+/* ==============================
+   出品管理専用スタイル
+   ============================== */
+
+/* 出品管理リスト */
+.seller-goods-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+/* 出品管理アイテム */
+.seller-goods-item {
+    flex: 1 1 calc(25% - 16px);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    box-sizing: border-box;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.seller-goods-item img {
+    max-width: 100px;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
+
+.no-image {
+    display: block;
+    width: 100px;
+    height: 100px;
+    background: #f5f5f5;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #666;
+    line-height: 100px;
+    text-align: center;
+    margin-bottom: 4px;
+}
+
+.seller-goods-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.seller-goods-info p {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.seller-goods-info p a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.seller-goods-info p a:hover {
+    text-decoration: underline;
+}
+
+.status-sold {
+    color: #d00;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.status-active {
+    color: #28a745;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.status-ended {
+    color: #6c757d;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.status-upcoming {
+    color: #ffc107;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+/* スマートフォン対応 */
+@media (max-width: 768px) {
+    .seller-goods-item {
+        flex: 1 1 calc(50% - 16px);
+    }
+}
+
+@media (max-width: 480px) {
+    .seller-goods-item {
+        flex: 1 1 100%;
+    }
 }

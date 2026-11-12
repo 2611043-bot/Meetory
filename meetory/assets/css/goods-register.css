@@ -5,3 +5,112 @@
     width: 200px;
     display: none;
 }
+
+/* エラー表示 */
+.register-errors {
+    margin-bottom: 20px;
+    padding: 12px;
+    border: 1px solid #dc3545;
+    background: #fdecea;
+    border-radius: 4px;
+}
+
+.register-errors p {
+    margin: 4px 0;
+    color: #dc3545;
+    font-size: 14px;
+}
+
+/* 出品タイプ選択パネル */
+.listing-type-panel {
+    margin: 20px 0;
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.listing-type-panel legend {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #333;
+}
+
+.listing-type-options {
+    display: flex;
+    gap: 20px;
+}
+
+.listing-type-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #333;
+}
+
+.listing-type-option input[type="radio"] {
+    margin: 0;
+}
+
+/* 出品タイプ別入力欄パネル */
+.listing-fields {
+    margin: 20px 0;
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.listing-fields legend {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #333;
+}
+
+.listing-fields p {
+    margin: 0 0 12px 0;
+}
+
+/* スマートフォンでは縦並び（デフォルトは左右2カラム） */
+@media (min-width: 768px) {
+    .listing-type-options {
+        flex-direction: row;
+    }
+
+    .listing-type-option {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 767px) {
+    .listing-type-options {
+        flex-direction: column;
+    }
+
+    .listing-type-option {
+        flex: none;
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+/* 共通入力項目のfieldset共通スタイル */
+.register-form fieldset {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 0 0 20px 0;
+}
+
+.register-form fieldset legend {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #333;
+    padding: 0 8px;
+}
