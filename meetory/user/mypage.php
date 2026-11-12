@@ -240,4 +240,8 @@ require '../../meetory-header.php';
     <a href="favorites.php">ほしいものリストを見る</a>
 </p>
 
+<p>
+    <a href="../index.php">ホームに戻る</a>
+</p>
+
 <?php require '../../meetory-footer.php'; ?>

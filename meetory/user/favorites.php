@@ -97,7 +97,7 @@ require '../../meetory-header.php';
         <p>ほしいものリストはまだ空です。</p>
 
         <p>
-            <a href="../goods/goods-list.php">商品を探す</a>
+            <a href="../index.php">ホームに戻る</a>
         </p>
 
     <?php else: ?>
