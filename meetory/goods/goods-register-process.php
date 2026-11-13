@@ -605,6 +605,13 @@ try {
 
 } catch (Throwable $e) {
 
+    // エラーログを記録
+    error_log(
+        '商品登録エラー: ' . $e->getMessage() .
+        ' in ' . $e->getFile() . ':' . $e->getLine() .
+        ' [' . get_class($e) . ']'
+    );
+
     // DB登録を取り消す
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
