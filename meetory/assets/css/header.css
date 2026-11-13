@@ -56,6 +56,7 @@ body {
     display: flex;
     align-items: center;
     margin: 0 10px;
+    position: relative;
 }
 
 .search-input-group {
@@ -104,6 +105,101 @@ body {
 
 .search-submit-btn:hover {
     background-color: #0d47a1;
+}
+
+/* 商品・カテゴリーの検索候補 */
+.search-suggestions {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 1001;
+    max-height: min(70vh, 480px);
+    overflow-y: auto;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+}
+
+.search-suggestions[hidden] {
+    display: none;
+}
+
+.search-suggestion-group + .search-suggestion-group {
+    border-top: 1px solid #e1e8ed;
+}
+
+.search-suggestion-heading {
+    padding: 10px 14px 6px;
+    color: #777;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.search-suggestion {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    color: #333;
+    text-decoration: none;
+}
+
+.search-suggestion:hover,
+.search-suggestion:focus-visible {
+    outline: none;
+    background: #f4f7fb;
+}
+
+.search-suggestion-image,
+.search-suggestion-placeholder {
+    display: flex;
+    flex: 0 0 48px;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    background: #f0f2f5;
+    color: #999;
+    object-fit: cover;
+}
+
+.search-suggestion-details {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    gap: 3px;
+}
+
+.search-suggestion-name {
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-suggestion-price {
+    color: #e05252;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.search-suggestion-category {
+    min-height: 40px;
+}
+
+.search-suggestion-category i {
+    color: #1a73e8;
+}
+
+.search-suggestion-message {
+    padding: 14px;
+    color: #777;
+    font-size: 13px;
 }
 
 /* 右側メニュー */
