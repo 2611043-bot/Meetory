@@ -59,6 +59,21 @@
     gap: 20px;
 }
 
+.mypage-user-identity {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 14px;
+}
+
+.mypage-avatar {
+    flex: 0 0 64px;
+    width: 64px;
+    height: 64px;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
 .mypage-user-panel h2 {
     margin: 4px 0;
 }

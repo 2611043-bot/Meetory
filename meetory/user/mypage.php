@@ -23,7 +23,12 @@ $pdo = getPDO();
 
 // ユーザー情報を取得
 $sql = '
-    SELECT user_name, email, created_at
+    SELECT
+        user_name,
+        email,
+        created_at,
+        profile_image_type,
+        profile_image
     FROM users
     WHERE user_id = ?
 ';
@@ -169,15 +174,25 @@ require '../../meetory-header.php';
     </header>
 
     <section class="mypage-panel mypage-user-panel">
-        <div>
-            <p class="mypage-eyebrow">ユーザー情報</p>
-            <h2><?= htmlspecialchars($user['user_name'], ENT_QUOTES, 'UTF-8') ?></h2>
-            <p class="mypage-user-email">
-                <?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?>
-            </p>
+        <div class="mypage-user-identity">
+            <div class="mypage-avatar">
+                <?= renderProfileAvatar(
+                    $user,
+                    '',
+                    $user['user_name'] . 'のプロフィールアイコン'
+                ) ?>
+            </div>
+            <div>
+                <p class="mypage-eyebrow">ユーザー情報</p>
+                <h2><?= htmlspecialchars($user['user_name'], ENT_QUOTES, 'UTF-8') ?></h2>
+                <p class="mypage-user-email">
+                    <?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?>
+                </p>
+            </div>
         </div>
         <div class="mypage-link-list">
             <a href="profile.php?user_id=<?= $user_id ?>">プロフィールを見る</a>
+            <a href="profile-image.php">アイコンを変更する</a>
             <a href="password-reset.php">パスワード再設定</a>
         </div>
     </section>

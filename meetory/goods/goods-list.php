@@ -27,6 +27,7 @@ $category_id = is_string($category_id) ? trim($category_id) : '';
 $sql = '
     SELECT
         g.goods_id,
+        g.seller_id,
         g.goods_name,
         g.description,
         g.price,
@@ -38,8 +39,13 @@ $sql = '
             WHERE gi.goods_id = g.goods_id
             ORDER BY gi.display_order ASC, gi.image_id ASC
             LIMIT 1
-        ) AS image_path
+        ) AS image_path,
+        seller.user_name AS seller_name,
+        seller.profile_image_type,
+        seller.profile_image
     FROM goods AS g
+    INNER JOIN users AS seller
+        ON seller.user_id = g.seller_id
 ';
 
 $conditions = [];
@@ -309,6 +315,19 @@ if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $
                     商品の状態：
                     <?= htmlspecialchars($goods['condition'], ENT_QUOTES, 'UTF-8') ?>
                 </p>
+
+                <a
+                    class="goods-seller"
+                    href="../user/profile.php?user_id=<?= (int) $goods['seller_id'] ?>"
+                >
+                    <span class="goods-seller-avatar">
+                        <?= renderProfileAvatar($goods, '', '') ?>
+                    </span>
+                    <span>
+                        出品者：
+                        <?= htmlspecialchars($goods['seller_name'], ENT_QUOTES, 'UTF-8') ?>
+                    </span>
+                </a>
 
                 <p>
                     <?= nl2br(htmlspecialchars($goods['description'], ENT_QUOTES, 'UTF-8')) ?>

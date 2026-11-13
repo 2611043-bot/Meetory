@@ -17,6 +17,20 @@
     background: #fff;
 }
 
+.profile-user-identity {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.profile-avatar {
+    flex: 0 0 80px;
+    width: 80px;
+    height: 80px;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
 .profile-container > .profile-reviews,
 .profile-container > .profile-products,
 .profile-container > .profile-auctions {

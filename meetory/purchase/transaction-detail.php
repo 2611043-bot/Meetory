@@ -57,7 +57,9 @@ $sql = '
         b.purchased_at,
         b.transaction_status,
         b.completed_at,
-        buyer.user_name AS buyer_name
+        buyer.user_name AS buyer_name,
+        buyer.profile_image_type,
+        buyer.profile_image
     FROM buy AS b
     INNER JOIN users AS buyer
         ON b.buyer_id = buyer.user_id
@@ -83,6 +85,8 @@ $sql = '
         g.goods_name,
         g.seller_id,
         seller.user_name AS seller_name,
+        seller.profile_image_type,
+        seller.profile_image,
         bi.purchase_price
     FROM buy_items AS bi
     INNER JOIN goods AS g
@@ -119,6 +123,8 @@ require_once '../../meetory-header.php';
 
 ?>
 
+<link rel="stylesheet" href="../assets/css/transaction-detail.css">
+
 <h1>取引詳細</h1>
 
 <p>
@@ -146,11 +152,16 @@ require_once '../../meetory-header.php';
 
 <p>
     購入者：
-    <?= htmlspecialchars(
-        $transaction['buyer_name'],
-        ENT_QUOTES,
-        'UTF-8'
-    ) ?>
+    <span class="transaction-user">
+        <span class="transaction-user-avatar">
+            <?= renderProfileAvatar(
+                $transaction,
+                '',
+                $transaction['buyer_name'] . 'のプロフィールアイコン'
+            ) ?>
+        </span>
+        <?= htmlspecialchars($transaction['buyer_name'], ENT_QUOTES, 'UTF-8') ?>
+    </span>
 </p>
 
 <h2>商品情報</h2>
@@ -174,11 +185,16 @@ require_once '../../meetory-header.php';
 
             <p>
                 出品者：
-                <?= htmlspecialchars(
-                    $item['seller_name'],
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?>
+                <span class="transaction-user">
+                    <span class="transaction-user-avatar">
+                        <?= renderProfileAvatar(
+                            $item,
+                            '',
+                            $item['seller_name'] . 'のプロフィールアイコン'
+                        ) ?>
+                    </span>
+                    <?= htmlspecialchars($item['seller_name'], ENT_QUOTES, 'UTF-8') ?>
+                </span>
             </p>
 
             <p>

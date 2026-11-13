@@ -22,6 +22,24 @@
     background: #fff;
 }
 
+.goods-seller {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0;
+    color: #475467;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.goods-seller-avatar {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
 /* 商品画像のラッパー */
 .goods-image {
     text-align: center;

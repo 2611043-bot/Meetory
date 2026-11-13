@@ -48,7 +48,11 @@ if (!$user_id || $user_id <= 0 || $user_id === $my_user_id) {
 
 // 相手のユーザー情報を取得
 $sql = "
-    SELECT user_id, user_name
+    SELECT
+        user_id,
+        user_name,
+        profile_image_type,
+        profile_image
     FROM users
     WHERE user_id = :user_id
 ";
@@ -250,6 +254,8 @@ $sql = "
         m.message_id,
         partner.user_id,
         partner.user_name,
+        partner.profile_image_type,
+        partner.profile_image,
         m.content,
         m.message_type,
         m.sent_at
@@ -451,11 +457,7 @@ if (!$is_partial) {
                 >
 
                     <div class="room-talk-avatar">
-                        <?= htmlspecialchars(
-                            $talk['initial'],
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
+                        <?= renderProfileAvatar($talk, '', '') ?>
                     </div>
 
                     <div class="room-talk-info">
@@ -524,11 +526,7 @@ if (!$is_partial) {
             </a>
 
             <div class="room-avatar">
-                <?= htmlspecialchars(
-                    $partner_initial,
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?>
+                <?= renderProfileAvatar($partner, '', '') ?>
             </div>
 
             <div class="room-partner">
@@ -581,11 +579,7 @@ if (!$is_partial) {
                             <?php if (!$is_sent): ?>
 
                                 <div class="message-avatar">
-                                    <?= htmlspecialchars(
-                                        $partner_initial,
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?>
+                                    <?= renderProfileAvatar($partner, '', '') ?>
                                 </div>
 
                             <?php endif; ?>
@@ -681,11 +675,7 @@ if (!$is_partial) {
                             <?php if (!$is_sent): ?>
 
                                 <div class="message-avatar">
-                                    <?= htmlspecialchars(
-                                        $partner_initial,
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?>
+                                    <?= renderProfileAvatar($partner, '', '') ?>
                                 </div>
 
                             <?php endif; ?>

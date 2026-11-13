@@ -37,6 +37,8 @@ $sql = "
         m.message_id,
         partner.user_id,
         partner.user_name,
+        partner.profile_image_type,
+        partner.profile_image,
         m.content,
         m.message_type,
         m.sent_at
@@ -213,11 +215,7 @@ require_once '../../meetory-header.php';
                         >
 
                             <div class="talk-avatar">
-                                <?= htmlspecialchars(
-                                    $talk['initial'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
+                                <?= renderProfileAvatar($talk, '', '') ?>
                             </div>
 
                             <div class="talk-info">

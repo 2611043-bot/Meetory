@@ -38,8 +38,13 @@ $sql = 'SELECT
             price,
             `condition`,
             listed_at,
-            is_sold
+            is_sold,
+            seller.user_name AS seller_name,
+            seller.profile_image_type,
+            seller.profile_image
         FROM goods
+        INNER JOIN users AS seller
+            ON seller.user_id = goods.seller_id
         WHERE goods_id = ?';
 
 $stmt = $pdo->prepare($sql);
@@ -124,6 +129,7 @@ if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $
 
 <!-- ページ固有のスタイルシートを読み込む（商品詳細専用） -->
 <link rel="stylesheet" href="../assets/css/favorites.css">
+<link rel="stylesheet" href="../assets/css/goods-detail.css">
 
 <main>
 
@@ -187,6 +193,23 @@ if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $
             価格：
             <?= number_format((int) $goods['price']) ?>円
         </p>
+
+        <a
+            class="goods-detail-seller"
+            href="../user/profile.php?user_id=<?= (int) $goods['seller_id'] ?>"
+        >
+            <span class="goods-detail-seller-avatar">
+                <?= renderProfileAvatar(
+                    $goods,
+                    '',
+                    $goods['seller_name'] . 'のプロフィールアイコン'
+                ) ?>
+            </span>
+            <span>
+                <small>出品者</small>
+                <strong><?= htmlspecialchars($goods['seller_name'], ENT_QUOTES, 'UTF-8') ?></strong>
+            </span>
+        </a>
 
         <!-- ほしいものリストボタン -->
         <form

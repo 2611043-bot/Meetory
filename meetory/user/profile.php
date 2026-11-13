@@ -37,7 +37,9 @@ $sql = '
     SELECT
         user_id,
         user_name,
-        created_at
+        created_at,
+        profile_image_type,
+        profile_image
     FROM users
     WHERE user_id = :user_id
 ';
@@ -252,6 +254,15 @@ require '../../meetory-header.php';
 <main class="profile-container">
 
     <section class="profile-header">
+        <div class="profile-user-identity">
+            <div class="profile-avatar">
+                <?= renderProfileAvatar(
+                    $profile_user,
+                    '',
+                    $profile_user['user_name'] . 'のプロフィールアイコン'
+                ) ?>
+            </div>
+            <div>
         <h1>
             <?= htmlspecialchars(
                 $profile_user['user_name'],
@@ -270,10 +281,13 @@ require '../../meetory-header.php';
                 'UTF-8'
             ) ?>
         </p>
+            </div>
+        </div>
 
         <?php if ($is_own_profile): ?>
             <p class="profile-owner-link">
                 <a href="mypage.php">マイページへ戻る</a>
+                <a href="profile-image.php">アイコンを変更する</a>
             </p>
         <?php endif; ?>
     </section>
