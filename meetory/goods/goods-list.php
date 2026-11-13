@@ -43,6 +43,12 @@ $sql = '
 $conditions = [];
 $params = [];
 
+// オークション商品は除外
+$conditions[] = 'NOT EXISTS (SELECT 1 FROM auctions a WHERE a.goods_id = g.goods_id)';
+
+// 売却済み商品は除外
+$conditions[] = 'g.is_sold = 0';
+
 // 商品名で検索
 if ($keyword !== '') {
     $conditions[] = 'goods_name LIKE :keyword';

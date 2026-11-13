@@ -1,7 +1,7 @@
 /* ==============================
-   商品一覧ページ専用スタイルシート
-   goods-list.php で class="goods-list", "goods-item", "goods-image" を使用
-   他ページのスタイルと競合しないよう、セレクタはページ固有のクラス名に限定
+    商品一覧ページ専用スタイルシート
+    goods-list.php で class="goods-list", "goods-item", "goods-image" を使用
+    他ページのスタイルと競合しないよう、セレクタはページ固有のクラス名に限定
    ============================== */
 
 /* 商品カードの一覧コンテナ */
@@ -14,7 +14,7 @@
 
 /* 個別の商品カード */
 .goods-item {
-    flex: 1 1 calc(25% - 20px);
+    flex: 0 0 calc((100% - 60px) / 4);
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 16px;
@@ -38,12 +38,12 @@
 /* スマートフォン対応：カードを1列に */
 @media (max-width: 768px) {
     .goods-item {
-        flex: 1 1 calc(50% - 20px);
+        flex: 0 0 calc((100% - 20px) / 2);
     }
 }
 
 @media (max-width: 480px) {
     .goods-item {
-        flex: 1 1 100%;
+        flex: 0 0 100%;
     }
 }

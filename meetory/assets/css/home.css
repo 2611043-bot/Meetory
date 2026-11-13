@@ -118,3 +118,18 @@
     background: #fafafa;
     border-radius: 8px;
 }
+
+/* 開催中のオークションセクション */
+.active-auctions {
+    margin-top: 40px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.active-auctions .auction-end {
+    margin: 0 12px 12px 12px;
+    font-size: 14px;
+    color: #666;
+}
