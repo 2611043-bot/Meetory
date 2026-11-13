@@ -19,6 +19,16 @@ if ($goods_id === false || $goods_id === null || $goods_id <= 0) {
     exit('商品IDが正しくありません。');
 }
 
+// オークション商品の場合はオークション詳細ページへリダイレクト
+$auction_sql = 'SELECT 1 FROM auctions WHERE goods_id = ? LIMIT 1';
+$auction_stmt = $pdo->prepare($auction_sql);
+$auction_stmt->execute([$goods_id]);
+
+if ($auction_stmt->fetch(PDO::FETCH_ASSOC) !== false) {
+    header('Location: ../auction/auction-detail.php?goods_id=' . (int) $goods_id);
+    exit;
+}
+
 // 商品情報を取得
 $sql = 'SELECT
             goods_id,
