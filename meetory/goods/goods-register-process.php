@@ -528,9 +528,9 @@ try {
     if ($listing_type === 'auction') {
         $sql_auction = <<<SQL
         INSERT INTO auctions
-        (goods_id, seller_id, start_price, current_price, buyout_price, start_at, end_at, auto_extend, status)
+        (goods_id, start_price, current_price, buyout_price, start_at, end_at, auto_extend, status)
         VALUES
-        (:goods_id, :seller_id, :start_price, :current_price, :buyout_price, NOW(), :end_at, :auto_extend, 'active')
+        (:goods_id, :start_price, :current_price, :buyout_price, NOW(), :end_at, :auto_extend, 'active')
         SQL;
 
         $stmt_auction = $pdo->prepare($sql_auction);
@@ -539,7 +539,6 @@ try {
 
         $stmt_auction->execute([
             ':goods_id' => $goods_id,
-            ':seller_id' => $_SESSION['user_id'],
             ':start_price' => (int)$start_price,
             ':current_price' => (int)$start_price,
             ':buyout_price' => $buyout_value,
