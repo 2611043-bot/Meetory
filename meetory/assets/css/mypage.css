@@ -18,110 +18,197 @@
     border-radius: 4px;
 }
 
-/* ==============================
-   出品管理専用スタイル
-   ============================== */
+/* マイページダッシュボード */
+.mypage-container {
+    width: min(100% - 32px, 1040px);
+    margin: 28px auto;
+}
 
-/* 出品管理リスト */
-.seller-goods-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 20px 0;
+.mypage-heading {
+    margin-bottom: 20px;
+}
+
+.mypage-heading h1 {
+    margin-bottom: 6px;
+    color: #243447;
+}
+
+.mypage-heading p,
+.mypage-eyebrow {
+    color: #667085;
+}
+
+.mypage-panel {
+    margin: 18px 0;
+    padding: 22px;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.mypage-panel > h2 {
+    margin: 0 0 16px;
+    color: #243447;
+    font-size: 20px;
+}
+
+.mypage-user-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.mypage-user-panel h2 {
+    margin: 4px 0;
+}
+
+.mypage-eyebrow {
+    margin: 0;
+    font-size: 13px;
+}
+
+.mypage-user-email {
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: #667085;
+}
+
+.mypage-link-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 10px 18px;
 }
 
-/* 出品管理アイテム */
-.seller-goods-item {
-    flex: 1 1 calc(25% - 16px);
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 12px;
-    box-sizing: border-box;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.seller-goods-item img {
-    max-width: 100px;
-    height: auto;
-    border-radius: 4px;
-    margin-bottom: 4px;
-}
-
-.no-image {
-    display: block;
-    width: 100px;
-    height: 100px;
-    background: #f5f5f5;
-    border: 1px dashed #ccc;
-    border-radius: 4px;
-    font-size: 12px;
-    color: #666;
-    line-height: 100px;
-    text-align: center;
-    margin-bottom: 4px;
-}
-
-.seller-goods-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.seller-goods-info p {
-    margin: 0;
-    font-size: 14px;
-    color: #333;
-}
-
-.seller-goods-info p a {
-    color: #007bff;
+.mypage-link-list a,
+.mypage-purchase-card > a {
+    color: #1769aa;
+    font-weight: 600;
     text-decoration: none;
-    font-weight: bold;
 }
 
-.seller-goods-info p a:hover {
+.mypage-link-list a:hover,
+.mypage-purchase-card > a:hover {
     text-decoration: underline;
 }
 
-.status-sold {
-    color: #d00;
-    font-weight: bold;
-    font-size: 12px;
+.mypage-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
 }
 
-.status-active {
-    color: #28a745;
-    font-weight: bold;
-    font-size: 12px;
+.mypage-stat-card {
+    display: flex;
+    min-height: 104px;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid #dfe6ee;
+    border-radius: 10px;
+    background: #f9fbfd;
+    color: #344054;
+    text-decoration: none;
 }
 
-.status-ended {
-    color: #6c757d;
-    font-weight: bold;
-    font-size: 12px;
+a.mypage-stat-card:hover {
+    border-color: #83b7e5;
+    background: #f2f8fd;
 }
 
-.status-upcoming {
-    color: #ffc107;
-    font-weight: bold;
-    font-size: 12px;
+.mypage-stat-card strong {
+    color: #1a73e8;
+    font-size: 24px;
 }
 
-/* スマートフォン対応 */
-@media (max-width: 768px) {
-    .seller-goods-item {
-        flex: 1 1 calc(50% - 16px);
+.mypage-action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.mypage-action-card {
+    display: flex;
+    min-height: 60px;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    border: 1px solid #dfe6ee;
+    border-radius: 10px;
+    color: #344054;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+}
+
+.mypage-action-card:hover {
+    border-color: #83b7e5;
+    background: #f2f8fd;
+}
+
+.mypage-action-primary {
+    border-color: #1a73e8;
+    background: #1a73e8;
+    color: #fff;
+}
+
+.mypage-action-primary:hover {
+    background: #0d5fbd;
+    color: #fff;
+}
+
+.mypage-purchase-card {
+    margin-top: 14px;
+    padding: 18px;
+    border: 1px solid #e1e8ed;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.mypage-purchase-card h3 {
+    margin: 0 0 10px;
+}
+
+.mypage-purchase-card ul {
+    padding-left: 20px;
+}
+
+.mypage-purchase-card li {
+    margin: 12px 0;
+}
+
+#purchase-history {
+    scroll-margin-top: 24px;
+}
+
+@media (max-width: 800px) {
+    .mypage-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mypage-action-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
-@media (max-width: 480px) {
-    .seller-goods-item {
-        flex: 1 1 100%;
+@media (max-width: 520px) {
+    .mypage-container {
+        width: min(100% - 20px, 1040px);
+        margin: 18px auto;
+    }
+
+    .mypage-panel {
+        padding: 16px;
+    }
+
+    .mypage-user-panel {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .mypage-stat-grid,
+    .mypage-action-grid {
+        grid-template-columns: 1fr;
     }
 }

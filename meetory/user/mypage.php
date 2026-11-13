@@ -102,76 +102,54 @@ foreach ($purchase_rows as $row) {
     }
 }
 
-// 出品管理 - 自身が出品した商品を取得
-$seller_goods_sql = '
-    SELECT
-        g.goods_id,
-        g.goods_name,
-        g.price,
-        g.is_sold,
-        g.listed_at,
-        a.auction_id,
-        a.current_price,
-        a.buyout_price,
-        a.start_at,
-        a.end_at,
-        a.auto_extend,
-        a.status,
-        a.winner_user_id,
-        a.winning_price,
-        (
-            SELECT gi.image_path
-            FROM goods_images AS gi
-            WHERE gi.goods_id = g.goods_id
-            ORDER BY gi.display_order ASC, gi.image_id ASC
-            LIMIT 1
-        ) AS image_path
+$purchase_count = count($purchase_history);
+
+$listing_count_stmt = $pdo->prepare(
+    'SELECT
+        COALESCE(SUM(
+            CASE
+                WHEN g.is_sold = 0 AND (
+                    a.auction_id IS NULL
+                    OR (
+                        a.status = :auction_status
+                        AND a.start_at <= NOW()
+                        AND a.end_at > NOW()
+                    )
+                )
+                THEN 1 ELSE 0
+            END
+        ), 0)
+            AS active_goods_count,
+        COALESCE(SUM(CASE WHEN g.is_sold = 1 THEN 1 ELSE 0 END), 0)
+            AS sold_goods_count
     FROM goods AS g
     LEFT JOIN auctions AS a
         ON a.goods_id = g.goods_id
-    WHERE g.seller_id = ?
-    ORDER BY g.listed_at DESC
-';
+    WHERE g.seller_id = :seller_id'
+);
+$listing_count_stmt->execute([
+    'auction_status' => 'active',
+    'seller_id' => $user_id
+]);
+$listing_counts = $listing_count_stmt->fetch(PDO::FETCH_ASSOC);
 
-$stmt = $pdo->prepare($seller_goods_sql);
-$stmt->execute([$user_id]);
-
-$seller_goods = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// 出品管理の分類
-$tz = new DateTimeZone('Asia/Tokyo');
-$now = new DateTimeImmutable('now', $tz);
-
-$normal_listing = [];
-$normal_sold = [];
-$auction_upcoming = [];
-$auction_active = [];
-$auction_ended = [];
-
-foreach ($seller_goods as $item) {
-    $is_auction = $item['auction_id'] !== null;
-
-    if (!$is_auction) {
-        // 通常出品
-        if ((int) $item['is_sold'] === 1) {
-            $normal_sold[] = $item;
-        } else {
-            $normal_listing[] = $item;
-        }
-    } else {
-        // オークション出品
-        $start_at = new DateTimeImmutable($item['start_at'], $tz);
-        $end_at = new DateTimeImmutable($item['end_at'], $tz);
-
-        if ($now < $start_at) {
-            $auction_upcoming[] = $item;
-        } elseif ($item['status'] === 'sold' || $now >= $end_at) {
-            $auction_ended[] = $item;
-        } else {
-            $auction_active[] = $item;
-        }
-    }
-}
+$in_progress_stmt = $pdo->prepare(
+    'SELECT COUNT(DISTINCT bi.buy_item_id)
+    FROM buy_items AS bi
+    INNER JOIN buy AS b
+        ON b.transaction_id = bi.transaction_id
+    INNER JOIN goods AS g
+        ON g.goods_id = bi.goods_id
+    WHERE (b.buyer_id = :buyer_id OR g.seller_id = :seller_id)
+        AND b.transaction_status IN (:purchased, :shipped)'
+);
+$in_progress_stmt->execute([
+    'buyer_id' => $user_id,
+    'seller_id' => $user_id,
+    'purchased' => '購入済み',
+    'shipped' => '発送済み'
+]);
+$in_progress_count = (int) $in_progress_stmt->fetchColumn();
 
 // 共通ヘッダー
 require '../../meetory-header.php';
@@ -179,34 +157,83 @@ require '../../meetory-header.php';
 ?>
 
 <!-- ページ固有のスタイルシートを読み込む（マイページ専用） -->
-<link rel="stylesheet" href="../assets/css/mypage.css">
+<link
+    rel="stylesheet"
+    href="/Meetory/meetory/assets/css/mypage.css?v=<?= filemtime(__DIR__ . '/../assets/css/mypage.css') ?>"
+>
 
-<h1>マイページ</h1>
+<div class="mypage-container">
+    <header class="mypage-heading">
+        <h1>マイページ</h1>
+        <p>アカウントと取引をまとめて確認できます。</p>
+    </header>
 
-<h2>ユーザー情報</h2>
+    <section class="mypage-panel mypage-user-panel">
+        <div>
+            <p class="mypage-eyebrow">ユーザー情報</p>
+            <h2><?= htmlspecialchars($user['user_name'], ENT_QUOTES, 'UTF-8') ?></h2>
+            <p class="mypage-user-email">
+                <?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?>
+            </p>
+        </div>
+        <div class="mypage-link-list">
+            <a href="profile.php?user_id=<?= $user_id ?>">プロフィールを見る</a>
+            <a href="password-reset.php">パスワード再設定</a>
+        </div>
+    </section>
 
-<p>
-    ユーザー名：
-    <?= htmlspecialchars($user['user_name'], ENT_QUOTES, 'UTF-8') ?>
-</p>
+    <section class="mypage-panel">
+        <h2>取引管理</h2>
+        <div class="mypage-stat-grid">
+            <a class="mypage-stat-card" href="#purchase-history">
+                <span>購入履歴</span>
+                <strong><?= $purchase_count ?>件</strong>
+            </a>
+            <a class="mypage-stat-card" href="../goods/my-goods.php">
+                <span>出品中の商品</span>
+                <strong><?= (int) $listing_counts['active_goods_count'] ?>件</strong>
+            </a>
+            <a class="mypage-stat-card" href="../goods/my-goods.php">
+                <span>売却済みの商品</span>
+                <strong><?= (int) $listing_counts['sold_goods_count'] ?>件</strong>
+            </a>
+            <div class="mypage-stat-card">
+                <span>取引中の商品</span>
+                <strong><?= $in_progress_count ?>件</strong>
+            </div>
+        </div>
+    </section>
 
-<p>
-    メールアドレス：
-    <?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?>
-</p>
+    <section class="mypage-panel">
+        <h2>出品管理</h2>
+        <div class="mypage-action-grid">
+            <a class="mypage-action-card mypage-action-primary" href="../goods/goods-register.php">
+                <span aria-hidden="true">＋</span>
+                商品を出品する
+            </a>
+            <a class="mypage-action-card" href="../goods/my-goods.php">
+                通常出品の商品を確認する
+            </a>
+            <a
+                class="mypage-action-card"
+                href="profile.php?user_id=<?= $user_id ?>#profile-auctions"
+            >
+                自分の開催中オークションを確認する
+            </a>
+        </div>
+    </section>
 
-<p>
-    会員登録日：
-    <?= htmlspecialchars(
-        date('Y年m月d日', strtotime($user['created_at'])),
-        ENT_QUOTES,
-        'UTF-8'
-    ) ?>
-</p>
+    <section class="mypage-panel">
+        <h2>その他</h2>
+        <nav class="mypage-link-list" aria-label="その他のメニュー">
+            <a href="favorites.php">ほしいものリスト</a>
+            <a href="../messages/message-center.php">メッセージ</a>
+            <a href="logout.php">ログアウト</a>
+        </nav>
+    </section>
 
-<hr>
-
-<h2>購入履歴</h2>
+    <section class="mypage-panel" id="purchase-history">
+        <h2>購入履歴</h2>
 
 <?php if (empty($purchase_history)): ?>
 
@@ -216,7 +243,7 @@ require '../../meetory-header.php';
 
     <?php foreach ($purchase_history as $transaction_id => $purchase): ?>
 
-        <section>
+        <article class="mypage-purchase-card">
             <h3>
                 取引番号：
                 <?= htmlspecialchars((string) $transaction_id, ENT_QUOTES, 'UTF-8') ?>
@@ -297,177 +324,16 @@ require '../../meetory-header.php';
                 <?= number_format((int) $purchase['total_price']) ?>円
             </p>
 
-            <hr>
-        </section>
+            <a href="../purchase/transaction-detail.php?transaction_id=<?= (int) $transaction_id ?>">
+                取引詳細を見る
+            </a>
+        </article>
 
     <?php endforeach; ?>
 
 <?php endif; ?>
 
-<hr>
-
-<!-- 出品管理 -->
-<h2>出品管理</h2>
-
-<p>
-    <a href="../goods/goods-register.php">商品を出品する</a>
-</p>
-
-<h3>通常出品</h3>
-
-<h4>出品中</h4>
-<?php if (empty($normal_listing)): ?>
-    <p>出品中の商品はありません。</p>
-<?php else: ?>
-    <ul class="seller-goods-list">
-    <?php foreach ($normal_listing as $item): ?>
-        <li class="seller-goods-item">
-            <?php if (!empty($item['image_path'])): ?>
-                <img
-                    src="/Meetory/<?= htmlspecialchars(ltrim($item['image_path'], '/'), ENT_QUOTES, 'UTF-8') ?>"
-                    alt="<?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?>"
-                    width="100"
-                    loading="lazy"
-                >
-            <?php else: ?>
-                <span class="no-image">画像なし</span>
-            <?php endif; ?>
-            <div class="seller-goods-info">
-                <p><a href="../goods/goods-detail.php?goods_id=<?= (int) $item['goods_id'] ?>"><?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?></a></p>
-                <p>価格：<?= number_format((int) $item['price']) ?>円</p>
-            </div>
-        </li>
-    <?php endforeach; ?>
-    </ul>
-<?php endif; ?>
-
-<h4>売却済み</h4>
-<?php if (empty($normal_sold)): ?>
-    <p>売却済みの商品はありません。</p>
-<?php else: ?>
-    <ul class="seller-goods-list">
-    <?php foreach ($normal_sold as $item): ?>
-        <li class="seller-goods-item">
-            <?php if (!empty($item['image_path'])): ?>
-                <img
-                    src="/Meetory/<?= htmlspecialchars(ltrim($item['image_path'], '/'), ENT_QUOTES, 'UTF-8') ?>"
-                    alt="<?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?>"
-                    width="100"
-                    loading="lazy"
-                >
-            <?php else: ?>
-                <span class="no-image">画像なし</span>
-            <?php endif; ?>
-            <div class="seller-goods-info">
-                <p><a href="../goods/goods-detail.php?goods_id=<?= (int) $item['goods_id'] ?>"><?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?></a></p>
-                <p>価格：<?= number_format((int) $item['price']) ?>円</p>
-                <p class="status-sold">売却済み</p>
-            </div>
-        </li>
-    <?php endforeach; ?>
-    </ul>
-<?php endif; ?>
-
-<h3>オークション出品</h3>
-
-<h4>開始予定</h4>
-<?php if (empty($auction_upcoming)): ?>
-    <p>開始予定のオークションはありません。</p>
-<?php else: ?>
-    <ul class="seller-goods-list">
-    <?php foreach ($auction_upcoming as $item): ?>
-        <li class="seller-goods-item">
-            <?php if (!empty($item['image_path'])): ?>
-                <img
-                    src="/Meetory/<?= htmlspecialchars(ltrim($item['image_path'], '/'), ENT_QUOTES, 'UTF-8') ?>"
-                    alt="<?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?>"
-                    width="100"
-                    loading="lazy"
-                >
-            <?php else: ?>
-                <span class="no-image">画像なし</span>
-            <?php endif; ?>
-            <div class="seller-goods-info">
-                <p><a href="../goods/goods-detail.php?goods_id=<?= (int) $item['goods_id'] ?>"><?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?></a></p>
-                <p>開始価格：<?= number_format((int) $item['price']) ?>円</p>
-                <p>開始日時：<?= htmlspecialchars(date('Y/m/d H:i', strtotime($item['start_at'])), ENT_QUOTES, 'UTF-8') ?></p>
-                <p class="status-upcoming">開始予定</p>
-            </div>
-        </li>
-    <?php endforeach; ?>
-    </ul>
-<?php endif; ?>
-
-<h4>開催中</h4>
-<?php if (empty($auction_active)): ?>
-    <p>開催中のオークションはありません。</p>
-<?php else: ?>
-    <ul class="seller-goods-list">
-    <?php foreach ($auction_active as $item): ?>
-        <li class="seller-goods-item">
-            <?php if (!empty($item['image_path'])): ?>
-                <img
-                    src="/Meetory/<?= htmlspecialchars(ltrim($item['image_path'], '/'), ENT_QUOTES, 'UTF-8') ?>"
-                    alt="<?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?>"
-                    width="100"
-                    loading="lazy"
-                >
-            <?php else: ?>
-                <span class="no-image">画像なし</span>
-            <?php endif; ?>
-            <div class="seller-goods-info">
-                <p><a href="../goods/goods-detail.php?goods_id=<?= (int) $item['goods_id'] ?>"><?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?></a></p>
-                <p>現在価格：<?= number_format((int) $item['current_price']) ?>円</p>
-                <p>終了日時：<?= htmlspecialchars(date('Y/m/d H:i', strtotime($item['end_at'])), ENT_QUOTES, 'UTF-8') ?></p>
-                <p class="status-active">開催中</p>
-            </div>
-        </li>
-    <?php endforeach; ?>
-    </ul>
-<?php endif; ?>
-
-<h4>終了</h4>
-<?php if (empty($auction_ended)): ?>
-    <p>終了したオークションはありません。</p>
-<?php else: ?>
-    <ul class="seller-goods-list">
-    <?php foreach ($auction_ended as $item): ?>
-        <li class="seller-goods-item">
-            <?php if (!empty($item['image_path'])): ?>
-                <img
-                    src="/Meetory/<?= htmlspecialchars(ltrim($item['image_path'], '/'), ENT_QUOTES, 'UTF-8') ?>"
-                    alt="<?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?>"
-                    width="100"
-                    loading="lazy"
-                >
-            <?php else: ?>
-                <span class="no-image">画像なし</span>
-            <?php endif; ?>
-            <div class="seller-goods-info">
-                <p><a href="../goods/goods-detail.php?goods_id=<?= (int) $item['goods_id'] ?>"><?= htmlspecialchars($item['goods_name'], ENT_QUOTES, 'UTF-8') ?></a></p>
-                <p>開始価格：<?= number_format((int) $item['price']) ?>円</p>
-                <p>現在価格：<?= number_format((int) $item['current_price']) ?>円</p>
-                <p>終了日時：<?= htmlspecialchars(date('Y/m/d H:i', strtotime($item['end_at'])), ENT_QUOTES, 'UTF-8') ?></p>
-                <?php if ($item['winner_user_id'] !== null && $item['winner_user_id'] !== ''): ?>
-                    <p>落札価格：<?= number_format((int) $item['winning_price']) ?>円</p>
-                <?php else: ?>
-                    <p>落札者なし</p>
-                <?php endif; ?>
-                <p class="status-ended">終了</p>
-            </div>
-        </li>
-    <?php endforeach; ?>
-    </ul>
-<?php endif; ?>
-
-<a href="logout.php">ログアウト</a>
-
-<p>
-    <a href="favorites.php">ほしいものリストを見る</a>
-</p>
-
-<p>
-    <a href="../index.php">ホームに戻る</a>
-</p>
+    </section>
+</div>
 
 <?php require '../../meetory-footer.php'; ?>

@@ -55,6 +55,13 @@ if (!$profile_user) {
     exit('ユーザーが見つかりません。');
 }
 
+$viewer_user_id = isset($_SESSION['user_id'])
+    ? filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT)
+    : false;
+$is_own_profile = $viewer_user_id !== false
+    && $viewer_user_id !== null
+    && (int) $viewer_user_id === (int) $profile_user['user_id'];
+
 // 評価ごとの件数を取得
 $sql = '
     SELECT
@@ -109,6 +116,108 @@ $stmt->execute([
 
 $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+$active_goods_count_stmt = $pdo->prepare(
+    'SELECT COUNT(*)
+    FROM goods AS g
+    WHERE g.seller_id = :seller_id
+        AND g.is_sold = 0
+        AND NOT EXISTS (
+            SELECT 1
+            FROM auctions AS a
+            WHERE a.goods_id = g.goods_id
+        )'
+);
+$active_goods_count_stmt->execute(['seller_id' => $profile_user_id]);
+$active_goods_count = (int) $active_goods_count_stmt->fetchColumn();
+
+$show_all_goods = isset($_GET['products']) && $_GET['products'] === 'all';
+$goods_sql = '
+    SELECT
+        g.goods_id,
+        g.goods_name,
+        g.price,
+        (
+            SELECT gi.image_path
+            FROM goods_images AS gi
+            WHERE gi.goods_id = g.goods_id
+            ORDER BY gi.display_order ASC, gi.image_id ASC
+            LIMIT 1
+        ) AS image_path
+    FROM goods AS g
+    WHERE g.seller_id = :seller_id
+        AND g.is_sold = 0
+        AND NOT EXISTS (
+            SELECT 1
+            FROM auctions AS a
+            WHERE a.goods_id = g.goods_id
+        )
+    ORDER BY g.listed_at DESC, g.goods_id DESC';
+
+if (!$show_all_goods) {
+    $goods_sql .= ' LIMIT 4';
+}
+
+$goods_stmt = $pdo->prepare($goods_sql);
+$goods_stmt->execute(['seller_id' => $profile_user_id]);
+$listed_goods = $goods_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$auction_stmt = $pdo->prepare(
+    'SELECT
+        g.goods_id,
+        g.goods_name,
+        a.current_price,
+        a.end_at,
+        (
+            SELECT gi.image_path
+            FROM goods_images AS gi
+            WHERE gi.goods_id = g.goods_id
+            ORDER BY gi.display_order ASC, gi.image_id ASC
+            LIMIT 1
+        ) AS image_path
+    FROM goods AS g
+    INNER JOIN auctions AS a
+        ON a.goods_id = g.goods_id
+    WHERE g.seller_id = :seller_id
+        AND a.status = :status
+        AND a.start_at <= NOW()
+        AND a.end_at > NOW()
+        AND g.is_sold = 0
+    ORDER BY a.end_at ASC, g.goods_id DESC'
+);
+$auction_stmt->execute([
+    'seller_id' => $profile_user_id,
+    'status' => 'active'
+]);
+$active_auctions = $auction_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+foreach ($listed_goods as &$goods) {
+    $image_path = $goods['image_path'] ?? '';
+    if (
+        !is_string($image_path) ||
+        !preg_match(
+            '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
+            $image_path
+        )
+    ) {
+        $goods['image_path'] = '';
+    }
+}
+unset($goods);
+
+foreach ($active_auctions as &$auction) {
+    $image_path = $auction['image_path'] ?? '';
+    if (
+        !is_string($image_path) ||
+        !preg_match(
+            '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
+            $image_path
+        )
+    ) {
+        $auction['image_path'] = '';
+    }
+}
+unset($auction);
+
 // 評価表示用の情報
 $rating_labels = [
     5 => 'すごくよかった',
@@ -161,15 +270,16 @@ require '../../meetory-header.php';
                 'UTF-8'
             ) ?>
         </p>
+
+        <?php if ($is_own_profile): ?>
+            <p class="profile-owner-link">
+                <a href="mypage.php">マイページへ戻る</a>
+            </p>
+        <?php endif; ?>
     </section>
 
-    <section>
+    <section class="profile-rating">
         <h2>購入者からの評価</h2>
-
-        <p>
-            レビュー合計：
-            <?= $total_reviews ?>件
-        </p>
 
         <div class="rating-summary">
 
@@ -190,7 +300,7 @@ require '../../meetory-header.php';
                     </span>
 
                     <span class="rating-count">
-                        <?= $rating_counts[$rating] ?>
+                        <?= $rating_counts[$rating] ?>件
                     </span>
 
                     <span class="rating-label">
@@ -208,7 +318,7 @@ require '../../meetory-header.php';
         </div>
     </section>
 
-    <section>
+    <section class="profile-reviews">
         <h2>最近のレビュー</h2>
 
         <?php if (empty($reviews)): ?>
@@ -294,163 +404,111 @@ require '../../meetory-header.php';
         <?php endif; ?>
     </section>
 
-    <p>
-        <a href="mypage.php">マイページへ戻る</a>
-    </p>
+    <section class="profile-products" id="profile-products">
+        <h2>出品中の商品</h2>
 
-</main>
-
-
-<?php
-
-// 現在選択されているタブを取得
-$active_tab = $_GET['tab'] ?? 'selling';
-
-// 不正な値が指定された場合は出品中にする
-if (!in_array($active_tab, ['selling', 'sold'], true)) {
-    $active_tab = 'selling';
-}
-
-// 出品中・売却済みの商品を取得
-$sql = '
-    SELECT
-        g.goods_id,
-        g.goods_name,
-        g.price,
-        g.is_sold,
-        (
-            SELECT gi.image_path
-            FROM goods_images AS gi
-            WHERE gi.goods_id = g.goods_id
-            ORDER BY gi.display_order ASC, gi.image_id ASC
-            LIMIT 1
-        ) AS image_path
-    FROM goods AS g
-    WHERE g.seller_id = :seller_id
-        AND g.is_sold = :is_sold
-    ORDER BY g.listed_at DESC, g.goods_id DESC
-';
-
-$stmt = $pdo->prepare($sql);
-
-// 出品中の商品
-$stmt->execute([
-    'seller_id' => $profile_user_id,
-    'is_sold' => 0
-]);
-
-$listed_goods = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// 売却済みの商品
-$stmt->execute([
-    'seller_id' => $profile_user_id,
-    'is_sold' => 1
-]);
-
-$sold_goods = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// 選択中のタブに応じて表示商品を決定
-$display_goods = ($active_tab === 'selling')
-    ? $listed_goods
-    : $sold_goods;
-
-?>
-
-<section class="profile-products">
-
-    <h2>出品商品</h2>
-
-    <div class="profile-tabs">
-
-        <a
-            href="profile.php?user_id=<?= (int) $profile_user_id ?>&tab=selling"
-            class="<?= $active_tab === 'selling' ? 'active' : '' ?>"
-        >
-            出品中（<?= count($listed_goods) ?>）
-        </a>
-
-        <a
-            href="profile.php?user_id=<?= (int) $profile_user_id ?>&tab=sold"
-            class="<?= $active_tab === 'sold' ? 'active' : '' ?>"
-        >
-            売却済み（<?= count($sold_goods) ?>）
-        </a>
-
-    </div>
-
-    <?php if (empty($display_goods)): ?>
-
-        <?php if ($active_tab === 'selling'): ?>
-
-            <p>現在、出品中の商品はありません。</p>
-
+        <?php if (empty($listed_goods)): ?>
+            <p>現在出品中の商品はありません。</p>
         <?php else: ?>
+            <div class="profile-goods-list">
+                <?php foreach ($listed_goods as $goods): ?>
+                    <article class="profile-goods-card">
+                        <a href="../goods/goods-detail.php?goods_id=<?= (int) $goods['goods_id'] ?>">
+                            <?php if (!empty($goods['image_path'])): ?>
+                                <img
+                                    src="/Meetory/<?= htmlspecialchars(
+                                        ltrim($goods['image_path'], '/'),
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                    alt="<?= htmlspecialchars(
+                                        $goods['goods_name'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                    loading="lazy"
+                                >
+                            <?php else: ?>
+                                <div class="profile-no-image">画像なし</div>
+                            <?php endif; ?>
+                            <h3><?= htmlspecialchars(
+                                $goods['goods_name'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?></h3>
+                        </a>
+                        <p class="profile-goods-price">
+                            <?= number_format((int) $goods['price']) ?>円
+                        </p>
+                    </article>
+                <?php endforeach; ?>
+            </div>
 
-            <p>売却済みの商品はありません。</p>
-
+            <?php if ($active_goods_count > 4): ?>
+                <p class="profile-products-more">
+                    <?php if ($show_all_goods): ?>
+                        <a href="profile.php?user_id=<?= (int) $profile_user_id ?>#profile-products">
+                            4件に戻す
+                        </a>
+                    <?php else: ?>
+                        <a href="profile.php?user_id=<?= (int) $profile_user_id ?>&amp;products=all#profile-products">
+                            すべての商品を見る
+                        </a>
+                    <?php endif; ?>
+                </p>
+            <?php endif; ?>
         <?php endif; ?>
+    </section>
 
-    <?php else: ?>
+    <section class="profile-auctions" id="profile-auctions">
+        <h2>開催中のオークション</h2>
 
-        <div class="profile-goods-list">
-
-            <?php foreach ($display_goods as $goods): ?>
-
-                <article class="profile-goods-card">
-
-                    <a href="../goods/goods-detail.php?goods_id=<?= (int) $goods['goods_id'] ?>">
-
-                        <?php if (!empty($goods['image_path'])): ?>
-
+        <?php if (empty($active_auctions)): ?>
+            <p>開催中のオークションはありません。</p>
+        <?php else: ?>
+            <div class="profile-auction-list">
+                <?php foreach ($active_auctions as $auction): ?>
+                    <a
+                        class="profile-auction-card"
+                        href="../auction/auction-detail.php?goods_id=<?= (int) $auction['goods_id'] ?>"
+                    >
+                        <?php if (!empty($auction['image_path'])): ?>
                             <img
                                 src="/Meetory/<?= htmlspecialchars(
-                                    ltrim($goods['image_path'], '/'),
+                                    $auction['image_path'],
                                     ENT_QUOTES,
                                     'UTF-8'
                                 ) ?>"
                                 alt="<?= htmlspecialchars(
-                                    $goods['goods_name'],
+                                    $auction['goods_name'],
                                     ENT_QUOTES,
                                     'UTF-8'
                                 ) ?>"
                                 loading="lazy"
                             >
-
                         <?php else: ?>
-
-                            <p>画像はありません</p>
-
+                            <span class="profile-no-image">画像なし</span>
                         <?php endif; ?>
-
-                        <h3>
-                            <?= htmlspecialchars(
-                                $goods['goods_name'],
+                        <span class="profile-auction-info">
+                            <strong><?= htmlspecialchars(
+                                $auction['goods_name'],
                                 ENT_QUOTES,
                                 'UTF-8'
-                            ) ?>
-                        </h3>
-
+                            ) ?></strong>
+                            <span>現在価格：<?= number_format((int) $auction['current_price']) ?>円</span>
+                            <span>終了日時：<?= htmlspecialchars(
+                                date('Y/m/d H:i', strtotime($auction['end_at'])),
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?></span>
+                        </span>
                     </a>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </section>
 
-                    <p class="profile-goods-price">
-                        <?= number_format((int) $goods['price']) ?>円
-                    </p>
-
-                    <?php if ((int) $goods['is_sold'] === 1): ?>
-
-                        <span class="sold-out-label">SOLD OUT</span>
-
-                    <?php endif; ?>
-
-                </article>
-
-            <?php endforeach; ?>
-
-        </div>
-
-    <?php endif; ?>
-
-</section>
+</main>
 
 <?php require '../../meetory-footer.php'; ?>
 <script src="../assets/js/profile.js"></script>

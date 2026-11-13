@@ -14,6 +14,21 @@
     border: 1px solid #ddd;
     border-radius: 8px;
     margin-bottom: 24px;
+    background: #fff;
+}
+
+.profile-container > .profile-reviews,
+.profile-container > .profile-products,
+.profile-container > .profile-auctions {
+    margin: 20px 0;
+    padding: 20px;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.profile-owner-link {
+    margin: 16px 0 0;
 }
 
 /* ==============================
@@ -21,15 +36,21 @@
 ============================== */
 
 .rating-summary {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    display: flex;
     gap: 8px;
     margin: 16px 0 24px;
 }
 
 .rating-item {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+    min-height: 132px;
     text-align: center;
-    padding: 12px 4px;
+    padding: 12px 8px;
     border: 1px solid #ddd;
     border-radius: 8px;
 }
@@ -47,7 +68,9 @@
 }
 
 .rating-label {
+    display: block;
     font-size: 12px;
+    line-height: 1.4;
     overflow-wrap: anywhere;
 }
 
@@ -88,29 +111,7 @@
 ============================== */
 
 .profile-products {
-    margin: 30px 0;
-}
-
-.profile-tabs {
-    display: flex;
-    gap: 10px;
-    margin: 16px 0;
-    border-bottom: 1px solid #ddd;
-}
-
-.profile-tabs a {
-    flex: 1;
-    padding: 12px;
-    text-align: center;
-    text-decoration: none;
-    color: #555;
-    border-bottom: 3px solid transparent;
-}
-
-.profile-tabs a.active {
-    color: #222;
-    font-weight: bold;
-    border-bottom-color: #333;
+    margin: 24px 0;
 }
 
 .profile-goods-list {
@@ -131,6 +132,7 @@
     width: 100%;
     height: 180px;
     object-fit: contain;
+    background: #f4f7fb;
 }
 
 .profile-goods-card a {
@@ -139,21 +141,80 @@
 }
 
 .profile-goods-card h3 {
+    margin: 12px 0 8px;
     overflow-wrap: anywhere;
 }
 
 .profile-goods-price {
     font-weight: bold;
+    color: #d84a4a;
 }
 
-.sold-out-label {
-    display: inline-block;
-    padding: 5px 10px;
-    background: #555;
-    color: white;
-    font-size: 12px;
-    font-weight: bold;
-    border-radius: 4px;
+.profile-no-image {
+    display: flex;
+    min-height: 160px;
+    align-items: center;
+    justify-content: center;
+    background: #f4f7fb;
+    color: #667085;
+}
+
+.profile-products-more {
+    margin: 18px 0 0;
+    text-align: right;
+}
+
+.profile-products-more a {
+    color: #1769aa;
+    font-weight: 600;
+}
+
+.profile-auction-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.profile-auction-card {
+    display: flex;
+    min-width: 0;
+    gap: 14px;
+    padding: 12px;
+    border: 1px solid #e1e8ed;
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.profile-auction-card:hover {
+    border-color: #83b7e5;
+    background: #f9fbfd;
+}
+
+.profile-auction-card img,
+.profile-auction-card .profile-no-image {
+    flex: 0 0 120px;
+    width: 120px;
+    height: 100px;
+    min-height: 100px;
+    object-fit: cover;
+}
+
+.profile-auction-info {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 6px;
+    overflow-wrap: anywhere;
+}
+
+.profile-auction-info strong {
+    font-size: 15px;
+}
+
+.profile-auction-info span {
+    color: #667085;
+    font-size: 13px;
 }
 
 /* ==============================
@@ -162,11 +223,43 @@
 
 @media (max-width: 480px) {
     .rating-summary {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        padding-bottom: 8px;
+    }
+
+    .rating-item {
+        flex: 0 0 108px;
     }
 
     .profile-goods-list {
         grid-template-columns: 1fr;
+    }
+
+    .profile-container {
+        padding: 10px;
+    }
+
+    .profile-container > .profile-reviews,
+    .profile-container > .profile-products,
+    .profile-container > .profile-auctions {
+        padding: 14px;
+    }
+
+    .profile-auction-list {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-auction-card {
+        gap: 10px;
+    }
+
+    .profile-auction-card img,
+    .profile-auction-card .profile-no-image {
+        flex-basis: 92px;
+        width: 92px;
+        height: 92px;
+        min-height: 92px;
     }
 }
 
