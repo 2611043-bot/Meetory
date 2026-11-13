@@ -1,45 +1,175 @@
-<?php
-require_once '../../meetory-header.php';
 
-// 表示確認用のサンプルデータ
-// あとからMySQLから取得する形に変更する
-$talks = [
-    [
-        'user_id' => 2,
-        'user_name' => 'ユーザーA',
-        'last_message' => '商品の発送はいつ頃になりますか？',
-        'time' => '14:30',
-        'unread' => 2,
-        'initial' => 'A'
-    ],
-    [
-        'user_id' => 3,
-        'user_name' => 'ユーザーB',
-        'last_message' => 'ありがとうございます！',
-        'time' => '昨日',
-        'unread' => 0,
-        'initial' => 'B'
-    ],
-    [
-        'user_id' => 4,
-        'user_name' => 'ユーザーC',
-        'last_message' => '購入を検討しています。',
-        'time' => '10/20',
-        'unread' => 0,
-        'initial' => 'C'
-    ]
-];
+<?php
+// ========================================
+// 初期設定
+// ========================================
+
+// セッション開始
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 共通ファイル読み込み
+require_once '../../meetory-functions.php';
+
+$pdo = getPDO();
+
+
+// ========================================
+// ログイン確認
+// ========================================
+
+$my_user_id = $_SESSION['user_id'] ?? null;
+
+if (!$my_user_id) {
+    exit('ログインしてください。');
+}
+
+$my_user_id = (int)$my_user_id;
+
+
+// ========================================
+// トーク一覧をデータベースから取得
+// ========================================
+
+$sql = "
+    SELECT
+        m.message_id,
+        partner.user_id,
+        partner.user_name,
+        m.content,
+        m.message_type,
+        m.sent_at
+
+    FROM messages AS m
+
+    INNER JOIN users AS partner
+        ON partner.user_id = CASE
+            WHEN m.sender_id = ?
+            THEN m.receiver_id
+            ELSE m.sender_id
+        END
+
+    WHERE
+        (m.sender_id = ? OR m.receiver_id = ?)
+
+        AND NOT EXISTS (
+
+            SELECT 1
+            FROM messages AS newer
+
+            WHERE
+                (newer.sender_id = ? OR newer.receiver_id = ?)
+
+                AND (
+                    CASE
+                        WHEN newer.sender_id = ?
+                        THEN newer.receiver_id
+                        ELSE newer.sender_id
+                    END
+                ) = (
+                    CASE
+                        WHEN m.sender_id = ?
+                        THEN m.receiver_id
+                        ELSE m.sender_id
+                    END
+                )
+
+                AND (
+                    newer.sent_at > m.sent_at
+
+                    OR (
+                        newer.sent_at = m.sent_at
+                        AND newer.message_id > m.message_id
+                    )
+                )
+        )
+
+    ORDER BY
+        m.sent_at DESC,
+        m.message_id DESC
+";
+
+$stmt = $pdo->prepare($sql);
+
+$stmt->execute([
+    $my_user_id,
+    $my_user_id,
+    $my_user_id,
+    $my_user_id,
+    $my_user_id,
+    $my_user_id,
+    $my_user_id
+]);
+
+$talks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+// ========================================
+// トーク一覧の表示用データを作成
+// ========================================
+
+foreach ($talks as &$talk) {
+
+    // 相手の名前の最初の文字
+    $talk['initial'] = mb_substr(
+        $talk['user_name'],
+        0,
+        1,
+        'UTF-8'
+    );
+
+    // 最後のメッセージ
+    if ($talk['message_type'] === 'goods') {
+
+        $talk['last_message'] = '商品を紹介しました。';
+
+    } else {
+
+        $talk['last_message'] = $talk['content'];
+
+    }
+
+    // 送信日時
+    $sent_time = strtotime($talk['sent_at']);
+
+    if (date('Y-m-d', $sent_time) === date('Y-m-d')) {
+
+        $talk['time'] = date('H:i', $sent_time);
+
+    } elseif (
+        date('Y-m-d', $sent_time) === date('Y-m-d', strtotime('yesterday'))
+    ) {
+
+        $talk['time'] = '昨日';
+
+    } else {
+
+        $talk['time'] = date('m/d', $sent_time);
+
+    }
+
+    // 未読件数（未読管理は今後実装）
+    $talk['unread'] = 0;
+}
+
+unset($talk);
+
+
+// ========================================
+// 共通ヘッダー読み込み
+// ========================================
+
+require_once '../../meetory-header.php';
 ?>
 
 <link rel="stylesheet"
     href="/Meetory/meetory/assets/css/message-center.css">
+<link rel="stylesheet"
+    href="/Meetory/meetory/assets/css/message-room.css">
+
 
 <section class="message-center">
-
-    <div class="message-heading">
-        <h1>メッセージ</h1>
-        <p>ユーザーとのやり取りを確認できます。</p>
-    </div>
 
     <div class="message-layout">
 
@@ -54,54 +184,91 @@ $talks = [
                 <input
                     type="search"
                     id="talkSearch"
-                    placeholder="トークを検索..."
+                    placeholder="トーク相手を検索..."
                     autocomplete="off"
                 >
             </div>
 
             <div class="talk-list" id="talkList">
 
-                <?php foreach ($talks as $talk): ?>
+                <?php if (empty($talks)): ?>
 
-                    <a
-                        href="message-room.php?user_id=<?= (int)$talk['user_id'] ?>"
-                        class="talk-item"
-                        data-name="<?= htmlspecialchars($talk['user_name'], ENT_QUOTES, 'UTF-8') ?>"
-                    >
+                    <p class="talk-empty">
+                        まだトークはありません。
+                    </p>
 
-                        <div class="talk-avatar">
-                            <?= htmlspecialchars($talk['initial'], ENT_QUOTES, 'UTF-8') ?>
-                        </div>
+                <?php else: ?>
 
-                        <div class="talk-info">
+                    <?php foreach ($talks as $talk): ?>
 
-                            <div class="talk-name-row">
-                                <span class="talk-user-name">
-                                    <?= htmlspecialchars($talk['user_name'], ENT_QUOTES, 'UTF-8') ?>
-                                </span>
+                        <a
+                            href="message-room.php?user_id=<?= (int)$talk['user_id'] ?>"
+                            class="talk-item room-talk-item"
+                            data-user-id="<?= (int)$talk['user_id'] ?>"
+                            data-name="<?= htmlspecialchars(
+                                $talk['user_name'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>"
+                        >
 
-                                <span class="talk-time">
-                                    <?= htmlspecialchars($talk['time'], ENT_QUOTES, 'UTF-8') ?>
-                                </span>
+                            <div class="talk-avatar">
+                                <?= htmlspecialchars(
+                                    $talk['initial'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
                             </div>
 
-                            <div class="talk-message-row">
-                                <p class="talk-last-message">
-                                    <?= htmlspecialchars($talk['last_message'], ENT_QUOTES, 'UTF-8') ?>
-                                </p>
+                            <div class="talk-info">
 
-                                <?php if ($talk['unread'] > 0): ?>
-                                    <span class="unread-badge">
-                                        <?= (int)$talk['unread'] ?>
+                                <div class="talk-name-row">
+
+                                    <span class="talk-user-name">
+                                        <?= htmlspecialchars(
+                                            $talk['user_name'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>
                                     </span>
-                                <?php endif; ?>
+
+                                    <span class="talk-time">
+                                        <?= htmlspecialchars(
+                                            $talk['time'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>
+                                    </span>
+
+                                </div>
+
+                                <div class="talk-message-row">
+
+                                    <p class="talk-last-message">
+                                        <?= htmlspecialchars(
+                                            $talk['last_message'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>
+                                    </p>
+
+                                    <?php if ($talk['unread'] > 0): ?>
+
+                                        <span class="unread-badge">
+                                            <?= (int)$talk['unread'] ?>
+                                        </span>
+
+                                    <?php endif; ?>
+
+                                </div>
+
                             </div>
 
-                        </div>
+                        </a>
 
-                    </a>
+                    <?php endforeach; ?>
 
-                <?php endforeach; ?>
+                    <?php endif; ?>
 
                 <p class="talk-empty" id="talkEmpty" hidden>
                     該当するトークがありません。
@@ -111,19 +278,24 @@ $talks = [
 
         </aside>
 
-        <!-- 右側：トーク未選択時の表示 -->
-        <section class="talk-welcome">
 
-            <div class="welcome-icon">
-                <i class="fa-regular fa-comments"></i>
+        <!-- 右側：会話表示エリア -->
+        <section id="messageRoomPanel">
+
+            <div class="talk-welcome">
+
+                <div class="welcome-icon">
+                    <i class="fa-regular fa-comments"></i>
+                </div>
+
+                <h2>メッセージ</h2>
+
+                <p>
+                    左側のトーク一覧から相手を選択すると、
+                    ここに会話が表示されます。
+                </p>
+
             </div>
-
-            <h2>メッセージ</h2>
-
-            <p>
-                左側のトーク一覧から相手を選択すると、
-                ここに会話が表示されます。
-            </p>
 
         </section>
 
@@ -131,8 +303,13 @@ $talks = [
 
 </section>
 
-<script src="/Meetory/meetory/assets/js/message-center.js" defer></script>
+
+<script
+    src="/Meetory/meetory/assets/js/message-center.js?v=<?= filemtime(__DIR__ . '/../assets/js/message-center.js') ?>"
+    defer
+></script>
+
 
 </main>
 
-<?php require_once '../../Meetory/meetory-footer.php'; ?>
+<?php require_once '../../meetory-footer.php'; ?>

@@ -4,20 +4,6 @@
     color: #333;
 }
 
-.message-heading {
-    margin-bottom: 20px;
-}
-
-.message-heading h1 {
-    font-size: 25px;
-    margin-bottom: 6px;
-}
-
-.message-heading p {
-    color: #777;
-    font-size: 14px;
-}
-
 /* 2カラムレイアウト */
 .message-layout {
     display: grid;
@@ -26,9 +12,7 @@
     min-height: 500px;
     background: #fff;
     border: 1px solid #e1e8ed;
-    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
 }
 
 /* 左側：トーク一覧 */
@@ -164,6 +148,29 @@
     text-align: center;
 }
 
+/* 右側：会話表示エリア */
+#messageRoomPanel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* 読み込み中・エラー表示 */
+.room-loading,
+.room-error {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    color: #888;
+    font-size: 13px;
+    text-align: center;
+}
+
 /* 右側：未選択時の表示 */
 .talk-welcome {
     display: flex;
@@ -202,19 +209,10 @@
 /* スマートフォン */
 @media (max-width: 700px) {
 
-    .message-heading {
-        margin-bottom: 15px;
-    }
-
-    .message-heading h1 {
-        font-size: 21px;
-    }
-
     .message-layout {
         display: block;
         height: auto;
         min-height: 0;
-        border-radius: 10px;
     }
 
     .talk-sidebar {
@@ -233,5 +231,11 @@
     /* スマホでは未選択時の右側表示を隠す */
     .talk-welcome {
         display: none;
+    }
+
+    /* 会話表示後は高さをビューポート基準にする */
+    #messageRoomPanel {
+        height: calc(100dvh - 190px);
+        min-height: 400px;
     }
 }
