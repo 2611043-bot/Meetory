@@ -23,9 +23,9 @@ body {
 
 /* メインヘッダーエリア */
 .header-main {
-    max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
-    padding: 10px 20px;
+    padding: 10px 30px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -46,7 +46,7 @@ body {
 }
 
 .header-logo .logo-img {
-    height: 42px;
+    height: 56px;
     width: auto;
     display: block;
 }
@@ -213,10 +213,10 @@ body {
 /* アイコンボタン */
 .icon-btn {
     color: #444;
-    font-size: 18px;
+    font-size: 26px;
     background: none;
     border: none;
-    padding: 8px 10px;
+    padding: 10px;
     border-radius: 50%;
     cursor: pointer;
     text-decoration: none;
