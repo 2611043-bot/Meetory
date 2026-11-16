@@ -121,7 +121,36 @@
     background: linear-gradient(135deg, #1976d2, #1565c0);
 }
 
-/* .register-link - 新規登録リンク */
+/* .error-message - エラーメッセージ */
+.error-message {
+    color: #d32f2f;
+    font-size: 14px;
+    margin: 0 0 15px 0;
+    text-align: center;
+    font-weight: bold;
+    animation: shake 0.6s ease-in-out;
+}
+
+/* エラーアニメーション：左右に揺れる */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+
+/* .input-error - 入力欄のエラー時（赤枠） */
+.input-error {
+    border-color: #d32f2f !important;
+    box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.12) !important;
+    animation: inputShake 0.6s ease-in-out;
+}
+
+/* 入力欄のエラーアニメーション */
+@keyframes inputShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+}
 .register-link {
     text-align: center;
     margin-top: 15px;

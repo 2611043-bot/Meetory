@@ -1,4 +1,6 @@
 db-config.php
 mail-config.php
+/meetory/gemini-test.php
 
 meetory/vendor
+/meetory/gemini-secret.php

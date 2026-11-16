@@ -87,12 +87,36 @@ $sql .= ' ORDER BY listed_at DESC';
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $goods_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// CSRFトークンを作成
+if (
+    !isset($_SESSION['csrf_token']) ||
+    !is_string($_SESSION['csrf_token']) ||
+    $_SESSION['csrf_token'] === ''
+) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrf_token = $_SESSION['csrf_token'];
+
+// ログイン中のユーザーが保存済みの商品ID一覧を取得
+$favorited_goods_ids = [];
+if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $_SESSION['user_id'] > 0) {
+    $login_user_id = (int) $_SESSION['user_id'];
+    $fav_stmt = $pdo->prepare(
+        'SELECT goods_id FROM favorites WHERE user_id = ?'
+    );
+    $fav_stmt->execute([$login_user_id]);
+    while ($fav_row = $fav_stmt->fetch(PDO::FETCH_ASSOC)) {
+        $favorited_goods_ids[] = (int) $fav_row['goods_id'];
+    }
+}
 ?>
 
 <?php require '../../meetory-header.php'; ?>
 
 <!-- ページ固有のスタイルシートを読み込む（商品一覧専用） -->
 <link rel="stylesheet" href="../assets/css/goods-list.css">
+<link rel="stylesheet" href="../assets/css/favorites.css">
 
 <main>
     <h1>商品一覧</h1>
@@ -200,6 +224,28 @@ $goods_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <article class="goods-item">
 
+        <!-- ほしいものリストボタン -->
+        <form
+            action="<?= in_array((int) $goods['goods_id'], $favorited_goods_ids, true)
+                ? '../goods/goods-favorite-delete.php'
+                : '../goods/goods-favorite-add.php' ?>"
+            method="post"
+            class="favorite-form"
+        >
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="goods_id" value="<?= (int) $goods['goods_id'] ?>">
+            <input type="hidden" name="return_url" value="goods-list.php?<?= http_build_query(['keyword' => $keyword, 'min_price' => $min_price, 'max_price' => $max_price, 'condition' => $condition]) ?>">
+            <button
+                type="submit"
+                class="js-favorite-btn favorite-btn<?= in_array((int) $goods['goods_id'], $favorited_goods_ids, true) ? ' is-favorited' : '' ?>"
+                data-goods-id="<?= (int) $goods['goods_id'] ?>"
+                data-is-logged-in="<?= isset($_SESSION['user_id']) ? '1' : '0' ?>"
+                data-csrf-token="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>"
+            >
+                <i class="fa-solid fa-heart<?= in_array((int) $goods['goods_id'], $favorited_goods_ids, true) ? '' : '-o' ?>"></i>
+            </button>
+        </form>
+
         <!-- 商品画像 -->
         <?php if ($image_path !== ''): ?>
 
@@ -263,5 +309,8 @@ $goods_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <?php endif; ?>
 
 </main>
+
+<!-- ほしいものリスト用JavaScript -->
+<script src="../assets/js/favorites.js" defer></script>
 
 <?php require '../../meetory-footer.php'; ?>

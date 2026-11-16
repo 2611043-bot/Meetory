@@ -23,7 +23,7 @@ $current_page = basename($_SERVER['SCRIPT_NAME']);
     </a>
 
     <!-- ホーム -->
-    <a href="/Meetory/meetory/home.php">
+    <a href="/Meetory/meetory/index.php">
         <i class="fa-solid fa-house"></i>
         <span>ホーム</span>
     </a>

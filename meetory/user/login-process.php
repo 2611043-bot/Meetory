@@ -48,13 +48,20 @@ if ($user && password_verify($password, $user['password'])) {
     $_SESSION['role'] = $user['role'] ?? 'user';
 
     // ログイン後のページへ移動
-    header('Location: ../home.php');
+    $return_url = $_POST['return_url'] ?? '';
+    if ($return_url !== '' && is_string($return_url) && preg_match('~\A/Meetory/meetory/.*\z~', $return_url)) {
+        header('Location: ' . $return_url);
+    } else {
+        header('Location: ../index.php');
+    }
     exit;
 
 } else {
 
-    // ログイン失敗
-    exit('ユーザー名またはパスワードが間違っています。');
+    // ログイン失敗：ログイン画面へ戻る（エラーフラグとユーザー名を保持）
+    $redirect_url = 'login.php?error=1&user_name=' . urlencode($user_name);
+    header('Location: ' . $redirect_url);
+    exit;
 
 }
 ?>

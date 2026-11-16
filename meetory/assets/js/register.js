@@ -23,7 +23,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // --- 2. パスワード強度判定処理 ---
+    // --- 2. エラー表示と赤枠を消す処理 ---
+    const inputs = document.querySelectorAll('.form-group input');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+            const formGroup = this.closest('.form-group');
+            if (formGroup) {
+                const errorMsg = formGroup.querySelector('.field-error');
+                if (errorMsg) {
+                    errorMsg.remove();
+                }
+            }
+        });
+    });
+
+    // --- 3. パスワード強度判定処理 ---
     const passwordInput = document.getElementById('password');
     const wrapper = document.getElementById('strength-wrapper');
     const bar = document.getElementById('strength-bar');

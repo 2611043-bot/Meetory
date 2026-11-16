@@ -8,11 +8,26 @@
 
         <h1 class="login-title">ログイン</h1>
 
+        <?php
+        $show_error = isset($_GET['error']) && $_GET['error'] === '1';
+        $saved_user_name = htmlspecialchars($_GET['user_name'] ?? '', ENT_QUOTES, 'UTF-8');
+        $input_class = $show_error ? 'input-error' : '';
+        ?>
+
+        <?php if ($show_error): ?>
+            <p class="error-message">ユーザー名またはパスワードが間違っています。</p>
+        <?php endif; ?>
+
         <p class="login-description">
             Meetoryへようこそ
         </p>
 
         <form action="login-process.php" method="post">
+
+            <?php $return_url = $_GET['return_url'] ?? ''; ?>
+            <?php if ($return_url !== ''): ?>
+                <input type="hidden" name="return_url" value="<?= htmlspecialchars($return_url, ENT_QUOTES, 'UTF-8') ?>">
+            <?php endif; ?>
 
             <div class="form-group">
                 <label for="user_name">ユーザー名</label>
@@ -22,6 +37,8 @@
                     name="user_name"
                     placeholder="ユーザー名を入力"
                     required
+                    value="<?= $saved_user_name ?>"
+                    class="<?= $input_class ?>"
                 >
             </div>
 
@@ -34,6 +51,7 @@
                         name="password"
                         placeholder="パスワードを入力"
                         required
+                        class="<?= $input_class ?>"
                     >
                     <button type="button" id="togglePasswordBtn" class="toggle-password-btn" aria-label="パスワードの表示切り替え">
                         <i class="fa-solid fa-eye-slash" id="eyeIcon"></i>

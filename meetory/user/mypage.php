@@ -215,6 +215,7 @@ require_once __DIR__ . '/../../meetory-header.php';
                                         ) ?>
                                     </p>
 
+<<<<<<< HEAD
                                     <!-- 購入時の価格 -->
                                     <p class="item-price">
                                         購入時の価格：
@@ -247,3 +248,14 @@ require_once __DIR__ . '/../../meetory-header.php';
 </div>
 
 <?php require_once __DIR__ . '/../../meetory-footer.php'; ?>
+=======
+<p>
+    <a href="favorites.php">ほしいものリストを見る</a>
+</p>
+
+<p>
+    <a href="../index.php">ホームに戻る</a>
+</p>
+
+<?php require '../../meetory-footer.php'; ?>
+>>>>>>> b388cdae05de0f31dad2f06b36010a2018a6406c

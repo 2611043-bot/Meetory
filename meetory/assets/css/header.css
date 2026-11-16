@@ -53,13 +53,13 @@ body {
 
 /* 検索バー */
 .header-search-form {
-    flex: 1;
     display: flex;
     align-items: center;
     margin: 0 10px;
 }
 
 .search-input-group {
+    max-width: 300px;
     width: 100%;
     display: flex;
     align-items: center;
@@ -231,4 +231,250 @@ body {
         padding: 7px 12px;
         font-size: 12px;
     }
+}
+
+/* サイドメニューオーバーレイ */
+.sidebar-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    z-index: 1050 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: opacity 0.3s ease, visibility 0.3s ease !important;
+}
+
+.sidebar-overlay.open {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* サイドメニュー */
+.sidebar-menu {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 85vw !important;
+    max-width: 320px !important;
+    height: 100vh !important;
+    background-color: #ffffff !important;
+    z-index: 1060 !important;
+    transform: translateX(100%) !important;
+    transition: transform 0.3s ease !important;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    left: auto !important;
+}
+
+.sidebar-menu.open {
+    transform: translateX(0) !important;
+}
+
+/* サイドメニュー閉じるボタン */
+.sidebar-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #444;
+    padding: 16px 20px;
+    cursor: pointer;
+    text-align: right;
+    transition: color 0.2s;
+}
+
+.sidebar-close:hover {
+    color: #1a73e8;
+}
+
+/* サイドメニューナビゲーション */
+.sidebar-nav {
+    flex: 1;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+}
+
+/* セクション見出し（ショッピング、アカウントなど） */
+.sidebar-section-title {
+    padding: 16px 20px 10px 20px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: bold;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.sidebar-section-title:first-child {
+    border-top: none;
+}
+
+/* サイドメニューリンク */
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    color: #444;
+    text-decoration: none;
+    font-size: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar-link i {
+    width: 24px;
+    text-align: center;
+    color: #666;
+}
+
+.sidebar-link:hover {
+    background-color: #f0f4f9;
+    color: #1a73e8;
+}
+
+.sidebar-link:hover i {
+    color: #1a73e8;
+}
+
+/* ログアウトリンク */
+.sidebar-link.sidebar-logout {
+    color: #d33;
+}
+
+.sidebar-link.sidebar-logout:hover {
+    background-color: #ffe5e5;
+    color: #d33;
+}
+
+.sidebar-link.sidebar-logout:hover i {
+    color: #d33;
+}
+
+/* アカウント削除リンク */
+.sidebar-link.sidebar-delete {
+    color: #b71c1c;
+}
+
+.sidebar-link.sidebar-delete:hover {
+    background-color: #ffebee;
+    color: #b71c1c;
+}
+
+.sidebar-link.sidebar-delete:hover i {
+    color: #b71c1c;
+}
+
+/* アカウント削除確認モーダル オーバーレイ */
+.delete-account-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1100;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.delete-account-modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* アカウント削除確認モーダル */
+.delete-account-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 100%;
+    max-width: 400px;
+    background-color: #ffffff;
+    z-index: 1110;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    padding: 0;
+    overflow: hidden;
+}
+
+.delete-account-modal.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* モーダルコンテンツ */
+.delete-account-modal-content {
+    padding: 32px 28px;
+    text-align: center;
+}
+
+/* モーダルタイトル */
+.delete-account-modal-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 12px 0;
+}
+
+/* モーダル警告文 */
+.delete-account-modal-warning {
+    font-size: 11px;
+    color: #d32f2f;
+    margin: 0 0 20px 0;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+/* モーダルボタン群 */
+.delete-account-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+/* モーダルボタン共通 */
+.delete-account-modal-btn {
+    flex: 1;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+/* キャンセルボタン */
+.delete-account-modal-cancel {
+    background-color: #f5f5f5;
+    color: #555;
+}
+
+.delete-account-modal-cancel:hover {
+    background-color: #e0e0e0;
+}
+
+/* 削除実行ボタン */
+.delete-account-modal-confirm {
+    background-color: #1a73e8;
+    color: #ffffff;
+}
+
+.delete-account-modal-confirm:hover {
+    background-color: #0d47a1;
 }
