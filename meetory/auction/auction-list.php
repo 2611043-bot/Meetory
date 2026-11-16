@@ -16,7 +16,7 @@ $sql = '
     SELECT
         g.goods_id,
         g.goods_name,
-        g.price,
+        a.current_price,
         (
             SELECT gi.image_path
             FROM goods_images gi
@@ -29,9 +29,9 @@ $sql = '
     INNER JOIN auctions AS a
         ON a.goods_id = g.goods_id
     WHERE a.status = :status
-      AND a.start_at <= NOW()
-      AND a.end_at > NOW()
-      AND g.is_sold = 0
+        AND a.start_at <= NOW()
+        AND a.end_at > NOW()
+        AND g.is_sold = 0
     ORDER BY g.listed_at DESC, g.goods_id DESC
 ';
 
@@ -91,7 +91,7 @@ $auction_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                     <p class="goods-price">
                         現在価格：
-                        <?= number_format((int) $auction['price']) ?>円
+                        <?= number_format((int) $auction['current_price']) ?>円
                     </p>
 
                     <p class="auction-end">
