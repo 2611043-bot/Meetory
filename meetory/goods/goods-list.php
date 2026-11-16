@@ -14,17 +14,20 @@ $keyword = $_GET['keyword'] ?? '';
 $min_price = $_GET['min_price'] ?? '';
 $max_price = $_GET['max_price'] ?? '';
 $condition = $_GET['condition'] ?? '';
+$category_id = $_GET['category_id'] ?? '';
 
 // 文字列以外が送信された場合は空文字にする
 $keyword = is_string($keyword) ? trim($keyword) : '';
 $min_price = is_string($min_price) ? trim($min_price) : '';
 $max_price = is_string($max_price) ? trim($max_price) : '';
 $condition = is_string($condition) ? trim($condition) : '';
+$category_id = is_string($category_id) ? trim($category_id) : '';
 
 // 商品一覧を取得（各商品の先頭画像も取得）
 $sql = '
     SELECT
         g.goods_id,
+        g.seller_id,
         g.goods_name,
         g.description,
         g.price,
@@ -36,12 +39,31 @@ $sql = '
             WHERE gi.goods_id = g.goods_id
             ORDER BY gi.display_order ASC, gi.image_id ASC
             LIMIT 1
-        ) AS image_path
+        ) AS image_path,
+        seller.user_name AS seller_name,
+        seller.profile_image_type,
+        seller.profile_image
     FROM goods AS g
+    INNER JOIN users AS seller
+        ON seller.user_id = g.seller_id
 ';
 
 $conditions = [];
 $params = [];
+
+// オークション商品は除外
+$conditions[] = 'NOT EXISTS (SELECT 1 FROM auctions a WHERE a.goods_id = g.goods_id)';
+
+// 売却済み商品は除外
+$conditions[] = 'g.is_sold = 0';
+
+// カテゴリーで絞り込み
+if ($category_id !== '' && ctype_digit($category_id) && (int) $category_id > 0) {
+    $conditions[] = 'g.category_id = :category_id';
+    $params[':category_id'] = (int) $category_id;
+} else {
+    $category_id = '';
+}
 
 // 商品名で検索
 if ($keyword !== '') {
@@ -123,6 +145,14 @@ if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $
 
 <!-- 商品検索フォーム -->
 <form action="goods-list.php" method="get">
+
+    <?php if ($category_id !== ''): ?>
+        <input
+            type="hidden"
+            name="category_id"
+            value="<?= (int) $category_id ?>"
+        >
+    <?php endif; ?>
 
     <div>
         <label for="keyword">商品名：</label>
@@ -234,7 +264,7 @@ if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $
         >
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="goods_id" value="<?= (int) $goods['goods_id'] ?>">
-            <input type="hidden" name="return_url" value="goods-list.php?<?= http_build_query(['keyword' => $keyword, 'min_price' => $min_price, 'max_price' => $max_price, 'condition' => $condition]) ?>">
+            <input type="hidden" name="return_url" value="goods-list.php?<?= http_build_query(['keyword' => $keyword, 'min_price' => $min_price, 'max_price' => $max_price, 'condition' => $condition, 'category_id' => $category_id]) ?>">
             <button
                 type="submit"
                 class="js-favorite-btn favorite-btn<?= in_array((int) $goods['goods_id'], $favorited_goods_ids, true) ? ' is-favorited' : '' ?>"
@@ -285,6 +315,19 @@ if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $
                     商品の状態：
                     <?= htmlspecialchars($goods['condition'], ENT_QUOTES, 'UTF-8') ?>
                 </p>
+
+                <a
+                    class="goods-seller"
+                    href="../user/profile.php?user_id=<?= (int) $goods['seller_id'] ?>"
+                >
+                    <span class="goods-seller-avatar">
+                        <?= renderProfileAvatar($goods, '', '') ?>
+                    </span>
+                    <span>
+                        出品者：
+                        <?= htmlspecialchars($goods['seller_name'], ENT_QUOTES, 'UTF-8') ?>
+                    </span>
+                </a>
 
                 <p>
                     <?= nl2br(htmlspecialchars($goods['description'], ENT_QUOTES, 'UTF-8')) ?>

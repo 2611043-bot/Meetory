@@ -40,7 +40,7 @@ $is_auth_page = in_array(
     <!-- ヘッダー専用CSS -->
     <link
         rel="stylesheet"
-        href="/Meetory/meetory/assets/css/header.css?v=2026110901"
+        href="/Meetory/meetory/assets/css/header.css?v=<?= filemtime(__DIR__ . '/meetory/assets/css/header.css') ?>"
     >
 </head>
 
@@ -73,6 +73,10 @@ $is_auth_page = in_array(
                         id="searchInput"
                         class="header-search-input"
                         placeholder="Meetoryで商品を検索..."
+                        autocomplete="off"
+                        aria-autocomplete="list"
+                        aria-controls="searchSuggestions"
+                        aria-expanded="false"
                     >
 
                     <button
@@ -83,6 +87,13 @@ $is_auth_page = in_array(
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
                 </div>
+                <div
+                    class="search-suggestions"
+                    id="searchSuggestions"
+                    role="region"
+                    aria-label="検索候補"
+                    hidden
+                ></div>
             </form>
 
             <!-- 右側のメニュー -->
@@ -263,6 +274,10 @@ $is_auth_page = in_array(
     <!-- ヘッダー専用JavaScript -->
     <script
         src="/Meetory/meetory/assets/js/header.js?v=2026110901"
+        defer
+    ></script>
+    <script
+        src="/Meetory/meetory/assets/js/search-suggest.js?v=<?= filemtime(__DIR__ . '/meetory/assets/js/search-suggest.js') ?>"
         defer
     ></script>
 

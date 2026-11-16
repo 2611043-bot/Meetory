@@ -22,7 +22,12 @@ $pdo = getPDO();
 
 // ユーザー情報を取得
 $sql = '
-    SELECT user_name, email, created_at
+    SELECT
+        user_name,
+        email,
+        created_at,
+        profile_image_type,
+        profile_image
     FROM users
     WHERE user_id = ?
 ';
@@ -101,62 +106,164 @@ foreach ($purchase_rows as $row) {
     }
 }
 
+$purchase_count = count($purchase_history);
+
+$listing_count_stmt = $pdo->prepare(
+    'SELECT
+        COALESCE(SUM(
+            CASE
+                WHEN g.is_sold = 0 AND (
+                    a.auction_id IS NULL
+                    OR (
+                        a.status = :auction_status
+                        AND a.start_at <= NOW()
+                        AND a.end_at > NOW()
+                    )
+                )
+                THEN 1 ELSE 0
+            END
+        ), 0)
+            AS active_goods_count,
+        COALESCE(SUM(CASE WHEN g.is_sold = 1 THEN 1 ELSE 0 END), 0)
+            AS sold_goods_count
+    FROM goods AS g
+    LEFT JOIN auctions AS a
+        ON a.goods_id = g.goods_id
+    WHERE g.seller_id = :seller_id'
+);
+$listing_count_stmt->execute([
+    'auction_status' => 'active',
+    'seller_id' => $user_id
+]);
+$listing_counts = $listing_count_stmt->fetch(PDO::FETCH_ASSOC);
+
+$in_progress_stmt = $pdo->prepare(
+    'SELECT COUNT(DISTINCT bi.buy_item_id)
+    FROM buy_items AS bi
+    INNER JOIN buy AS b
+        ON b.transaction_id = bi.transaction_id
+    INNER JOIN goods AS g
+        ON g.goods_id = bi.goods_id
+    WHERE (b.buyer_id = :buyer_id OR g.seller_id = :seller_id)
+        AND b.transaction_status IN (:purchased, :shipped)'
+);
+$in_progress_stmt->execute([
+    'buyer_id' => $user_id,
+    'seller_id' => $user_id,
+    'purchased' => '購入済み',
+    'shipped' => '発送済み'
+]);
+$in_progress_count = (int) $in_progress_stmt->fetchColumn();
+
 // 共通ヘッダー
 require_once __DIR__ . '/../../meetory-header.php';
 
 ?>
 
 <!-- ページ固有のスタイルシートを読み込む（マイページ専用） -->
-<link rel="stylesheet" href="/Meetory/meetory/assets/css/mypage.css">
+<link
+    rel="stylesheet"
+    href="/Meetory/meetory/assets/css/mypage.css?v=<?= filemtime(__DIR__ . '/../assets/css/mypage.css') ?>"
+>
 
 <div class="mypage-container">
-    <h1 class="mypage-title">マイページ</h1>
+    <header class="mypage-heading">
+        <h1>マイページ</h1>
+        <p>アカウントと取引をまとめて確認できます。</p>
+    </header>
 
-    <div class="user-info-card">
-        <h2>ユーザー情報</h2>
-
-        <p class="info-row">
-            <span class="info-label">ユーザー名：</span>
-            <span class="info-value"><?= htmlspecialchars($user['user_name'], ENT_QUOTES, 'UTF-8') ?></span>
-        </p>
-
-        <p class="info-row">
-            <span class="info-label">メールアドレス：</span>
-            <span class="info-value"><?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?></span>
-        </p>
-
-        <p class="info-row">
-            <span class="info-label">会員登録日：</span>
-            <span class="info-value">
-                <?= htmlspecialchars(
-                    date('Y年m月d日', strtotime($user['created_at'])),
-                    ENT_QUOTES,
-                    'UTF-8'
+    <section class="mypage-panel mypage-user-panel">
+        <div class="mypage-user-identity">
+            <div class="mypage-avatar">
+                <?= renderProfileAvatar(
+                    $user,
+                    '',
+                    $user['user_name'] . 'のプロフィールアイコン'
                 ) ?>
-            </span>
-        </p>
-    </div>
+            </div>
+            <div>
+                <p class="mypage-eyebrow">ユーザー情報</p>
+                <h2><?= htmlspecialchars($user['user_name'], ENT_QUOTES, 'UTF-8') ?></h2>
+                <p class="mypage-user-email">
+                    <?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?>
+                </p>
+            </div>
+        </div>
+        <div class="mypage-link-list">
+            <a href="profile.php?user_id=<?= $user_id ?>">プロフィールを見る</a>
+            <a href="profile-image.php">アイコンを変更する</a>
+            <a href="password-reset.php">パスワード再設定</a>
+        </div>
+    </section>
 
-    <hr class="section-divider">
+    <section class="mypage-panel">
+        <h2>取引管理</h2>
+        <div class="mypage-stat-grid">
+            <a class="mypage-stat-card" href="#purchase-history">
+                <span>購入履歴</span>
+                <strong><?= $purchase_count ?>件</strong>
+            </a>
+            <a class="mypage-stat-card" href="../goods/my-goods.php">
+                <span>出品中の商品</span>
+                <strong><?= (int) $listing_counts['active_goods_count'] ?>件</strong>
+            </a>
+            <a class="mypage-stat-card" href="../goods/my-goods.php">
+                <span>売却済みの商品</span>
+                <strong><?= (int) $listing_counts['sold_goods_count'] ?>件</strong>
+            </a>
+            <div class="mypage-stat-card">
+                <span>取引中の商品</span>
+                <strong><?= $in_progress_count ?>件</strong>
+            </div>
+        </div>
+    </section>
 
-    <div class="purchase-history-card">
+    <section class="mypage-panel">
+        <h2>出品管理</h2>
+        <div class="mypage-action-grid">
+            <a class="mypage-action-card mypage-action-primary" href="../goods/goods-register.php">
+                <span aria-hidden="true">＋</span>
+                商品を出品する
+            </a>
+            <a class="mypage-action-card" href="../goods/my-goods.php">
+                通常出品の商品を確認する
+            </a>
+            <a
+                class="mypage-action-card"
+                href="profile.php?user_id=<?= $user_id ?>#profile-auctions"
+            >
+                自分の開催中オークションを確認する
+            </a>
+        </div>
+    </section>
+
+    <section class="mypage-panel">
+        <h2>その他</h2>
+        <nav class="mypage-link-list" aria-label="その他のメニュー">
+            <a href="favorites.php">ほしいものリスト</a>
+            <a href="../messages/message-center.php">メッセージ</a>
+            <a href="logout.php">ログアウト</a>
+        </nav>
+    </section>
+
+    <section class="mypage-panel" id="purchase-history">
         <h2>購入履歴</h2>
 
         <?php if (empty($purchase_history)): ?>
 
-            <p class="empty-message">購入履歴はまだありません。</p>
+            <p>購入履歴はまだありません。</p>
 
         <?php else: ?>
 
             <?php foreach ($purchase_history as $transaction_id => $purchase): ?>
 
-                <section class="transaction-box">
+                <article class="mypage-purchase-card">
                     <h3>
                         取引番号：
                         <?= htmlspecialchars((string) $transaction_id, ENT_QUOTES, 'UTF-8') ?>
                     </h3>
 
-                    <p class="meta-row">
+                    <p>
                         購入日時：
                         <?= htmlspecialchars(
                             date('Y年m月d日 H:i:s', strtotime($purchase['purchased_at'])),
@@ -165,48 +272,45 @@ require_once __DIR__ . '/../../meetory-header.php';
                         ) ?>
                     </p>
 
-                    <p class="meta-row">
+                    <p>
                         取引状況：
-                        <span class="status-badge"><?= htmlspecialchars($purchase['transaction_status'], ENT_QUOTES, 'UTF-8') ?></span>
+                        <?= htmlspecialchars($purchase['transaction_status'], ENT_QUOTES, 'UTF-8') ?>
                     </p>
 
                     <h4>購入した商品</h4>
 
                     <?php if (empty($purchase['items'])): ?>
 
-                        <p class="empty-message">商品情報を確認できません。</p>
+                        <p>商品情報を確認できません。</p>
 
                     <?php else: ?>
 
-                        <ul class="item-list">
-                        <?php foreach ($purchase['items'] as $item): ?>
+                        <ul>
+                            <?php foreach ($purchase['items'] as $item): ?>
 
-                            <li class="item-card">
-                                <!-- 商品画像 -->
-                                <?php if (!empty($item['image_path'])): ?>
-                                    <div class="goods-image">
-                                        <img
-                                            src="/Meetory/<?= htmlspecialchars(
-                                                ltrim($item['image_path'], '/'),
-                                                ENT_QUOTES,
-                                                'UTF-8'
-                                            ) ?>"
-                                            alt="<?= htmlspecialchars(
-                                                $item['goods_name'] ?? '商品画像',
-                                                ENT_QUOTES,
-                                                'UTF-8'
-                                            ) ?>"
-                                            width="200"
-                                            loading="lazy"
-                                        >
-                                    </div>
-                                <?php else: ?>
-                                    <p class="no-image-text">画像はありません</p>
-                                <?php endif; ?>
+                                <li>
+                                    <?php if (!empty($item['image_path'])): ?>
+                                        <div>
+                                            <img
+                                                src="/Meetory/<?= htmlspecialchars(
+                                                    ltrim($item['image_path'], '/'),
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                ) ?>"
+                                                alt="<?= htmlspecialchars(
+                                                    $item['goods_name'] ?? '商品画像',
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                ) ?>"
+                                                width="200"
+                                                loading="lazy"
+                                            >
+                                        </div>
+                                    <?php else: ?>
+                                        <p>画像はありません</p>
+                                    <?php endif; ?>
 
-                                <div class="item-details">
-                                    <!-- 商品名 -->
-                                    <p class="item-name">
+                                    <p>
                                         商品名：
                                         <?= htmlspecialchars(
                                             $item['goods_name'] ?? '商品情報なし',
@@ -215,47 +319,31 @@ require_once __DIR__ . '/../../meetory-header.php';
                                         ) ?>
                                     </p>
 
-<<<<<<< HEAD
-                                    <!-- 購入時の価格 -->
-                                    <p class="item-price">
+                                    <p>
                                         購入時の価格：
-                                        <span><?= number_format((int) $item['purchase_price']) ?>円</span>
+                                        <?= number_format((int) $item['purchase_price']) ?>円
                                     </p>
-                                </div>
-                            </li>
+                                </li>
 
-                        <?php endforeach; ?>
+                            <?php endforeach; ?>
                         </ul>
 
                     <?php endif; ?>
 
-                    <p class="total-price-row">
+                    <p>
                         購入合計金額：
-                        <span class="total-price-value"><?= number_format((int) $purchase['total_price']) ?>円</span>
+                        <?= number_format((int) $purchase['total_price']) ?>円
                     </p>
 
-                    <hr class="transaction-divider">
-                </section>
+                    <a href="../purchase/transaction-detail.php?transaction_id=<?= (int) $transaction_id ?>">
+                        取引詳細を見る
+                    </a>
+                </article>
 
             <?php endforeach; ?>
 
         <?php endif; ?>
-    </div>
-
-    <div class="logout-container">
-        <a href="logout.php" class="btn-logout">ログアウト</a>
-    </div>
+    </section>
 </div>
 
 <?php require_once __DIR__ . '/../../meetory-footer.php'; ?>
-=======
-<p>
-    <a href="favorites.php">ほしいものリストを見る</a>
-</p>
-
-<p>
-    <a href="../index.php">ホームに戻る</a>
-</p>
-
-<?php require '../../meetory-footer.php'; ?>
->>>>>>> b388cdae05de0f31dad2f06b36010a2018a6406c

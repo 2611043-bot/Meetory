@@ -1,200 +1,101 @@
+/* ヘッダーに影響を与えないよう * と body の上書きを削除 */
 
-/* ==============================
-プロフィール全体
-============================== */
-
-.profile-container {
-    max-width: 760px;
-    margin: 24px auto;
-    padding: 16px;
+.main-container {
+    min-height: calc(100vh - 60px);
+    background: linear-gradient(135deg, #f3f9ff 0%, #ebf5ff 50%, #f5faff 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 40px 24px;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
 }
 
-.profile-header {
-    padding: 20px;
-    border: 1px solid #ddd;
+.reset-card {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 440px;
+    padding: 48px 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(22, 119, 230, 0.08);
+    box-sizing: border-box;
+}
+
+.reset-card h1 {
+    color: #1677e6;
+    font-size: 26px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 12px 0;
+}
+
+.subtitle {
+    color: #666666;
+    font-size: 13px;
+    text-align: center;
+    margin: 0 0 32px 0;
+    line-height: 1.5;
+}
+
+.form-group {
+    margin: 0 0 24px 0;
+}
+
+.form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 8px;
+}
+
+.reset-card input[type="email"] {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: 1px solid #d9e1e8;
     border-radius: 8px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.reset-card input[type="email"]:focus {
+    border-color: #1677e6;
+    box-shadow: 0 0 0 3px rgba(22, 119, 230, 0.12);
+}
+
+.reset-card input[type="submit"] {
+    width: 100%;
+    padding: 14px;
+    background-color: #1677e6;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background-color 0.2s;
     margin-bottom: 24px;
 }
 
-/* ==============================
-評価一覧
-============================== */
-
-.rating-summary {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 8px;
-    margin: 16px 0 24px;
+.reset-card input[type="submit"]:hover {
+    background-color: #1262c4;
 }
 
-.rating-item {
+.back-link {
     text-align: center;
-    padding: 12px 4px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-}
-
-.rating-face {
-    display: block;
-    font-size: 28px;
-}
-
-.rating-count {
-    display: block;
-    font-size: 22px;
-    font-weight: bold;
-    margin: 4px 0;
-}
-
-.rating-label {
-    font-size: 12px;
-    overflow-wrap: anywhere;
-}
-
-/* ==============================
-レビュー一覧
-============================== */
-
-.review-card {
-    background: #f1f1f1;
-    padding: 12px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-}
-
-.review-heading {
-    font-weight: bold;
-    margin-bottom: 6px;
-}
-
-.review-comment {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
+    font-size: 13px;
     margin: 0;
 }
 
-.review-date {
-    color: #666;
-    font-size: 12px;
-    margin-top: 8px;
+.back-link a {
+    color: #1677e6;
+    text-decoration: underline;
 }
 
-.review-more {
-    text-align: right;
-}
-
-/* ==============================
-出品商品
-============================== */
-
-.profile-products {
-    margin: 30px 0;
-}
-
-.profile-tabs {
-    display: flex;
-    gap: 10px;
-    margin: 16px 0;
-    border-bottom: 1px solid #ddd;
-}
-
-.profile-tabs a {
-    flex: 1;
-    padding: 12px;
-    text-align: center;
-    text-decoration: none;
-    color: #555;
-    border-bottom: 3px solid transparent;
-}
-
-.profile-tabs a.active {
-    color: #222;
-    font-weight: bold;
-    border-bottom-color: #333;
-}
-
-.profile-goods-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-}
-
-.profile-goods-card {
-    min-width: 0;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-}
-
-.profile-goods-card img {
-    display: block;
-    width: 100%;
-    height: 180px;
-    object-fit: contain;
-}
-
-.profile-goods-card a {
-    color: inherit;
-    text-decoration: none;
-}
-
-.profile-goods-card h3 {
-    overflow-wrap: anywhere;
-}
-
-.profile-goods-price {
-    font-weight: bold;
-}
-
-.sold-out-label {
-    display: inline-block;
-    padding: 5px 10px;
-    background: #555;
-    color: white;
-    font-size: 12px;
-    font-weight: bold;
-    border-radius: 4px;
-}
-
-/* ==============================
-スマートフォン対応
-============================== */
-
-@media (max-width: 480px) {
-    .rating-summary {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .profile-goods-list {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* ==============================
-   プロフィール: もっと見る / 非表示 ボタン
-   profile.php の id="show-more-button" と id="collapse-button" に対応
-   profile.js で表示/非表示を制御し、CSS は見た目と hidden 属性対応のみを担当
-   ============================== */
-#show-more-button,
-#collapse-button {
-    display: inline-block;
-    padding: 8px 16px;
-    margin: 8px 4px 0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: #fff;
-    color: #555;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-#show-more-button:hover,
-#collapse-button:hover {
-    background: #f5f5f5;
-    border-color: #bbb;
-}
-
-/* JavaScript の hidden 属性で非表示にする際のスタイル */
-#collapse-button[hidden] {
-    display: none;
+.back-link a:hover {
+    color: #1262c4;
 }

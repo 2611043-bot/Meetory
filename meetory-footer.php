@@ -29,9 +29,12 @@ $current_page = basename($_SERVER['SCRIPT_NAME']);
     </a>
 
     <!-- メッセージ -->
-    <a href="/Meetory/meetory/messages/message-inbox.php">
-        <i class="fa-solid fa-envelope"></i>
-        <span>メッセージ</span>
+    <a href="/Meetory/meetory/messages/message-center.php"
+    class="footer-item">
+        <span class="footer-icon">
+            <i class="fa-solid fa-envelope"></i>
+        </span>
+        <span class="footer-label">メッセージ</span>
     </a>
 
     <!-- マイページ -->
