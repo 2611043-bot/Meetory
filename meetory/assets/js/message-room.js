@@ -11,26 +11,78 @@
     // メッセージ表示エリア
     const roomMessages = document.getElementById('roomMessages');
 
-    // 商品カードの開閉（イベント委譲）
+    // 画像拡大モーダル
+    const imageModal = document.getElementById('imageModal');
+    const imageModalImg = document.getElementById('imageModalImg');
+    const imageModalClose = imageModal ? imageModal.querySelector('.image-modal-close') : null;
+    const imageModalOverlay = imageModal ? imageModal.querySelector('.image-modal-overlay') : null;
+
+    // モーダルを開く
+    function openImageModal(imageSrc, imageAlt) {
+        if (!imageModal || !imageModalImg || !imageSrc) {
+            return;
+        }
+        imageModalImg.src = imageSrc;
+        imageModalImg.alt = imageAlt || '';
+        imageModal.hidden = false;
+        document.body.style.overflow = 'hidden';
+    }
+
+    // モーダルを閉じる
+    function closeImageModal() {
+        if (!imageModal) {
+            return;
+        }
+        imageModal.hidden = true;
+        imageModalImg.src = '';
+        document.body.style.overflow = '';
+    }
+
+    // モーダル関連のイベント
+    if (imageModal) {
+        // 閉じるボタン
+        if (imageModalClose) {
+            imageModalClose.addEventListener('click', function (e) {
+                e.stopPropagation();
+                closeImageModal();
+            });
+        }
+
+        // オーバーレイクリック
+        if (imageModalOverlay) {
+            imageModalOverlay.addEventListener('click', closeImageModal);
+        }
+
+        // ESCキー
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !imageModal.hidden) {
+                closeImageModal();
+            }
+        });
+    }
+
+    // 商品画像クリックでモーダル表示（イベント委譲）
     if (roomMessages) {
         roomMessages.addEventListener('click', function (event) {
-            const button = event.target.closest('.product-card-header');
+            const imageContainer = event.target.closest('.product-card-image');
 
-            if (!button) {
+            if (imageContainer) {
+                // 画像クリック時はリンク移動を防ぐ
+                event.preventDefault();
+                event.stopPropagation();
+
+                const imageSrc = imageContainer.dataset.imageSrc;
+                const imageAlt = imageContainer.dataset.imageAlt;
+
+                if (imageSrc) {
+                    openImageModal(imageSrc, imageAlt);
+                }
                 return;
             }
 
-            const card = button.closest('.product-card');
-            const body = card.querySelector('.product-card-body');
-
-            const isOpen = button.getAttribute('aria-expanded') === 'true';
-
-            button.setAttribute('aria-expanded', String(!isOpen));
-            body.hidden = isOpen;
+            // 最初に最新メッセージまでスクロール
+            roomMessages.scrollTop = roomMessages.scrollHeight;
         });
-
-        // 最初に最新メッセージまでスクロール
-        roomMessages.scrollTop = roomMessages.scrollHeight;
     }
 
     // トーク一覧の検索

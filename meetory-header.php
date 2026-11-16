@@ -44,7 +44,7 @@ $is_auth_page = in_array(
     >
 </head>
 
-<body>
+<body class="<?= isset($body_class) ? htmlspecialchars($body_class, ENT_QUOTES, 'UTF-8') : '' ?>">
 
 <header class="site-header">
     <div class="header-main <?= $is_auth_page ? 'auth-header' : '' ?>">
