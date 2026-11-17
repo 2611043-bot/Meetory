@@ -21,6 +21,11 @@
     font-size: 14px;
 }
 
+/* 非表示ユーティリティ */
+.is-hidden {
+    display: none !important;
+}
+
 /* 出品タイプ選択パネル */
 .listing-type-panel {
     margin: 20px 0;

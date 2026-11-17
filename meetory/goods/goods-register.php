@@ -51,11 +51,13 @@ $old_buyout_price = $old['buyout_price'] ?? '';
 $old_end_at = $old['end_at'] ?? '';
 $old_auto_extend = $old['auto_extend'] ?? '1';
 
+// ページ固有CSS（ヘッダーより前に読み込むことで<head>内に配置）
+$page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DIR__ . '/../assets/css/goods-register.css');
+
 ?>
+<link rel="stylesheet" href="<?= htmlspecialchars($page_css, ENT_QUOTES, 'UTF-8') ?>">
 
 <?php require_once '../../meetory-header.php'; ?>
-
-<link rel="stylesheet" href="../assets/css/goods-register.css">
 
 <h1>商品出品</h1>
 
@@ -140,7 +142,7 @@ $old_auto_extend = $old['auto_extend'] ?? '1';
     </fieldset>
 
     <!-- 通常出品入力欄 -->
-    <fieldset class="listing-fields normal-fields" data-listing-type="normal">
+    <fieldset class="listing-fields normal-fields<?= $old_listing_type === 'auction' ? ' is-hidden' : '' ?>" data-listing-type="normal">
         <legend>通常出品情報</legend>
 
         <p>
@@ -151,7 +153,7 @@ $old_auto_extend = $old['auto_extend'] ?? '1';
     </fieldset>
 
     <!-- オークション出品入力欄 -->
-    <fieldset class="listing-fields auction-fields" data-listing-type="auction">
+    <fieldset class="listing-fields auction-fields<?= $old_listing_type === 'normal' ? ' is-hidden' : '' ?>" data-listing-type="auction">
         <legend>オークション出品情報</legend>
 
         <p>
@@ -183,7 +185,7 @@ $old_auto_extend = $old['auto_extend'] ?? '1';
 
 </form>
 
-<script src="../assets/js/goods-register.js"></script>
+<script src="/Meetory/meetory/assets/js/goods-register.js?v=<?= filemtime(__DIR__ . '/../assets/js/goods-register.js') ?>"></script>
 
 <form action="../user/logout.php" method="post">
     <input

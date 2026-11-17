@@ -17,16 +17,16 @@ document.getElementById('goods_image').addEventListener('change', function() {
         if (!checked) return;
 
         if (checked.value === 'normal') {
-            normalFields.style.display = '';
-            auctionFields.style.display = 'none';
+            normalFields.classList.remove('is-hidden');
+            auctionFields.classList.add('is-hidden');
             // オークション必須項目を一時的に不要にする
             auctionFields.querySelectorAll('[required]').forEach(function(el) {
                 el.removeAttribute('required');
             });
             normalFields.querySelector('input[name="price"]').setAttribute('required', '');
         } else {
-            auctionFields.style.display = '';
-            normalFields.style.display = 'none';
+            auctionFields.classList.remove('is-hidden');
+            normalFields.classList.add('is-hidden');
             // 通常必須項目を一時的に不要にする
             normalFields.querySelectorAll('[required]').forEach(function(el) {
                 el.removeAttribute('required');
