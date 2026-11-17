@@ -101,7 +101,6 @@ switch ($type) {
     case 'purchase':
     case 'shipping':
     case 'received':
-    case 'review':
         // related_id = transaction_id。取引詳細画面へ。
         // 取引の当事者（購入者または出品者）か確認してから遷移。
         $stmtTx = $pdo->prepare(
@@ -131,6 +130,39 @@ switch ($type) {
 
             if ($buyerId === $user_id || $isSeller) {
                 $redirectUrl = '../purchase/transaction-detail.php?transaction_id=' . $relatedId;
+            }
+        }
+        break;
+
+    case 'review':
+        // related_id = transaction_id。評価者のプロフィール画面へ。
+        $stmtTx = $pdo->prepare(
+            'SELECT buyer_id
+             FROM buy
+             WHERE transaction_id = :transaction_id
+             LIMIT 1'
+        );
+        $stmtTx->execute([':transaction_id' => $relatedId]);
+        $transaction = $stmtTx->fetch(PDO::FETCH_ASSOC);
+
+        if ($transaction) {
+            $reviewerId = (int) $transaction['buyer_id'];
+            // ログインユーザーが取引の当事者か確認
+            $stmtSeller = $pdo->prepare(
+                'SELECT COUNT(*) AS cnt
+                 FROM buy_items AS bi
+                 INNER JOIN goods AS g ON bi.goods_id = g.goods_id
+                 WHERE bi.transaction_id = :transaction_id
+                   AND g.seller_id = :user_id'
+            );
+            $stmtSeller->execute([
+                ':transaction_id' => $relatedId,
+                ':user_id' => $user_id,
+            ]);
+            $isSeller = (int) $stmtSeller->fetchColumn() > 0;
+
+            if ($reviewerId === $user_id || $isSeller) {
+                $redirectUrl = '../user/profile.php?user_id=' . $user_id;
             }
         }
         break;

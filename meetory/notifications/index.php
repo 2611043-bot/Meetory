@@ -427,7 +427,8 @@ require '../../meetory-header.php';
             <?php if ($unreadCount > 0): ?>
                 <form
                     action="index.php" method="post"
-                    onsubmit="return confirm('未読のすべての通知を既読にしますか？');"
+                    data-confirm
+                    data-confirm-message="未読のすべての通知を既読にしますか？"
                 >
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
                     <input type="hidden" name="action" value="mark_all_read">
@@ -459,7 +460,8 @@ require '../../meetory-header.php';
             <?php if ($hasReadCount > 0): ?>
                 <form
                     action="index.php" method="post"
-                    onsubmit="return confirm('既読のすべての通知を削除しますか？元に戻せません。');"
+                    data-confirm
+                    data-confirm-message="既読のすべての通知を削除しますか？元に戻せません。"
                 >
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
                     <input type="hidden" name="action" value="delete_all_read">
@@ -553,7 +555,8 @@ require '../../meetory-header.php';
                             <button
                                 type="submit"
                                 class="action-btn action-btn-read"
-                                onclick="return confirm('この通知を既読にしますか？');"
+                                data-confirm
+                                data-confirm-message="この通知を既読にしますか？"
                             >
                                 既読にする
                             </button>
@@ -573,7 +576,8 @@ require '../../meetory-header.php';
                         <button
                             type="submit"
                             class="action-btn action-btn-delete"
-                            onclick="return confirm('この通知を削除しますか？元に戻せません。');"
+                            data-confirm
+                            data-confirm-message="この通知を削除しますか？元に戻せません。"
                         >
                             削除
                         </button>
@@ -621,5 +625,100 @@ require '../../meetory-header.php';
     <?php endif; ?>
 
 </section>
+
+<!-- 通知確認モーダル（アカウント削除確認と同じデザイン） -->
+<div id="notificationConfirmOverlay" class="delete-account-modal-overlay"></div>
+<div id="notificationConfirmModal" class="delete-account-modal">
+    <div class="delete-account-modal-content">
+        <h2 class="delete-account-modal-title">確認</h2>
+        <p id="notificationConfirmMessage"></p>
+        <div class="delete-account-modal-actions">
+            <button
+                type="button"
+                class="delete-account-modal-btn delete-account-modal-cancel"
+                id="notificationConfirmCancel"
+            >
+                いいえ
+            </button>
+            <button
+                type="button"
+                class="delete-account-modal-btn delete-account-modal-confirm"
+                id="notificationConfirmConfirm"
+            >
+                はい
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var overlay = document.getElementById('notificationConfirmOverlay');
+    var modal = document.getElementById('notificationConfirmModal');
+    var messageEl = document.getElementById('notificationConfirmMessage');
+    var cancelBtn = document.getElementById('notificationConfirmCancel');
+    var confirmBtn = document.getElementById('notificationConfirmConfirm');
+
+    if (!overlay || !modal || !cancelBtn || !confirmBtn || !messageEl) {
+        return;
+    }
+
+    var targetForm = null;
+
+    function openModal(msg, form) {
+        messageEl.textContent = msg;
+        targetForm = form;
+        overlay.classList.add('open');
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        overlay.classList.remove('open');
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+        targetForm = null;
+    }
+
+    // data-confirm 付きフォームの submit をインターセプト
+    var confirmForms = document.querySelectorAll('form[data-confirm]');
+    confirmForms.forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            var msg = form.getAttribute('data-confirm-message');
+            openModal(msg, form);
+        });
+    });
+
+    // data-confirm 付きボタンのクリックをインターセプト
+    var confirmButtons = document.querySelectorAll('button[data-confirm]');
+    confirmButtons.forEach(function (btn) {
+        btn.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            var msg = btn.getAttribute('data-confirm-message');
+            var form = btn.closest('form');
+            openModal(msg, form);
+        });
+    });
+
+    cancelBtn.addEventListener('click', function () {
+        closeModal();
+    });
+
+    overlay.addEventListener('click', function (event) {
+        if (event.target === overlay) {
+            closeModal();
+        }
+    });
+
+    confirmBtn.addEventListener('click', function () {
+        if (targetForm) {
+            closeModal();
+            targetForm.submit();
+        }
+    });
+})();
+</script>
 
 <?php require '../../meetory-footer.php'; ?>
