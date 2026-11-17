@@ -328,6 +328,14 @@ if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $
         <a href="goods-list.php">商品一覧に戻る</a>
     </p>
 
+    <?php if (isset($_SESSION['user_id']) && !$is_owner): ?>
+        <p>
+            <a href="../reports/report.php?target_type=goods&amp;target_id=<?= (int) $goods['goods_id'] ?>">
+                この商品を通報する
+            </a>
+        </p>
+    <?php endif; ?>
+
     <?php if ($is_admin || $is_owner): ?>
 
         <p>

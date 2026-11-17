@@ -10,6 +10,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 require_once '../../meetory-functions.php';
 
 $pdo = getPDO();
+if (empty($_SESSION['csrf_token'])) { $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); }
 
 // URLからプロフィールを表示するユーザーIDを取得
 $profile_user_id = filter_input(
@@ -288,6 +289,23 @@ require '../../meetory-header.php';
             <p class="profile-owner-link">
                 <a href="mypage.php">マイページへ戻る</a>
                 <a href="profile-image.php">アイコンを変更する</a>
+            </p>
+        <?php elseif ($viewer_user_id !== false && $viewer_user_id !== null && (int)$viewer_user_id > 0): ?>
+            <?php
+            $is_blocked = isUserBlocked($pdo, (int)$viewer_user_id, (int)$profile_user_id);
+            ?>
+            <?php if ($is_blocked): ?>
+            <form method="POST" action="unblock-user.php" style="display:inline">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="target_id" value="<?= (int)$profile_user_id ?>">
+                <input type="hidden" name="redirect" value="profile.php?user_id=<?= (int)$profile_user_id ?>">
+                <button type="submit">ブロック解除</button>
+            </form>
+            <?php else: ?>
+            <a href="block-confirm.php?target_id=<?= (int)$profile_user_id ?>"><button type="button">ブロックする</button></a>
+            <?php endif; ?>
+            <p class="profile-report-link">
+                <a href="../reports/report.php?target_type=user&amp;target_id=<?= (int)$profile_user_id ?>">このユーザーを通報する</a>
             </p>
         <?php endif; ?>
     </section>

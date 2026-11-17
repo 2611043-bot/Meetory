@@ -389,6 +389,14 @@ $can_bid = isset($_SESSION['user_id'])
         <a href="../goods/goods-list.php">商品一覧に戻る</a>
     </p>
 
+    <?php if (isset($_SESSION['user_id']) && !$is_owner): ?>
+        <p>
+            <a href="../reports/report.php?target_type=goods&amp;target_id=<?= (int) $auction['goods_id'] ?>">
+                この商品を通報する
+            </a>
+        </p>
+    <?php endif; ?>
+
 </main>
 
 <script src="../assets/js/auction-detail.js"></script>

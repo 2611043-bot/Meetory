@@ -248,6 +248,7 @@ require '../../meetory-header.php';
             <a href="favorites.php">ほしいものリスト</a>
             <a href="../messages/message-center.php">メッセージ</a>
             <a href="notification-settings.php">通知設定</a>
+            <a href="blocked-list.php">ブロック一覧</a>
             <a href="logout.php">ログアウト</a>
         </nav>
     </section>

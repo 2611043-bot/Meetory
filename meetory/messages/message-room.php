@@ -122,6 +122,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 送信する種類を取得
     $action = $_POST['action'] ?? '';
 
+    if (isBlockedEitherWay($pdo, $my_user_id, $user_id)) {
+        exit('ブロック中のためメッセージを送信できません。');
+    }
+
     // ------------------------------------
     // 通常メッセージ
     // ------------------------------------

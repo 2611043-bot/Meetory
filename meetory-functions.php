@@ -150,4 +150,76 @@ function renderProfileAvatar(
         '" alt="' . htmlspecialchars($alt, ENT_QUOTES, 'UTF-8') . '" loading="lazy">';
 }
 
+function isUserBlocked(PDO $pdo, int $blocker_id, int $blocked_id): bool
+{
+    $stmt = $pdo->prepare('SELECT 1 FROM user_blocks WHERE blocker_id = :b AND blocked_id = :d LIMIT 1');
+    $stmt->execute([':b' => $blocker_id, ':d' => $blocked_id]);
+    return (bool) $stmt->fetchColumn();
+}
+
+function isBlockedEitherWay(PDO $pdo, int $user_a, int $user_b): bool
+{
+    return isUserBlocked($pdo, $user_a, $user_b) || isUserBlocked($pdo, $user_b, $user_a);
+}
+
+function isValidReportTargetType(string $target_type): bool
+{
+    return in_array($target_type, ['goods', 'user'], true);
+}
+
+function getReportGoodsReasons(): array
+{
+    return [
+        '禁止されている商品',
+        '偽物・模倣品',
+        '商品説明と実物が異なる',
+        '不適切な画像',
+        'その他',
+    ];
+}
+
+function getReportUserReasons(): array
+{
+    return [
+        '嫌がらせ・迷惑行為',
+        '詐欺・不正行為',
+        '不適切なプロフィール',
+        'なりすまし',
+        'その他',
+    ];
+}
+
+function getReportReasons(string $target_type): array
+{
+    return $target_type === 'user'
+        ? getReportUserReasons()
+        : getReportGoodsReasons();
+}
+
+function getReportStatuses(): array
+{
+    return [
+        'pending'   => '未対応',
+        'reviewing' => '確認中',
+        'resolved'  => '対応済み',
+        'rejected'  => '却下',
+    ];
+}
+
+function getReportStatusLabel(string $status): string
+{
+    $statuses = getReportStatuses();
+    return $statuses[$status] ?? $status;
+}
+
+function isValidReportStatus(string $status): bool
+{
+    return array_key_exists($status, getReportStatuses());
+}
+
+function getReportTargetTypeLabel(string $target_type): string
+{
+    return $target_type === 'user' ? 'ユーザー' : '商品';
+}
+
 ?>

@@ -1,0 +1,141 @@
+.report-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.report-errors {
+    border: 1px solid #dc2626;
+    background-color: #fef2f2;
+    color: #b91c1c;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+}
+
+.report-errors ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.report-target {
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.report-form {
+    margin-bottom: 20px;
+}
+
+.report-reasons {
+    border: 1px solid #ccc;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+}
+
+.report-reason {
+    display: block;
+    margin: 5px 0;
+}
+
+.report-form textarea {
+    width: 100%;
+    max-width: 500px;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.report-form button,
+.report-filter button {
+    padding: 8px 16px;
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.report-submit-btn {
+    font-weight: bold;
+}
+
+.report-filter {
+    margin-bottom: 20px;
+}
+
+.report-filter select {
+    padding: 6px;
+    margin: 0 8px;
+}
+
+.report-list {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.report-list th,
+.report-list td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.report-list th {
+    background-color: #f5f5f5;
+}
+
+.report-status-pending,
+.report-status-reviewing,
+.report-status-resolved,
+.report-status-rejected {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.report-status-pending {
+    background-color: #e5e7eb;
+    color: #374151;
+}
+
+.report-status-reviewing {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.report-status-resolved {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.report-status-rejected {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.report-detail dt {
+    font-weight: bold;
+    margin-top: 12px;
+}
+
+.report-detail dd {
+    margin: 4px 0 0 0;
+}
+
+.report-target-meta {
+    display: block;
+    color: #666;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.report-flash {
+    padding: 10px 15px;
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+    margin-bottom: 20px;
+}
+
+.profile-report-link {
+    margin-top: 10px;
+}

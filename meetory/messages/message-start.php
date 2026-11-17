@@ -67,6 +67,11 @@ if ($seller_id === $user_id) {
     exit('自分の商品にはDMを送れません。');
 }
 
+// ブロック確認
+if (isBlockedEitherWay($pdo, $user_id, $seller_id)) {
+    exit('ブロック中のためDMを開始できません。');
+}
+
 // 出品者との既存の取引があるか確認
 // 取引がある場合は、既存の取引メッセージ画面を開く
 $sql = '

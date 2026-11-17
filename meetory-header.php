@@ -286,6 +286,18 @@ if (
             </a>
             <?php endif; ?>
 
+            <!-- 管理（管理者のみ） -->
+            <?php if (isset($_SESSION['user_id']) && isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+            <h2 class="sidebar-section-title">管理</h2>
+            <a
+                href="/Meetory/meetory/reports/admin/index.php"
+                class="sidebar-link"
+            >
+                <i class="fa-solid fa-flag"></i>
+                通報管理
+            </a>
+            <?php endif; ?>
+
             <!-- その他 -->
             <h2 class="sidebar-section-title">その他</h2>
             <?php if (isset($_SESSION['user_id'])): ?>
