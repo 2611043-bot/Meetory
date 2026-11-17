@@ -57,6 +57,30 @@ if ($goods === false) {
     exit('商品が見つかりません。');
 }
 
+// 閲覧履歴を保存（ログイン中の場合のみ）
+if (
+    isset($_SESSION['user_id']) &&
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) !== false &&
+    (int) $_SESSION['user_id'] > 0
+) {
+    try {
+        $login_user_id = (int) $_SESSION['user_id'];
+        $history_sql = '
+            INSERT INTO browsing_history (user_id, goods_id, viewed_at)
+            VALUES (:user_id, :goods_id, CURRENT_TIMESTAMP)
+            ON DUPLICATE KEY UPDATE viewed_at = CURRENT_TIMESTAMP
+        ';
+        $history_stmt = $pdo->prepare($history_sql);
+        $history_stmt->execute([
+            ':user_id' => $login_user_id,
+            ':goods_id' => $goods_id,
+        ]);
+    } catch (Throwable $e) {
+        // 閲覧履歴の保存に失敗してもページ表示を妨げない
+        error_log($e->getMessage());
+    }
+}
+
 // 商品画像を取得
 $image_sql = '
     SELECT image_path

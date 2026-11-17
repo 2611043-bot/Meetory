@@ -714,8 +714,9 @@ require '../../meetory-header.php';
 
     confirmBtn.addEventListener('click', function () {
         if (targetForm) {
+            var form = targetForm;
             closeModal();
-            targetForm.submit();
+            form.submit();
         }
     });
 })();

@@ -246,6 +246,7 @@ require '../../meetory-header.php';
         <h2>その他</h2>
         <nav class="mypage-link-list" aria-label="その他のメニュー">
             <a href="favorites.php">ほしいものリスト</a>
+            <a href="browsing-history.php">閲覧履歴</a>
             <a href="../messages/message-center.php">メッセージ</a>
             <a href="notification-settings.php">通知設定</a>
             <a href="logout.php">ログアウト</a>
