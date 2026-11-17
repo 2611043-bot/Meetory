@@ -21,7 +21,8 @@ $pdo = getPDO();
 $my_user_id = $_SESSION['user_id'] ?? null;
 
 if (!$my_user_id) {
-    exit('ログインしてください。');
+    header('Location: ../user/login.php');
+    exit;
 }
 
 $my_user_id = (int)$my_user_id;
