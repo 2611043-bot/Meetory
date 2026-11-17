@@ -98,8 +98,8 @@ if (
 
 $pdo = getPDO();
 
-// 商品の出品者・現在の価格・商品名を確認
-$sql = 'SELECT seller_id, price AS old_price, goods_name
+// 商品の出品者・現在の価格・商品名・売却状態を確認
+$sql = 'SELECT seller_id, price AS old_price, goods_name, is_sold
         FROM goods
         WHERE goods_id = ?';
 
@@ -116,6 +116,7 @@ if (!$product) {
 $oldPrice = (int) $product['old_price'];
 $sellerId = (int) $product['seller_id'];
 $goodsName = $product['goods_name'];
+$isSold = (int) $product['is_sold'];
 
 // 管理者でなく、出品者本人でもない場合は拒否
 if (
@@ -157,7 +158,7 @@ $stmt->execute([
 ]);
 
 // 価格が値下げされた場合、お気に入り登録者へ通知を作成
-if ($price < $oldPrice) {
+if ($price < $oldPrice && $isSold === 0) {
     // お気に入り登録者（出品者本人を除く）を取得
     $stmtFav = $pdo->prepare(
         'SELECT user_id
@@ -168,28 +169,22 @@ if ($price < $oldPrice) {
     $stmtFav->execute([$goods_id, $sellerId]);
     $favoritedUserIds = $stmtFav->fetchAll(PDO::FETCH_COLUMN);
 
-    if ($favoritedUserIds !== []) {
-        $stmtNotify = $pdo->prepare(
-            'SELECT COUNT(*) FROM notifications
-             WHERE user_id = ? AND type = ? AND related_id = ?'
-        );
-
-        foreach ($favoritedUserIds as $favoritedUserId) {
-            $stmtNotify->execute([(int) $favoritedUserId, 'price_down', $goods_id]);
-            $alreadyNotified = $stmtNotify->fetchColumn() > 0;
-
-            if (!$alreadyNotified) {
-                createNotification(
-                    $pdo,
-                    (int) $favoritedUserId,
-                    'price_down',
-                    'お気に入り商品の価格が下がりました',
-                    'お気に入り登録している「' . $goodsName . '」が' .
-                    number_format($oldPrice) . '円から' . number_format($price) . '円に値下げされました',
-                    $goods_id
-                );
-            }
+    foreach ($favoritedUserIds as $favoritedUserId) {
+        // 通知設定を確認（type_price_down = 0 の場合はスキップ）
+        $settings = getNotificationSettings($pdo, (int) $favoritedUserId);
+        if ((int) $settings['type_price_down'] !== 1) {
+            continue;
         }
+
+        createNotification(
+            $pdo,
+            (int) $favoritedUserId,
+            'price_down',
+            'お気に入り商品の価格が下がりました',
+            'お気に入り登録している「' . $goodsName . '」が' .
+            number_format($oldPrice) . '円から' . number_format($price) . '円に値下げされました',
+            $goods_id
+        );
     }
 }
 
