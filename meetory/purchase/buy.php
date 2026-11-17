@@ -65,6 +65,38 @@ if (
 }
 
 $csrf_token = $_SESSION['csrf_token'];
+
+// 過去の配送先情報を初期値として取得（最新の購入取引から）
+$initial_shipping = [
+    'shipping_name' => '',
+    'shipping_postal_code' => '',
+    'shipping_prefecture' => '',
+    'shipping_city' => '',
+    'shipping_address_line' => '',
+    'shipping_building' => '',
+    'shipping_phone' => ''
+];
+$stmtInitial = $pdo->prepare(
+    'SELECT
+        shipping_name,
+        shipping_postal_code,
+        shipping_prefecture,
+        shipping_city,
+        shipping_address_line,
+        shipping_building,
+        shipping_phone
+    FROM buy
+    WHERE buyer_id = :buyer_id
+    ORDER BY purchased_at DESC
+    LIMIT 1'
+);
+$stmtInitial->execute(['buyer_id' => (int) $_SESSION['user_id']]);
+$pastShipping = $stmtInitial->fetch(PDO::FETCH_ASSOC);
+if ($pastShipping) {
+    foreach ($initial_shipping as $key => $default) {
+        $initial_shipping[$key] = $pastShipping[$key] ?? $default;
+    }
+}
 ?>
 
 <?php require_once '../../meetory-header.php'; ?>
@@ -103,16 +135,90 @@ $csrf_token = $_SESSION['csrf_token'];
         value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>"
     >
 
-    <h3>配送先住所</h3>
+    <h3>配送先情報</h3>
 
-    <label for="address">住所を入力してください</label><br>
-    <input
-        type="text"
-        id="address"
-        name="address"
-        maxlength="255"
-        required
-    >
+    <div class="form-group">
+        <label for="shipping_name">配送先氏名</label><br>
+        <input
+            type="text"
+            id="shipping_name"
+            name="shipping_name"
+            maxlength="100"
+            required
+            value="<?= htmlspecialchars($initial_shipping['shipping_name'], ENT_QUOTES, 'UTF-8') ?>"
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="shipping_postal_code">郵便番号</label><br>
+        <input
+            type="text"
+            id="shipping_postal_code"
+            name="shipping_postal_code"
+            maxlength="20"
+            required
+            value="<?= htmlspecialchars($initial_shipping['shipping_postal_code'], ENT_QUOTES, 'UTF-8') ?>"
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="shipping_prefecture">都道府県</label><br>
+        <input
+            type="text"
+            id="shipping_prefecture"
+            name="shipping_prefecture"
+            maxlength="50"
+            required
+            value="<?= htmlspecialchars($initial_shipping['shipping_prefecture'], ENT_QUOTES, 'UTF-8') ?>"
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="shipping_city">市区町村</label><br>
+        <input
+            type="text"
+            id="shipping_city"
+            name="shipping_city"
+            maxlength="100"
+            required
+            value="<?= htmlspecialchars($initial_shipping['shipping_city'], ENT_QUOTES, 'UTF-8') ?>"
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="shipping_address_line">町名・番地</label><br>
+        <input
+            type="text"
+            id="shipping_address_line"
+            name="shipping_address_line"
+            maxlength="255"
+            required
+            value="<?= htmlspecialchars($initial_shipping['shipping_address_line'], ENT_QUOTES, 'UTF-8') ?>"
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="shipping_building">建物名・部屋番号（任意）</label><br>
+        <input
+            type="text"
+            id="shipping_building"
+            name="shipping_building"
+            maxlength="255"
+            value="<?= htmlspecialchars($initial_shipping['shipping_building'], ENT_QUOTES, 'UTF-8') ?>"
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="shipping_phone">電話番号</label><br>
+        <input
+            type="text"
+            id="shipping_phone"
+            name="shipping_phone"
+            maxlength="20"
+            required
+            value="<?= htmlspecialchars($initial_shipping['shipping_phone'], ENT_QUOTES, 'UTF-8') ?>"
+        >
+    </div>
 
     <h3>支払い方法</h3>
 

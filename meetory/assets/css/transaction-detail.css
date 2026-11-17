@@ -30,3 +30,41 @@
     background: #0d47a1;
 }
 
+
+.cancel-btn {
+    display: inline-block;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: bold;
+    background: #d93025;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 8px 0;
+}
+.cancel-btn:hover { background: #b3261e; }
+.cancel-btn-danger {
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: bold;
+    background: #d93025;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.cancel-btn-secondary {
+    display: inline-block;
+    margin-top: 12px;
+    color: #1a73e8;
+}
+.cancel-confirm-box, .cancel-complete-box {
+    max-width: 520px;
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+}
+.cancel-warning { color: #b3261e; margin: 12px 0; }
+.cancel-action-form { margin: 8px 0; }

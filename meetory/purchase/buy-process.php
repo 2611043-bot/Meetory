@@ -42,13 +42,48 @@ if (
 // フォームから値を取得
 $goods_id = filter_input(INPUT_POST, 'goods_id', FILTER_VALIDATE_INT);
 
-$address_input = $_POST['address'] ?? '';
-
-if (!is_string($address_input)) {
-    exit('配送先住所を正しく入力してください。');
+// 配送先情報
+$shipping_name = $_POST['shipping_name'] ?? '';
+if (!is_string($shipping_name)) {
+    $shipping_name = '';
 }
+$shipping_name = trim($shipping_name);
 
-$address = trim($address_input);
+$shipping_postal_code = $_POST['shipping_postal_code'] ?? '';
+if (!is_string($shipping_postal_code)) {
+    $shipping_postal_code = '';
+}
+$shipping_postal_code = trim($shipping_postal_code);
+
+$shipping_prefecture = $_POST['shipping_prefecture'] ?? '';
+if (!is_string($shipping_prefecture)) {
+    $shipping_prefecture = '';
+}
+$shipping_prefecture = trim($shipping_prefecture);
+
+$shipping_city = $_POST['shipping_city'] ?? '';
+if (!is_string($shipping_city)) {
+    $shipping_city = '';
+}
+$shipping_city = trim($shipping_city);
+
+$shipping_address_line = $_POST['shipping_address_line'] ?? '';
+if (!is_string($shipping_address_line)) {
+    $shipping_address_line = '';
+}
+$shipping_address_line = trim($shipping_address_line);
+
+$shipping_building = $_POST['shipping_building'] ?? '';
+if (!is_string($shipping_building)) {
+    $shipping_building = '';
+}
+$shipping_building = trim($shipping_building);
+
+$shipping_phone = $_POST['shipping_phone'] ?? '';
+if (!is_string($shipping_phone)) {
+    $shipping_phone = '';
+}
+$shipping_phone = trim($shipping_phone);
 
 $payment_method = $_POST['payment_method'] ?? '';
 
@@ -57,8 +92,32 @@ if (!$goods_id || $goods_id <= 0) {
     exit('商品IDが正しくありません。');
 }
 
-if ($address === '' || mb_strlen($address) > 255) {
-    exit('配送先住所を正しく入力してください。');
+if ($shipping_name === '' || mb_strlen($shipping_name) > 100) {
+    exit('配送先氏名を正しく入力してください。');
+}
+
+if ($shipping_postal_code === '' || mb_strlen($shipping_postal_code) > 20) {
+    exit('郵便番号を正しく入力してください。');
+}
+
+if ($shipping_prefecture === '' || mb_strlen($shipping_prefecture) > 50) {
+    exit('都道府県を正しく入力してください。');
+}
+
+if ($shipping_city === '' || mb_strlen($shipping_city) > 100) {
+    exit('市区町村を正しく入力してください。');
+}
+
+if ($shipping_address_line === '' || mb_strlen($shipping_address_line) > 255) {
+    exit('町名・番地を正しく入力してください。');
+}
+
+if (mb_strlen($shipping_building) > 255) {
+    exit('建物名・部屋番号は255文字以内で入力してください。');
+}
+
+if ($shipping_phone === '' || mb_strlen($shipping_phone) > 20) {
+    exit('電話番号を正しく入力してください。');
 }
 
 // 選択可能な支払い方法
@@ -120,9 +179,13 @@ try {
     // 購入取引を登録
     $stmt = $pdo->prepare(
         'INSERT INTO buy
-            (buyer_id, total_price, payment_method, transaction_status, address)
+            (buyer_id, total_price, payment_method, transaction_status, address,
+             shipping_name, shipping_postal_code, shipping_prefecture, shipping_city,
+             shipping_address_line, shipping_building, shipping_phone)
         VALUES
-            (:buyer_id, :total_price, :payment_method, :transaction_status, :address)'
+            (:buyer_id, :total_price, :payment_method, :transaction_status, :address,
+             :shipping_name, :shipping_postal_code, :shipping_prefecture, :shipping_city,
+             :shipping_address_line, :shipping_building, :shipping_phone)'
     );
 
     $stmt->execute([
@@ -130,7 +193,14 @@ try {
         'total_price' => $price,
         'payment_method' => $payment_method,
         'transaction_status' => '購入済み',
-        'address' => $address
+        'address' => $shipping_address_line,
+        'shipping_name' => $shipping_name,
+        'shipping_postal_code' => $shipping_postal_code,
+        'shipping_prefecture' => $shipping_prefecture,
+        'shipping_city' => $shipping_city,
+        'shipping_address_line' => $shipping_address_line,
+        'shipping_building' => $shipping_building,
+        'shipping_phone' => $shipping_phone
     ]);
 
     // 登録された取引IDを取得
