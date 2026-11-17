@@ -92,6 +92,9 @@ if (
         rel="stylesheet"
         href="/Meetory/meetory/assets/css/header.css?v=<?= filemtime(__DIR__ . '/meetory/assets/css/header.css') ?>"
     >
+
+    <!-- サイトのアイコン -->
+    <link rel="icon" type="image/png" href="/Meetory/meetory/image/logo_white.png">
 </head>
 
 <body class="<?= isset($body_class) ? htmlspecialchars($body_class, ENT_QUOTES, 'UTF-8') : '' ?>">
@@ -102,7 +105,7 @@ if (
         <!-- ロゴ -->
         <a href="/Meetory/meetory/index.php" class="header-logo">
             <img
-                src="/Meetory/meetory/user/logo.png"
+                src="/Meetory/meetory/image/logo.png"
                 alt="Meetory"
                 class="logo-img"
             >
