@@ -22,6 +22,7 @@ if (
 
 // 共通処理・DB接続を読み込む
 require_once '../../meetory-functions.php';
+require_once '../notifications/create-notification.php';
 
 $pdo = getPDO();
 
@@ -82,7 +83,7 @@ try {
 
     // 商品情報を取得してロック
     $stmt = $pdo->prepare(
-        'SELECT goods_id, seller_id, price, is_sold
+        'SELECT goods_id, seller_id, goods_name, price, is_sold
         FROM goods
         WHERE goods_id = :goods_id
         FOR UPDATE'
@@ -168,6 +169,25 @@ try {
 
     // すべて成功したら確定
     $pdo->commit();
+
+    // 出品者へ購入通知を作成（重複は作成しない）
+    $stmtNotify = $pdo->prepare(
+        'SELECT COUNT(*) FROM notifications
+         WHERE user_id = ? AND type = ? AND related_id = ?'
+    );
+    $stmtNotify->execute([(int) $goods['seller_id'], 'purchase', $transaction_id]);
+    $alreadyNotified = $stmtNotify->fetchColumn() > 0;
+
+    if (!$alreadyNotified) {
+        createNotification(
+            $pdo,
+            (int) $goods['seller_id'],
+            'purchase',
+            '商品が購入されました',
+            '出品した「' . $goods['goods_name'] . '」が購入されました',
+            $transaction_id
+        );
+    }
 
     // CSRFトークンを更新
     unset($_SESSION['csrf_token']);

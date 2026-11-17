@@ -22,6 +22,56 @@ $is_auth_page = in_array(
     ['login.php', 'register.php', 'password-reset.php'],
     true
 );
+
+// 通知ベル：ログインユーザーの未読件数（COUNTで効率的に取得）
+$unreadNotificationCount = 0;
+if (
+    isset($_SESSION['user_id']) &&
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) !== false &&
+    (int) $_SESSION['user_id'] > 0
+) {
+    // 既存のDB接続を再利用し、なければ共通関数で取得（重複接続を避ける）
+    $pdoNotif = isset($pdo) && $pdo instanceof PDO ? $pdo : getPDO();
+    $user_id = (int) $_SESSION['user_id'];
+
+    // 通知設定を取得
+    $settings = getNotificationSettings($pdoNotif, $user_id);
+    $notificationsEnabled = (int) $settings['enabled'] === 1;
+
+    // 許可されている通知タイプを設定から構築
+    $allowedTypeKeys = [];
+    $typeColumnMap = [
+        'message'    => 'type_message',
+        'purchase'   => 'type_purchase',
+        'shipping'   => 'type_shipping',
+        'received'   => 'type_received',
+        'review'     => 'type_review',
+        'favorite'   => 'type_favorite',
+        'price_down' => 'type_price_down',
+        'follow'     => 'type_follow',
+        'admin'      => 'type_admin',
+    ];
+
+    foreach ($typeColumnMap as $typeKey => $colName) {
+        if ((int) $settings[$colName] === 1) {
+            $allowedTypeKeys[] = $typeKey;
+        }
+    }
+
+    // 通知全体がONかつ有効なタイプがある場合のみカウント
+    if ($notificationsEnabled && !empty($allowedTypeKeys)) {
+        $typePlaceholders = implode(',', array_map(fn($i) => ":type_$i", array_keys($allowedTypeKeys)));
+        $stmtUnread = $pdoNotif->prepare(
+            'SELECT COUNT(*) FROM notifications WHERE user_id = :user_id AND is_read = 0 AND type IN (' . $typePlaceholders . ')'
+        );
+        $stmtUnread->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+        foreach ($allowedTypeKeys as $i => $typeKey) {
+            $stmtUnread->bindValue(":type_$i", $typeKey, PDO::PARAM_STR);
+        }
+        $stmtUnread->execute();
+        $unreadNotificationCount = (int) $stmtUnread->fetchColumn();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -110,6 +160,26 @@ $is_auth_page = in_array(
                     >
                         <i class="fa-solid fa-bars"></i>
                     </button>
+
+                    <!-- 通知ベル（未読件数バッジ付き） -->
+                    <a
+                        id="notificationBell"
+                        href="/Meetory/meetory/notifications/index.php"
+                        class="icon-btn notification-bell-btn"
+                        aria-label="通知（未読<?= $unreadNotificationCount ?>件）"
+                        rel="nofollow"
+                    >
+                        <i class="fa-solid fa-bell"></i>
+                        <?php if ($unreadNotificationCount > 0): ?>
+                            <span
+                                id="notificationBadge"
+                                class="notification-badge"
+                                aria-hidden="true"
+                            >
+                                <?= $unreadNotificationCount >= 100 ? '99+' : $unreadNotificationCount ?>
+                            </span>
+                        <?php endif; ?>
+                    </a>
 
                 <?php else: ?>
 
@@ -207,6 +277,13 @@ $is_auth_page = in_array(
                         <i class="fa-solid fa-user-gear"></i>
                         プロフィール・設定
                     </a>
+            <a
+                href="/Meetory/meetory/user/notification-settings.php"
+                class="sidebar-link"
+            >
+                <i class="fa-solid fa-bell"></i>
+                通知設定
+            </a>
             <?php endif; ?>
 
             <!-- その他 -->
@@ -274,6 +351,10 @@ $is_auth_page = in_array(
     <!-- ヘッダー専用JavaScript -->
     <script
         src="/Meetory/meetory/assets/js/header.js?v=2026110901"
+        defer
+    ></script>
+    <script
+        src="/Meetory/meetory/assets/js/notifications.js?v=<?= filemtime(__DIR__ . '/meetory/assets/js/notifications.js') ?>"
         defer
     ></script>
     <script

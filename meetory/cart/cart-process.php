@@ -22,6 +22,7 @@ if (
 
 // 共通処理を読み込む
 require_once '../../meetory-functions.php';
+require_once '../notifications/create-notification.php';
 
 $pdo = getPDO();
 
@@ -224,6 +225,36 @@ try {
 
     // すべて成功したら確定
     $pdo->commit();
+
+    // 出品者へ購入通知を作成（重複は作成しない）
+    // 出品者ごとに購入商品名をまとめる
+    $sellerGoods = [];
+    foreach ($cart_items as $item) {
+        $sellerId = (int) $item['seller_id'];
+        $sellerGoods[$sellerId][] = $item['goods_name'];
+    }
+
+    $stmtNotify = $pdo->prepare(
+        'SELECT COUNT(*) FROM notifications
+         WHERE user_id = ? AND type = ? AND related_id = ?'
+    );
+
+    foreach ($sellerGoods as $sellerId => $goodsNames) {
+        $stmtNotify->execute([$sellerId, 'purchase', $transaction_id]);
+        $alreadyNotified = $stmtNotify->fetchColumn() > 0;
+
+        if (!$alreadyNotified) {
+            $goodsList = implode('、', $goodsNames);
+            createNotification(
+                $pdo,
+                $sellerId,
+                'purchase',
+                '商品が購入されました',
+                '出品した「' . $goodsList . '」が購入されました',
+                $transaction_id
+            );
+        }
+    }
 
     // 購入完了画面へ移動
     header(

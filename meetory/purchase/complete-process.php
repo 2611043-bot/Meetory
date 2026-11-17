@@ -49,6 +49,7 @@ if (
 
 // DB接続
 require_once '../../meetory-functions.php';
+require_once '../notifications/create-notification.php';
 
 $pdo = getPDO();
 
@@ -65,7 +66,6 @@ try {
         WHERE transaction_id = :transaction_id
         FOR UPDATE'
     );
-
     $stmt->execute([
         'transaction_id' => $transaction_id
     ]);
@@ -116,6 +116,51 @@ try {
 
     // 更新を確定
     $pdo->commit();
+
+    // 出品者へ受取通知を作成（重複は作成しない）
+    $buyerId = (int) $user_id;
+
+    // この取引の出品者IDと商品名を取得
+    $sellerId = null;
+    $goodsNames = [];
+    $stmtItems = $pdo->prepare(
+        'SELECT DISTINCT g.seller_id, g.goods_name
+        FROM buy_items AS bi
+        INNER JOIN goods AS g
+            ON bi.goods_id = g.goods_id
+        WHERE bi.transaction_id = :transaction_id
+        ORDER BY g.seller_id, g.goods_name'
+    );
+    $stmtItems->execute([
+        'transaction_id' => $transaction_id
+    ]);
+    foreach ($stmtItems->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        if ($sellerId === null) {
+            $sellerId = (int) $row['seller_id'];
+        }
+        $goodsNames[] = $row['goods_name'];
+    }
+
+    if ($sellerId !== null && $goodsNames !== []) {
+        $stmtNotify = $pdo->prepare(
+            'SELECT COUNT(*) FROM notifications
+             WHERE user_id = ? AND type = ? AND related_id = ?'
+        );
+        $stmtNotify->execute([$sellerId, 'received', $transaction_id]);
+        $alreadyNotified = $stmtNotify->fetchColumn() > 0;
+
+        if (!$alreadyNotified) {
+            $goodsList = implode('、', $goodsNames);
+            createNotification(
+                $pdo,
+                $sellerId,
+                'received',
+                '商品が受け取られました',
+                '出品した「' . $goodsList . '」が受け取られました',
+                $transaction_id
+            );
+        }
+    }
 
     // 取引詳細画面へ戻る
     header(

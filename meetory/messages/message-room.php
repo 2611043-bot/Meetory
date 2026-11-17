@@ -10,6 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // 共通ファイル読み込み
 require_once '../../meetory-functions.php';
+require_once '../notifications/create-notification.php';
 
 $pdo = getPDO();
 
@@ -26,6 +27,7 @@ if (!$my_user_id) {
 }
 
 $my_user_id = (int)$my_user_id;
+$sender_name = $_SESSION['user_name'] ?? '';
 
 
 // ========================================
@@ -136,27 +138,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit('メッセージは2000文字以内で入力してください。');
         }
 
-        $sql = "
-            INSERT INTO messages (
-                sender_id,
-                receiver_id,
-                content,
-                message_type
-            ) VALUES (
-                :sender_id,
-                :receiver_id,
-                :content,
-                'text'
-            )
-        ";
+        try {
+            $pdo->beginTransaction();
 
-        $stmt = $pdo->prepare($sql);
+            $sql = "
+                INSERT INTO messages (
+                    sender_id,
+                    receiver_id,
+                    content,
+                    message_type
+                ) VALUES (
+                    :sender_id,
+                    :receiver_id,
+                    :content,
+                    'text'
+                )
+            ";
 
-        $stmt->execute([
-            ':sender_id' => $my_user_id,
-            ':receiver_id' => $user_id,
-            ':content' => $content
-        ]);
+            $stmt = $pdo->prepare($sql);
+
+            $stmt->execute([
+                ':sender_id' => $my_user_id,
+                ':receiver_id' => $user_id,
+                ':content' => $content
+            ]);
+
+            $messageId = (int) $pdo->lastInsertId();
+
+            // 受信者へ通知を作成（重複は作成しない）
+            $stmtNotify = $pdo->prepare(
+                'SELECT COUNT(*) FROM notifications
+                 WHERE user_id = ? AND type = ? AND related_id = ?'
+            );
+            $stmtNotify->execute([$user_id, 'message', $messageId]);
+            $alreadyNotified = $stmtNotify->fetchColumn() > 0;
+
+            if (!$alreadyNotified) {
+                createNotification(
+                    $pdo,
+                    $user_id,
+                    'message',
+                    '新しいメッセージ',
+                    $sender_name . 'さんからメッセージが届きました。',
+                    $messageId
+                );
+            }
+
+            $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('message-room: テキスト送信エラー: ' . $e->getMessage());
+            exit('メッセージの送信に失敗しました。');
+        }
 
     }
 
@@ -199,30 +234,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // 商品カードをDBに保存
-        $sql = "
-            INSERT INTO messages (
-                sender_id,
-                receiver_id,
-                content,
-                message_type,
-                goods_id
-            ) VALUES (
-                :sender_id,
-                :receiver_id,
-                :content,
-                'goods',
-                :goods_id
-            )
-        ";
+        try {
+            $pdo->beginTransaction();
 
-        $stmt = $pdo->prepare($sql);
+            $sql = "
+                INSERT INTO messages (
+                    sender_id,
+                    receiver_id,
+                    content,
+                    message_type,
+                    goods_id
+                ) VALUES (
+                    :sender_id,
+                    :receiver_id,
+                    :content,
+                    'goods',
+                    :goods_id
+                )
+            ";
 
-        $stmt->execute([
-            ':sender_id' => $my_user_id,
-            ':receiver_id' => $user_id,
-            ':content' => '商品を紹介します。',
-            ':goods_id' => $goods_id
-        ]);
+            $stmt = $pdo->prepare($sql);
+
+            $stmt->execute([
+                ':sender_id' => $my_user_id,
+                ':receiver_id' => $user_id,
+                ':content' => '商品を紹介します。',
+                ':goods_id' => $goods_id
+            ]);
+
+            $messageId = (int) $pdo->lastInsertId();
+
+            // 受信者へ通知を作成（重複は作成しない）
+            $stmtNotify = $pdo->prepare(
+                'SELECT COUNT(*) FROM notifications
+                 WHERE user_id = ? AND type = ? AND related_id = ?'
+            );
+            $stmtNotify->execute([$user_id, 'message', $messageId]);
+            $alreadyNotified = $stmtNotify->fetchColumn() > 0;
+
+            if (!$alreadyNotified) {
+                createNotification(
+                    $pdo,
+                    $user_id,
+                    'message',
+                    '新しいメッセージ',
+                    $sender_name . 'さんからメッセージが届きました。',
+                    $messageId
+                );
+            }
+
+            $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('message-room: 商品送信エラー: ' . $e->getMessage());
+            exit('メッセージの送信に失敗しました。');
+        }
 
     } else {
         exit('送信内容が正しくありません。');

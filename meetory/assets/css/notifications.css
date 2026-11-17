@@ -1,0 +1,544 @@
+/* ==============================
+    通知センター専用スタイルシート
+    notifications/index.php で使用
+   ============================== */
+
+.notifications-page .main-container {
+    max-width: none;
+    padding: 0;
+    margin: 0;
+}
+
+.notifications-main {
+    width: 100%;
+    color: #222;
+    background-color: #f4f7fb;
+}
+
+/* ページタイトル */
+.notifications-header {
+    padding: 20px 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.notifications-header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #222;
+    margin: 0;
+}
+
+/* 通知種類フィルター */
+.notifications-filter {
+    padding: 12px 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #e1e8ed;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+}
+
+.filter-list {
+    display: inline-flex;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.filter-list li {
+    display: inline-block;
+}
+
+.filter-link {
+    display: inline-block;
+    padding: 8px 14px;
+    font-size: 14px;
+    color: #667085;
+    text-decoration: none;
+    border: 1px solid #dce2e9;
+    border-radius: 20px;
+    background: #fff;
+    transition: all 0.2s;
+}
+
+.filter-link:hover {
+    border-color: #1a73e8;
+    color: #1a73e8;
+    background: #f4f7fb;
+}
+
+.filter-link-active {
+    border-color: #1a73e8;
+    color: #1a73e8;
+    background: #eef4fb;
+}
+
+/* 通知一覧エリア */
+.notifications-list {
+    padding: 0;
+}
+
+.notification-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* 通知アイテム */
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 16px;
+    border-bottom: 1px solid #e1e8ed;
+    background: #ffffff;
+    transition: background 0.2s;
+    position: relative;
+    gap: 10px;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item-unread {
+    background: #fef6f0;
+    border-left: 4px solid #ff9d5a;
+}
+
+.notification-item-unread:hover {
+    background: #fee8d7;
+}
+
+.notification-item:not(.notification-item-unread):hover {
+    background: #f4f7fb;
+}
+
+/* 通知クリックリンク（本体） */
+.notification-link {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    text-decoration: none;
+    color: inherit;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.notification-link:focus {
+    outline: 2px solid #1a73e8;
+    outline-offset: 2px;
+}
+
+/* 通知コンテンツ（リンク内部） */
+.notification-content {
+    display: flex;
+    gap: 12px;
+    min-width: 0;
+}
+
+/* 通知種類バッジ */
+.notification-type-badge {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: #eef4fb;
+    color: #1a73e8;
+    line-height: 1.4;
+}
+
+/* 通知テキストエリア */
+.notification-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #222;
+    margin: 0 0 6px;
+    line-height: 1.4;
+}
+
+.notification-message {
+    font-size: 14px;
+    color: #555;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* メタ情報エリア */
+.notification-meta {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.notification-date {
+    font-size: 12px;
+    color: #8a94a6;
+    line-height: 1.4;
+}
+
+/* 未読マーク */
+.notification-unread-mark {
+    font-size: 11px;
+    font-weight: 600;
+    color: #ff9d5a;
+    background: #fff2e6;
+    padding: 2px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+/* 操作ボタンエリア（個別フォーム） */
+.notification-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: 10px;
+}
+
+/* アクションボタン */
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    background: #fff;
+}
+
+.action-btn-read {
+    background: #e3f2fd;
+    color: #1565c0;
+    border-color: #90caf9;
+}
+
+.action-btn-read:hover {
+    background: #bbdefb;
+}
+
+.action-btn-delete {
+    background: #ffebee;
+    color: #c62828;
+    border-color: #ef9a9a;
+}
+
+.action-btn-delete:hover {
+    background: #ffcdd2;
+}
+
+/* 既読アイテムでは削除ボタンのみ強調 */
+.notification-item:not(.notification-item-unread) .action-btn-delete {
+    background: #c62828;
+    color: #fff;
+    border-color: #c62828;
+}
+
+.notification-item:not(.notification-item-unread) .action-btn-delete:hover {
+    background: #b71c1c;
+}
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.notification-date {
+    font-size: 12px;
+    color: #8a94a6;
+    line-height: 1.4;
+}
+
+/* 未読マーク */
+.notification-unread-mark {
+    font-size: 11px;
+    font-weight: 600;
+    color: #ff9d5a;
+    background: #fff2e6;
+    padding: 2px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+/* 空状態 */
+.notifications-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #8a94a6;
+}
+
+.notifications-empty p {
+    font-size: 16px;
+    margin: 0;
+}
+
+/* ページネーション */
+.notifications-pagination {
+    padding: 24px 16px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.pagination-list {
+    display: inline-flex;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.pagination-list li {
+    display: inline-block;
+}
+
+.pagination-link {
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 14px;
+    color: #1a73e8;
+    text-decoration: none;
+    border: 1px solid #dce2e9;
+    border-radius: 8px;
+    background: #fff;
+    transition: all 0.2s;
+}
+
+.pagination-link:hover {
+    border-color: #1a73e8;
+    background: #eef4fb;
+}
+
+.pagination-current {
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 14px;
+    color: #8a94a6;
+    border: 1px solid #dce2e9;
+    border-radius: 8px;
+    background: #fff;
+}
+
+/* フラッシュメッセージ */
+.notify-flash {
+    padding: 12px 16px;
+    margin: 0 16px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    border: 1px solid;
+}
+
+.notify-flash-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-color: #a5d6a7;
+}
+
+.notify-flash-error {
+    background: #ffebee;
+    color: #c62828;
+    border-color: #ef9a9a;
+}
+
+.notify-flash-info {
+    background: #e3f2fd;
+    color: #1565c0;
+    border-color: #90caf9;
+}
+
+/* フィルター＋一括操作エリア */
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.bulk-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.settings-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a73e8;
+    text-decoration: none;
+    border: 1px solid #dce2e9;
+    border-radius: 8px;
+    background: #fff;
+    transition: all 0.2s;
+    margin-left: auto;
+}
+
+.settings-link:hover {
+    border-color: #1a73e8;
+    background: #eef4fb;
+    color: #1a73e8;
+}
+
+.bulk-btn-read {
+    background: #e3f2fd;
+    color: #1565c0;
+    border-color: #90caf9;
+}
+
+.bulk-btn-read:hover {
+    background: #bbdefb;
+}
+
+.bulk-btn-delete {
+    background: #ffebee;
+    color: #c62828;
+    border-color: #ef9a9a;
+}
+
+.bulk-btn-delete:hover {
+    background: #ffcdd2;
+}
+
+/* 通知アイテムの操作ボタン */
+.notification-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.action-btn-read {
+    background: #e3f2fd;
+    color: #1565c0;
+    border-color: #90caf9;
+}
+
+.action-btn-read:hover {
+    background: #bbdefb;
+}
+
+.action-btn-delete {
+    background: #ffebee;
+    color: #c62828;
+    border-color: #ef9a9a;
+}
+
+.action-btn-delete:hover {
+    background: #ffcdd2;
+}
+
+/* 既読アイテムでは削除ボタンのみ強調 */
+.notification-item:not(.notification-item-unread) .action-btn-delete {
+    background: #c62828;
+    color: #fff;
+    border-color: #c62828;
+}
+
+.notification-item:not(.notification-item-unread) .action-btn-delete:hover {
+    background: #b71c1c;
+}
+
+
+@media (max-width: 768px) {
+    .notification-item {
+        padding: 14px;
+    }
+
+    .notification-content {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .notification-type-badge {
+        align-self: flex-start;
+    }
+
+    .notification-meta {
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .filter-list {
+        gap: 6px;
+    }
+
+    .filter-link {
+        padding: 7px 12px;
+        font-size: 13px;
+    }
+
+    .pagination-list {
+        gap: 4px;
+    }
+
+    .pagination-link,
+    .pagination-current {
+        padding: 7px 14px;
+        font-size: 13px;
+    }
+
+    .filter-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .bulk-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .notification-actions {
+        flex-direction: column;
+        gap: 6px;
+        width: 100%;
+    }
+
+    .action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
