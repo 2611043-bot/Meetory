@@ -72,6 +72,29 @@ if (
         $unreadNotificationCount = (int) $stmtUnread->fetchColumn();
     }
 }
+
+// ログインユーザーのプロフィール画像を取得
+$profileAvatarUrl = '/Meetory/meetory/assets/images/profile-icons/preset-01.svg';
+if (
+    isset($_SESSION['user_id']) &&
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) !== false &&
+    (int) $_SESSION['user_id'] > 0
+) {
+    // 既存のDB接続を再利用し、なければ共通関数で取得
+    $pdoAvatar = isset($pdo) && $pdo instanceof PDO ? $pdo : getPDO();
+    $user_id = (int) $_SESSION['user_id'];
+
+    $stmtAvatar = $pdoAvatar->prepare(
+        'SELECT profile_image_type, profile_image FROM users WHERE user_id = :user_id LIMIT 1'
+    );
+    $stmtAvatar->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+    $stmtAvatar->execute();
+    $avatarData = $stmtAvatar->fetch(PDO::FETCH_ASSOC);
+
+    if ($avatarData) {
+        $profileAvatarUrl = getProfileAvatarUrl($avatarData);
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -153,6 +176,23 @@ if (
             <div class="header-actions">
 
                 <?php if (isset($_SESSION['user_id'])): ?>
+
+                    <!-- ユーザー名表示（マイページへリンク） -->
+                    <?php if (isset($_SESSION['user_name'])): ?>
+                    <a
+                        href="/Meetory/meetory/user/mypage.php"
+                        class="header-user-name"
+                        aria-label="マイページへ"
+                    >
+                        <img
+                            src="<?= htmlspecialchars($profileAvatarUrl, ENT_QUOTES, 'UTF-8') ?>"
+                            alt=""
+                            class="header-user-avatar"
+                            loading="lazy"
+                        >
+                        <span><?= htmlspecialchars($_SESSION['user_name'], ENT_QUOTES, 'UTF-8') ?></span>
+                    </a>
+                    <?php endif; ?>
 
                     <!-- ハンバーガーメニューボタン -->
                     <button

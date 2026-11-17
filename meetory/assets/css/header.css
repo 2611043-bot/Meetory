@@ -372,13 +372,92 @@ body {
     justify-content: center;
 }
 
-.nav-link:hover {
+/* ヘッダーのユーザー名表示 */
+.header-user-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #444;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 7px 14px 7px 10px;
+    border-radius: 20px;
+    border: 1px solid #d0d7de;
+    background-color: transparent;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.header-user-name:hover {
     background-color: #f0f4f9;
     border-color: #1a73e8;
     color: #1a73e8;
 }
 
-/* 検索時のオーバーレイ */
+.header-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    background-color: #f0f2f5;
+}
+
+.header-user-name span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 150px;
+}
+
+/* スマートフォン対応 */
+@media (max-width: 800px) {
+    .header-main {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .header-search-form {
+        order: 3;
+        flex-basis: 100%;
+        margin: 0;
+    }
+
+    .header-actions {
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .nav-link {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .btn-sell {
+        padding: 7px 12px;
+        font-size: 12px;
+    }
+
+    .header-user-name {
+        padding: 6px 10px 6px 8px;
+        font-size: 12px;
+        max-width: 160px;
+        gap: 6px;
+    }
+
+    .header-user-avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .header-user-name span {
+        max-width: 110px;
+    }
+}
 .search-overlay {
     position: fixed;
     top: 0;
