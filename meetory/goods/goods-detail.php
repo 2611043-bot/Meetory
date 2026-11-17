@@ -31,21 +31,21 @@ if ($auction_stmt->fetch(PDO::FETCH_ASSOC) !== false) {
 
 // 商品情報を取得
 $sql = 'SELECT
-            goods_id,
-            seller_id,
-            goods_name,
-            description,
-            price,
-            `condition`,
-            listed_at,
-            is_sold,
-            seller.user_name AS seller_name,
-            seller.profile_image_type,
-            seller.profile_image
-        FROM goods
-        INNER JOIN users AS seller
-            ON seller.user_id = goods.seller_id
-        WHERE goods_id = ?';
+    goods_id,
+    seller_id,
+    goods_name,
+    description,
+    price,
+    `condition`,
+    listed_at,
+    is_sold,
+    seller.user_name AS seller_name,
+    seller.profile_image_type,
+    seller.profile_image
+FROM goods
+INNER JOIN users AS seller
+    ON seller.user_id = goods.seller_id
+WHERE goods_id = ?';
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$goods_id]);
@@ -97,8 +97,6 @@ if (
 
 $csrf_token = $_SESSION['csrf_token'];
 
-$csrf_token = $_SESSION['csrf_token'];
-
 // ログイン中のユーザーが出品者か確認
 $is_owner = isset($_SESSION['user_id'])
     && (int) $_SESSION['user_id'] === (int) $goods['seller_id'];
@@ -137,8 +135,8 @@ if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $
 
     <article>
 
-<!-- 商品画像 -->
-<div class="goods-images">
+    <!-- 商品画像 -->
+    <div class="goods-images">
 
     <?php if (!empty($goods_images)): ?>
 

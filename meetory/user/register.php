@@ -28,10 +28,10 @@ unset($_SESSION['register_errors'], $_SESSION['register_old']);
 
         <form action="register-process.php" method="post">
             <input
-    type="hidden"
-    name="csrf_token"
-    value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
->
+                type="hidden"
+                name="csrf_token"
+                value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
+            >
 
             <!-- ユーザー名 -->
             <div class="form-group">

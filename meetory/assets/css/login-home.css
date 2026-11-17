@@ -1,9 +1,9 @@
-@charset "utf-8";
-
+/* ページ全体のリセット */
 * {
     box-sizing: border-box;
 }
 
+/* body要素 */
 body {
     margin: 0;
     font-family: Arial, "Noto Sans JP", sans-serif;
@@ -11,6 +11,7 @@ body {
     color: #34495e;
 }
 
+/* .welcome-page - welcomeページのメインコンテナ */
 .welcome-page {
     min-height: 100vh;
     display: flex;
@@ -19,6 +20,7 @@ body {
     padding: 30px 20px;
 }
 
+/* .welcome-card - ウェルカムカード */
 .welcome-card {
     width: 100%;
     max-width: 450px;
@@ -29,6 +31,7 @@ body {
     box-shadow: 0 15px 40px rgba(30, 136, 229, 0.15);
 }
 
+/* .logo - サイトロゴ */
 .logo {
     font-size: 48px;
     font-weight: bold;
@@ -36,12 +39,14 @@ body {
     margin-bottom: 10px;
 }
 
+/* .welcome-title - 見出しタイトル */
 .welcome-title {
     font-size: 24px;
     color: #34495e;
     margin-bottom: 10px;
 }
 
+/* .welcome-text - 説明文 */
 .welcome-text {
     color: #78909c;
     font-size: 14px;
@@ -49,6 +54,7 @@ body {
     margin-bottom: 35px;
 }
 
+/* .welcome-button - ベースボタンスタイル */
 .welcome-button {
     display: block;
     width: 100%;
@@ -60,17 +66,20 @@ body {
     text-decoration: none;
 }
 
+/* .login-button - ログインボタン（welcome-buttonを拡張） */
 .login-button {
     background-color: #2196f3;
     color: white;
 }
 
+/* .register-button - 新規登録ボタン（welcome-buttonを拡張） */
 .register-button {
     background-color: white;
     color: #1976d2;
     border: 2px solid #2196f3;
 }
 
+/* .welcome-footer - フッター */
 .welcome-footer {
     margin-top: 25px;
     color: #90a4ae;
