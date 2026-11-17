@@ -98,7 +98,8 @@ $auction_list = $auction_stmt->fetchAll(PDO::FETCH_ASSOC);
                             && preg_match(
                                 '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
                                 $image_path
-                            );
+                            )
+                            && is_file(__DIR__ . '/../' . $image_path);
                         ?>
 
                         <?php if ($is_valid_image): ?>
@@ -148,7 +149,8 @@ $auction_list = $auction_stmt->fetchAll(PDO::FETCH_ASSOC);
                             && preg_match(
                                 '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
                                 $image_path
-                            );
+                            )
+                            && is_file(__DIR__ . '/../' . $image_path);
                         ?>
 
                         <?php if ($is_valid_image): ?>

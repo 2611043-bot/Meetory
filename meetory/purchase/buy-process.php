@@ -85,6 +85,27 @@ if (!is_string($shipping_phone)) {
 }
 $shipping_phone = trim($shipping_phone);
 
+$buyer_id = (int) $_SESSION['user_id'];
+
+$address_id = filter_input(INPUT_POST, 'address_id', FILTER_VALIDATE_INT);
+
+// address_id が指定されている場合は、DBから住所情報を取得する
+if ($address_id && $address_id > 0) {
+    $stmtAddr = $pdo->prepare('SELECT * FROM user_addresses WHERE address_id = ? AND user_id = ?');
+    $stmtAddr->execute([$address_id, $buyer_id]);
+    $addrRow = $stmtAddr->fetch(PDO::FETCH_ASSOC);
+    if (!$addrRow) {
+        exit('不正な住所です。');
+    }
+    $shipping_name = $addrRow['recipient_name'];
+    $shipping_postal_code = $addrRow['postal_code'];
+    $shipping_prefecture = $addrRow['prefecture'];
+    $shipping_city = $addrRow['city'];
+    $shipping_address_line = $addrRow['address_line'];
+    $shipping_building = $addrRow['building'];
+    $shipping_phone = $addrRow['phone'];
+}
+
 $payment_method = $_POST['payment_method'] ?? '';
 
 // 入力チェック

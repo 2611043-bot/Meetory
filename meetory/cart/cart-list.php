@@ -116,7 +116,8 @@ foreach ($cart_items as $item) {
             !preg_match(
                 '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
                 $image_path
-            )
+            ) ||
+            !is_file(__DIR__ . '/../../' . $image_path)
         ) {
             $image_path = '';
         }

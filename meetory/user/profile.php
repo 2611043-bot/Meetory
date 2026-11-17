@@ -446,10 +446,19 @@ require '../../meetory-header.php';
                 <?php foreach ($listed_goods as $goods): ?>
                     <article class="profile-goods-card">
                         <a href="../goods/goods-detail.php?goods_id=<?= (int) $goods['goods_id'] ?>">
-                            <?php if (!empty($goods['image_path'])): ?>
+                            <?php
+                            $prof_image_path = $goods['image_path'] ?? '';
+                            $is_valid_prof_image = is_string($prof_image_path)
+                                && preg_match(
+                                    '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
+                                    $prof_image_path
+                                )
+                                && is_file(__DIR__ . '/../../' . $prof_image_path);
+                            ?>
+                            <?php if ($is_valid_prof_image): ?>
                                 <img
                                     src="/Meetory/<?= htmlspecialchars(
-                                        ltrim($goods['image_path'], '/'),
+                                        ltrim($prof_image_path, '/'),
                                         ENT_QUOTES,
                                         'UTF-8'
                                     ) ?>"
@@ -504,10 +513,19 @@ require '../../meetory-header.php';
                         class="profile-auction-card"
                         href="../auction/auction-detail.php?goods_id=<?= (int) $auction['goods_id'] ?>"
                     >
-                        <?php if (!empty($auction['image_path'])): ?>
+                        <?php
+                        $auc_image_path = $auction['image_path'] ?? '';
+                        $is_valid_auc_image = is_string($auc_image_path)
+                            && preg_match(
+                                '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
+                                $auc_image_path
+                            )
+                            && is_file(__DIR__ . '/../../' . $auc_image_path);
+                        ?>
+                        <?php if ($is_valid_auc_image): ?>
                             <img
                                 src="/Meetory/<?= htmlspecialchars(
-                                    $auction['image_path'],
+                                    $auc_image_path,
                                     ENT_QUOTES,
                                     'UTF-8'
                                 ) ?>"

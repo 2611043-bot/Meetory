@@ -247,6 +247,7 @@ require '../../meetory-header.php';
         <nav class="mypage-link-list" aria-label="その他のメニュー">
             <a href="favorites.php">ほしいものリスト</a>
             <a href="browsing-history.php">閲覧履歴</a>
+            <a href="address-list.php">住所管理</a>
             <a href="../messages/message-center.php">メッセージ</a>
             <a href="notification-settings.php">通知設定</a>
             <a href="blocked-list.php">ブロック一覧</a>
@@ -298,11 +299,20 @@ require '../../meetory-header.php';
 
                     <li>
                         <!-- 商品画像 -->
-                        <?php if (!empty($item['image_path'])): ?>
+                        <?php
+                        $item_image_path = $item['image_path'] ?? '';
+                        $is_valid_item_image = is_string($item_image_path)
+                            && preg_match(
+                                '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
+                                $item_image_path
+                            )
+                            && is_file(__DIR__ . '/../../' . $item_image_path);
+                        ?>
+                        <?php if ($is_valid_item_image): ?>
                             <div class="goods-image">
                                 <img
                                     src="/Meetory/<?= htmlspecialchars(
-                                        ltrim($item['image_path'], '/'),
+                                        ltrim($item_image_path, '/'),
                                         ENT_QUOTES,
                                         'UTF-8'
                                     ) ?>"

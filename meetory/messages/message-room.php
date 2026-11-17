@@ -689,20 +689,29 @@ if (!$is_partial) {
 
                                 <div class="product-card">
 
-                                    <!-- 商品画像（クリックでモーダル表示） -->
-                                    <div class="product-card-image" data-image-src="<?= !empty($message['goods_image']) ? '/Meetory/' . htmlspecialchars($message['goods_image'], ENT_QUOTES, 'UTF-8') : '' ?>" data-image-alt="<?= htmlspecialchars($message['goods_name'] ?? '商品画像', ENT_QUOTES, 'UTF-8') ?>">
-                                        <?php if (!empty($message['goods_image'])): ?>
-                                            <img
-                                                src="/Meetory/<?= htmlspecialchars($message['goods_image'], ENT_QUOTES, 'UTF-8') ?>"
-                                                alt="<?= htmlspecialchars($message['goods_name'] ?? '商品画像', ENT_QUOTES, 'UTF-8') ?>"
-                                                loading="lazy"
-                                            >
-                                        <?php else: ?>
-                                            <div class="product-image-placeholder">
-                                                <i class="fa-solid fa-box"></i>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
+<!-- 商品画像（クリックでモーダル表示） -->
+                                <?php
+                                $goods_image = $message['goods_image'] ?? '';
+                                $is_valid_goods_image = is_string($goods_image)
+                                    && preg_match(
+                                        '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
+                                        $goods_image
+                                    )
+                                    && is_file(__DIR__ . '/../../' . $goods_image);
+                                ?>
+                                <div class="product-card-image" data-image-src="<?= $is_valid_goods_image ? '/Meetory/' . htmlspecialchars($goods_image, ENT_QUOTES, 'UTF-8') : '' ?>" data-image-alt="<?= htmlspecialchars($message['goods_name'] ?? '商品画像', ENT_QUOTES, 'UTF-8') ?>">
+                                    <?php if ($is_valid_goods_image): ?>
+                                        <img
+                                            src="/Meetory/<?= htmlspecialchars($goods_image, ENT_QUOTES, 'UTF-8') ?>"
+                                            alt="<?= htmlspecialchars($message['goods_name'] ?? '商品画像', ENT_QUOTES, 'UTF-8') ?>"
+                                            loading="lazy"
+                                        >
+                                    <?php else: ?>
+                                        <div class="product-image-placeholder">
+                                            <i class="fa-solid fa-box"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
 
                                     <!-- 商品情報 -->
                                     <div class="product-card-info">

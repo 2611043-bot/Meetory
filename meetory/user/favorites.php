@@ -121,11 +121,20 @@ require '../../meetory-header.php';
                 </form>
 
                 <!-- 商品画像 -->
-                <?php if (!empty($favorite['image_path'])): ?>
+                <?php
+                $fav_image_path = $favorite['image_path'] ?? '';
+                $is_valid_fav_image = is_string($fav_image_path)
+                    && preg_match(
+                        '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
+                        $fav_image_path
+                    )
+                    && is_file(__DIR__ . '/../../' . $fav_image_path);
+                ?>
+                <?php if ($is_valid_fav_image): ?>
                     <div class="favorite-image">
                         <a href="../goods/goods-detail.php?goods_id=<?= (int) $favorite['goods_id'] ?>">
                             <img
-                                src="/Meetory/<?= htmlspecialchars($favorite['image_path'], ENT_QUOTES, 'UTF-8') ?>"
+                                src="/Meetory/<?= htmlspecialchars($fav_image_path, ENT_QUOTES, 'UTF-8') ?>"
                                 alt="<?= htmlspecialchars($favorite['goods_name'], ENT_QUOTES, 'UTF-8') ?>"
                                 width="200"
                                 loading="lazy"

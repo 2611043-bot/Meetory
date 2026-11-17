@@ -246,7 +246,8 @@ if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $
         !preg_match(
             '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
             $image_path
-        )
+        ) ||
+        !is_file(__DIR__ . '/../../' . $image_path)
     ) {
         $image_path = '';
     }
