@@ -198,6 +198,22 @@ switch ($type) {
         $redirectUrl = 'index.php';
         break;
 
+    case 'auction_bid_surpassed':
+    case 'auction_won':
+    case 'auction_ending':
+    case 'auction_bid_success':
+    case 'auction_ended_seller':
+        // related_id = goods_id。オークション詳細画面へ。
+        // 商品が存在するか確認。
+        $stmtGoods = $pdo->prepare(
+            'SELECT goods_id FROM goods WHERE goods_id = :goods_id LIMIT 1'
+        );
+        $stmtGoods->execute([':goods_id' => $relatedId]);
+        if ($stmtGoods->fetch(PDO::FETCH_ASSOC) !== false) {
+            $redirectUrl = '../auction/auction-detail.php?goods_id=' . $relatedId;
+        }
+        break;
+
     default:
         $redirectUrl = 'index.php';
         break;
