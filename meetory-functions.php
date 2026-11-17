@@ -2,7 +2,7 @@
 
 function getPDO()
 {
-    $config = require __DIR__ . '/../db-config.php';
+    $config = require __DIR__ . '/db-config.php';
 
     return new PDO(
         "mysql:host={$config['host']};dbname={$config['dbname']};charset=utf8mb4",
