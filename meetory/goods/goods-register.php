@@ -12,8 +12,6 @@ if (empty($_SESSION['csrf_token'])) {
 
 // ログインしていない場合
 if (!isset($_SESSION['user_id'])) {
-
-    // ログイン画面へ移動
     header('Location: ../user/login.php');
     exit;
 }
@@ -35,7 +33,7 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $errors = $_SESSION['goods_register_errors'] ?? [];
 $old = $_SESSION['goods_register_old'] ?? [];
 
-// エラーと保持値をクリア（次のリクエストのため）
+// エラーと保持値をクリア
 unset($_SESSION['goods_register_errors']);
 unset($_SESSION['goods_register_old']);
 
@@ -51,10 +49,11 @@ $old_buyout_price = $old['buyout_price'] ?? '';
 $old_end_at = $old['end_at'] ?? '';
 $old_auto_extend = $old['auto_extend'] ?? '1';
 
-// ページ固有CSS（ヘッダーより前に読み込むことで<head>内に配置）
+// ページ固有CSS
 $page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DIR__ . '/../assets/css/goods-register.css');
 
 ?>
+
 <link rel="stylesheet" href="<?= htmlspecialchars($page_css, ENT_QUOTES, 'UTF-8') ?>">
 
 <?php require_once '../../meetory-header.php'; ?>
@@ -84,17 +83,27 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DI
 
         <p>
             商品名
-            <input type="text" name="goods_name" value="<?= htmlspecialchars($old_goods_name, ENT_QUOTES, 'UTF-8') ?>" required>
+            <input
+                type="text"
+                id="goods_name"
+                name="goods_name"
+                value="<?= htmlspecialchars($old_goods_name, ENT_QUOTES, 'UTF-8') ?>"
+                required
+            >
         </p>
 
         <p>
             商品説明
-            <textarea name="description" required><?= htmlspecialchars($old_description, ENT_QUOTES, 'UTF-8') ?></textarea>
+            <textarea
+                id="description"
+                name="description"
+                required
+            ><?= htmlspecialchars($old_description, ENT_QUOTES, 'UTF-8') ?></textarea>
         </p>
 
         <p>
             商品状態
-            <select name="goods_condition" required>
+            <select id="goods_condition" name="goods_condition" required>
                 <option value="">選択してください</option>
                 <option value="新品" <?= $old_goods_condition === '新品' ? 'selected' : '' ?>>新品</option>
                 <option value="未使用" <?= $old_goods_condition === '未使用' ? 'selected' : '' ?>>未使用</option>
@@ -106,10 +115,13 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DI
 
         <p>
             カテゴリ
-            <select name="category_id" required>
+            <select id="category_id" name="category_id" required>
                 <option value="">選択してください</option>
                 <?php foreach ($categories as $category): ?>
-                    <option value="<?= htmlspecialchars($category['category_id'], ENT_QUOTES, 'UTF-8') ?>" <?= $old_category_id == $category['category_id'] ? 'selected' : '' ?>>
+                    <option
+                        value="<?= htmlspecialchars($category['category_id'], ENT_QUOTES, 'UTF-8') ?>"
+                        <?= $old_category_id == $category['category_id'] ? 'selected' : '' ?>
+                    >
                         <?= htmlspecialchars($category['category_name'], ENT_QUOTES, 'UTF-8') ?>
                     </option>
                 <?php endforeach; ?>
@@ -124,51 +136,175 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DI
 
     </fieldset>
 
+    <!-- AIアシスト利用選択 -->
+    <fieldset class="ai-mode-panel">
+        <legend>出品サポート</legend>
+
+        <div class="ai-mode-options">
+            <label class="ai-mode-option">
+                <input
+                    type="radio"
+                    name="listing_assist_mode"
+                    value="normal"
+                    checked
+                >
+                <span>通常入力</span>
+            </label>
+
+            <label class="ai-mode-option">
+                <input
+                    type="radio"
+                    name="listing_assist_mode"
+                    value="ai"
+                >
+                <span>AIアシストを利用する</span>
+            </label>
+        </div>
+
+        <p class="ai-mode-description">
+            AIとの会話を通じて、商品名や商品説明文の作成をサポートします。
+        </p>
+    </fieldset>
+
+    <!-- AIチャット欄 -->
+    <section id="ai-assist-panel" class="ai-assist-panel is-hidden">
+
+        <h2>Meetory AI出品アシスタント</h2>
+
+        <p class="ai-assist-intro">
+            入力された商品情報をもとに、AIが不足している情報を質問します。
+            回答を確認しながら、商品名と商品説明文を一緒に作成しましょう。
+        </p>
+
+        <div
+            id="ai-chat-messages"
+            class="ai-chat-messages"
+            aria-live="polite"
+        >
+            <div class="ai-chat-message model-message">
+                こんにちは！MeetoryのAI出品アシスタントです。
+                商品情報を確認して、出品に必要な情報を一緒に整理していきましょう！
+            </div>
+        </div>
+
+        <div class="ai-chat-input-area">
+            <textarea
+                id="ai-chat-input"
+                placeholder="AIへのメッセージを入力してください"
+                rows="3"
+                maxlength="5000"
+            ></textarea>
+
+            <button type="button" id="ai-chat-send">
+                送信
+            </button>
+        </div>
+
+        <p id="ai-chat-status" class="ai-chat-status" aria-live="polite"></p>
+
+        <!-- AI提案の商品名 -->
+        <div id="ai-title-result" class="ai-suggestion is-hidden">
+            <h3>AIが提案した商品名</h3>
+            <p id="ai-suggested-title"></p>
+            <button type="button" id="ai-apply-title">
+                商品名に反映する
+            </button>
+        </div>
+
+        <!-- AI提案の商品説明文 -->
+        <div id="ai-description-result" class="ai-suggestion is-hidden">
+            <h3>AIが提案した商品説明文</h3>
+            <p id="ai-suggested-description"></p>
+            <button type="button" id="ai-apply-description">
+                商品説明文に反映する
+            </button>
+        </div>
+
+    </section>
+
     <!-- 出品タイプ選択パネル -->
     <fieldset class="listing-type-panel">
         <legend>出品方法を選択</legend>
 
         <div class="listing-type-options">
             <label class="listing-type-option">
-                <input type="radio" name="listing_type" value="normal" <?= $old_listing_type === 'normal' ? 'checked' : '' ?>>
+                <input
+                    type="radio"
+                    name="listing_type"
+                    value="normal"
+                    <?= $old_listing_type === 'normal' ? 'checked' : '' ?>
+                >
                 <span class="option-label">通常出品</span>
             </label>
 
             <label class="listing-type-option">
-                <input type="radio" name="listing_type" value="auction" <?= $old_listing_type === 'auction' ? 'checked' : '' ?>>
+                <input
+                    type="radio"
+                    name="listing_type"
+                    value="auction"
+                    <?= $old_listing_type === 'auction' ? 'checked' : '' ?>
+                >
                 <span class="option-label">オークション出品</span>
             </label>
         </div>
     </fieldset>
 
     <!-- 通常出品入力欄 -->
-    <fieldset class="listing-fields normal-fields<?= $old_listing_type === 'auction' ? ' is-hidden' : '' ?>" data-listing-type="normal">
+    <fieldset
+        class="listing-fields normal-fields<?= $old_listing_type === 'auction' ? ' is-hidden' : '' ?>"
+        data-listing-type="normal"
+    >
         <legend>通常出品情報</legend>
 
         <p>
             販売価格
-            <input type="number" name="price" min="1" value="<?= htmlspecialchars($old_price, ENT_QUOTES, 'UTF-8') ?>" required>
+            <input
+                type="number"
+                name="price"
+                min="1"
+                value="<?= htmlspecialchars($old_price, ENT_QUOTES, 'UTF-8') ?>"
+                required
+            >
         </p>
 
     </fieldset>
 
     <!-- オークション出品入力欄 -->
-    <fieldset class="listing-fields auction-fields<?= $old_listing_type === 'normal' ? ' is-hidden' : '' ?>" data-listing-type="auction">
+    <fieldset
+        class="listing-fields auction-fields<?= $old_listing_type === 'normal' ? ' is-hidden' : '' ?>"
+        data-listing-type="auction"
+    >
         <legend>オークション出品情報</legend>
 
         <p>
             開始価格
-            <input type="number" name="start_price" min="1" value="<?= htmlspecialchars($old_start_price, ENT_QUOTES, 'UTF-8') ?>" required>
+            <input
+                type="number"
+                name="start_price"
+                min="1"
+                value="<?= htmlspecialchars($old_start_price, ENT_QUOTES, 'UTF-8') ?>"
+                required
+            >
         </p>
 
         <p>
             即決価格（任意）
-            <input type="number" name="buyout_price" min="1" value="<?= htmlspecialchars($old_buyout_price, ENT_QUOTES, 'UTF-8') ?>">
+            <input
+                type="number"
+                name="buyout_price"
+                min="1"
+                value="<?= htmlspecialchars($old_buyout_price, ENT_QUOTES, 'UTF-8') ?>"
+            >
         </p>
 
         <p>
             終了日時
-            <input type="datetime-local" name="end_at" value="<?= htmlspecialchars($old_end_at, ENT_QUOTES, 'UTF-8') ?>" required>
+            <input
+                type="datetime-local"
+                name="end_at"
+                value="<?= htmlspecialchars($old_end_at, ENT_QUOTES, 'UTF-8') ?>"
+                required
+            >
         </p>
 
         <p>
@@ -191,7 +327,8 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DI
     <input
         type="hidden"
         name="csrf_token"
-        value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+        value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
+    >
     <button type="submit">ログアウト</button>
 </form>
 
