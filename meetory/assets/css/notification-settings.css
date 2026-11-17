@@ -231,3 +231,151 @@
         flex: 1;
     }
 }
+
+/* 全体設定OFF時：種類別設定をグレーアウト */
+.settings-section-disabled {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.settings-section-disabled .setting-item {
+    border-bottom-color: #eef2f6;
+}
+
+.global-off-message {
+    margin: 0 0 16px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: #f4f7fb;
+    border: 1px solid #dfe6ee;
+    color: #667085;
+    font-size: 13px;
+    text-align: center;
+}
+
+.global-off-message p {
+    margin: 0;
+}
+
+/* トースト通知コンテナ */
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 8px;
+    pointer-events: none;
+}
+
+@media (max-width: 700px) {
+    .toast-container {
+        bottom: 16px;
+        left: 16px;
+        right: 16px;
+        align-items: center;
+    }
+}
+
+/* トースト通知アイテム */
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: auto;
+    max-width: 360px;
+    min-width: 280px;
+    box-sizing: border-box;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast i {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.toast-saving {
+    background: #eef6ff;
+    color: #1a73e8;
+    border: 1px solid #b3d9ff;
+}
+
+.toast-success {
+    background: #ecfdf3;
+    color: #027a48;
+    border: 1px solid #a5d6a7;
+}
+
+.toast-error {
+    background: #fff1f0;
+    color: #b42318;
+    border: 1px solid #ef9a9a;
+}
+
+.toast-saving i {
+    color: #1a73e8;
+}
+
+.toast-success i {
+    color: #027a48;
+}
+
+.toast-error i {
+    color: #b42318;
+}
+
+/* 古いスタイル（互換性のため残すが非表示） */
+.save-status {
+    display: none !important;
+}
+
+/* 種類別設定ヘッダー（見出し＋すべてONボタン） */
+.settings-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 16px;
+}
+
+.settings-section-header h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #243447;
+}
+
+.btn-small {
+    min-height: 32px;
+    padding: 4px 14px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.btn-outline {
+    background: #fff;
+    color: #1a73e8;
+    border: 1px solid #1a73e8;
+}
+
+.btn-outline:hover:not(:disabled) {
+    background: #eef6ff;
+}
+
+.btn-outline:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #dfe6ee;
+    color: #999;
+}

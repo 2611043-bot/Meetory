@@ -41,6 +41,11 @@ function createNotification(
         'price_down',
         'follow',
         'admin',
+        'auction_bid_surpassed',
+        'auction_won',
+        'auction_ending',
+        'auction_bid_success',
+        'auction_ended_seller',
     ];
 
     if (!is_string($type) || !in_array($type, $allowedTypes, true)) {

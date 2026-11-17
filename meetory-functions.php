@@ -27,10 +27,42 @@ function ensureNotificationSettingsTable(PDO $pdo): void
             type_price_down TINYINT(1) NOT NULL DEFAULT 1,
             type_follow TINYINT(1) NOT NULL DEFAULT 1,
             type_admin TINYINT(1) NOT NULL DEFAULT 1,
+            type_auction_bid_surpassed TINYINT(1) NOT NULL DEFAULT 1,
+            type_auction_won TINYINT(1) NOT NULL DEFAULT 1,
+            type_auction_ending TINYINT(1) NOT NULL DEFAULT 1,
+            type_auction_bid_success TINYINT(1) NOT NULL DEFAULT 1,
+            type_auction_ended_seller TINYINT(1) NOT NULL DEFAULT 1,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
+
+    // 既存テーブルにも安全にカラムを追加（既存設定を初期化しない）
+    $auctionTypeColumns = [
+        'type_auction_bid_surpassed' => 'TINYINT(1) NOT NULL DEFAULT 1',
+        'type_auction_won'           => 'TINYINT(1) NOT NULL DEFAULT 1',
+        'type_auction_ending'        => 'TINYINT(1) NOT NULL DEFAULT 1',
+        'type_auction_bid_success'   => 'TINYINT(1) NOT NULL DEFAULT 1',
+        'type_auction_ended_seller'  => 'TINYINT(1) NOT NULL DEFAULT 1',
+    ];
+    foreach ($auctionTypeColumns as $colName => $colDef) {
+        $stmt = $pdo->prepare(
+            'SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = :table_name
+               AND COLUMN_NAME = :col_name'
+        );
+        $stmt->execute([
+            ':table_name' => 'notification_settings',
+            ':col_name'   => $colName,
+        ]);
+        if ((int) $stmt->fetchColumn() === 0) {
+            $pdo->exec(
+                'ALTER TABLE notification_settings
+                 ADD COLUMN ' . $colName . ' ' . $colDef
+            );
+        }
+    }
 }
 
 function getNotificationSettings(PDO $pdo, int $user_id): array
@@ -56,6 +88,11 @@ function getNotificationSettings(PDO $pdo, int $user_id): array
             'type_price_down' => 1,
             'type_follow'     => 1,
             'type_admin'      => 1,
+            'type_auction_bid_surpassed' => 1,
+            'type_auction_won'           => 1,
+            'type_auction_ending'        => 1,
+            'type_auction_bid_success'   => 1,
+            'type_auction_ended_seller'  => 1,
         ];
         $cols = implode(', ', array_keys($defaultSettings));
         $placeholders = ':' . implode(', :', array_keys($defaultSettings));
@@ -71,17 +108,32 @@ function saveNotificationSettings(PDO $pdo, int $user_id, array $data): bool
 {
     ensureNotificationSettingsTable($pdo);
 
-    $allowed = ['enabled', 'sound_enabled', 'type_message', 'type_purchase', 'type_shipping', 'type_received', 'type_review', 'type_favorite', 'type_price_down', 'type_follow', 'type_admin'];
+    $allowed = ['enabled', 'sound_enabled', 'type_message', 'type_purchase', 'type_shipping', 'type_received', 'type_review', 'type_favorite', 'type_price_down', 'type_follow', 'type_admin', 'type_auction_bid_surpassed', 'type_auction_won', 'type_auction_ending', 'type_auction_bid_success', 'type_auction_ended_seller'];
     $updateData = ['user_id' => $user_id];
     foreach ($allowed as $key) {
-        $updateData[$key] = isset($data[$key]) ? 1 : 0;
+        $updateData[$key] = (($data[$key] ?? '') === '1') ? 1 : 0;
     }
 
-    $setClause = implode(', ', array_map(fn($k) => "$k = :$k", array_filter(array_keys($updateData), fn($k) => $k !== 'user_id')));
-    $sql = "UPDATE notification_settings SET $setClause WHERE user_id = :user_id";
+    // 既存レコードの存在を確認
+    $stmtExist = $pdo->prepare('SELECT COUNT(*) FROM notification_settings WHERE user_id = :user_id');
+    $stmtExist->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+    $stmtExist->execute();
+    $exists = (int) $stmtExist->fetchColumn() > 0;
 
-    $stmt = $pdo->prepare($sql);
-    return $stmt->execute($updateData);
+    if ($exists) {
+        // 既存レコードを更新
+        $setClause = implode(', ', array_map(fn($k) => "$k = :$k", array_filter(array_keys($updateData), fn($k) => $k !== 'user_id')));
+        $sql = "UPDATE notification_settings SET $setClause WHERE user_id = :user_id";
+        $stmt = $pdo->prepare($sql);
+        return (bool) $stmt->execute($updateData);
+    } else {
+        // 新規レコードを挿入
+        $cols = implode(', ', array_keys($updateData));
+        $placeholders = ':' . implode(', :', array_keys($updateData));
+        $sql = "INSERT INTO notification_settings ($cols) VALUES ($placeholders)";
+        $stmt = $pdo->prepare($sql);
+        return (bool) $stmt->execute($updateData);
+    }
 }
 
 function getProfileAvatarPresetIds(): array

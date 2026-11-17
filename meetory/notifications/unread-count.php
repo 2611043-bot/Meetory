@@ -59,6 +59,11 @@ $typeColumnMap = [
     'price_down' => 'type_price_down',
     'follow'     => 'type_follow',
     'admin'      => 'type_admin',
+    'auction_bid_surpassed'   => 'type_auction_bid_surpassed',
+    'auction_won'             => 'type_auction_won',
+    'auction_ending'          => 'type_auction_ending',
+    'auction_bid_success'     => 'type_auction_bid_success',
+    'auction_ended_seller'    => 'type_auction_ended_seller',
 ];
 
 foreach ($typeColumnMap as $typeKey => $colName) {
@@ -79,6 +84,11 @@ $allowedTypes = [
     'price_down' => 'price_down',
     'follow' => 'follow',
     'admin' => 'admin',
+    'auction_bid_surpassed' => 'auction_bid_surpassed',
+    'auction_won' => 'auction_won',
+    'auction_ending' => 'auction_ending',
+    'auction_bid_success' => 'auction_bid_success',
+    'auction_ended_seller' => 'auction_ended_seller',
 ];
 
 $filter = $_GET['type'] ?? 'all';
@@ -179,6 +189,11 @@ $typeLabels = [
     'price_down' => '値下げ',
     'follow' => 'フォロー',
     'admin' => '運営からのお知らせ',
+    'auction_bid_surpassed' => '入札額を上回られた',
+    'auction_won' => '落札しました',
+    'auction_ending' => 'ウォッチ中の商品が終了',
+    'auction_bid_success' => '入札を受け付けました',
+    'auction_ended_seller' => 'オークションが終了しました',
 ];
 
 $items = [];
