@@ -173,13 +173,13 @@ require_once '../../meetory-header.php';
         border-top: 1px solid #ddd;
     }
 
-    /* メッセージがない場合 */
-    .empty-message {
-        margin: 8px 0;
-        color: #777;
-        text-align: center;
-        font-size: 0.9em;
-    }
+/* メッセージがない場合 */
+.empty-message {
+    margin: 8px 0;
+    color: #888;
+    text-align: center;
+    font-size: 0.9em;
+}
 
     @media (max-width: 480px) {
         .chat-container {

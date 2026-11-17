@@ -233,10 +233,44 @@ require_once '../../meetory-header.php';
 
     <?php if ($transaction['transaction_status'] === '発送済み'): ?>
 
+        <button
+            type="button"
+            id="completeBtn"
+            class="complete-btn"
+        >
+            取引を完了する
+        </button>
+
+        <!-- 取引完了確認モーダル（アカウント削除確認と同じデザイン） -->
+        <div id="transactionCompleteOverlay" class="delete-account-modal-overlay"></div>
+        <div id="transactionCompleteModal" class="delete-account-modal">
+            <div class="delete-account-modal-content">
+                <h2 class="delete-account-modal-title">取引完了の確認</h2>
+                <p>この取引を完了してもよろしいですか？</p>
+                <p style="font-size: 14px; color: #666; margin-top: 8px;">取引を完了すると、取引状態が「取引完了」に変更されます。</p>
+                <div class="delete-account-modal-actions">
+                    <button
+                        type="button"
+                        class="delete-account-modal-btn delete-account-modal-cancel"
+                        id="completeCancel"
+                    >
+                        いいえ
+                    </button>
+                    <button
+                        type="button"
+                        class="delete-account-modal-btn delete-account-modal-confirm"
+                        id="completeConfirm"
+                    >
+                        はい
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <form
+            id="completeForm"
             action="complete-process.php"
             method="post"
-            onsubmit="return confirm('商品を受け取ったことを確認し、取引を完了しますか？');"
         >
             <input
                 type="hidden"
@@ -253,11 +287,62 @@ require_once '../../meetory-header.php';
                 name="transaction_id"
                 value="<?= (int) $transaction['transaction_id'] ?>"
             >
-
-            <button type="submit">
-                取引を完了する
-            </button>
         </form>
+
+        <script>
+            (function () {
+                var completeBtn = document.getElementById('completeBtn');
+                var overlay = document.getElementById('transactionCompleteOverlay');
+                var modal = document.getElementById('transactionCompleteModal');
+                var cancelBtn = document.getElementById('completeCancel');
+                var confirmBtn = document.getElementById('completeConfirm');
+                var form = document.getElementById('completeForm');
+                var submitting = false;
+
+                if (!completeBtn || !overlay || !modal || !cancelBtn || !confirmBtn || !form) {
+                    return;
+                }
+
+                function openModal() {
+                    overlay.classList.add('open');
+                    modal.classList.add('open');
+                    document.body.style.overflow = 'hidden';
+                }
+
+                function closeModal() {
+                    overlay.classList.remove('open');
+                    modal.classList.remove('open');
+                    document.body.style.overflow = '';
+                }
+
+                completeBtn.addEventListener('click', function () {
+                    openModal();
+                });
+
+                cancelBtn.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    closeModal();
+                });
+
+                overlay.addEventListener('click', function (event) {
+                    if (event.target === overlay) {
+                        closeModal();
+                    }
+                });
+
+                confirmBtn.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (submitting) {
+                        return;
+                    }
+                    submitting = true;
+                    confirmBtn.disabled = true;
+                    form.submit();
+                });
+            })();
+        </script>
 
     <?php elseif ($transaction['transaction_status'] === '取引完了'): ?>
 

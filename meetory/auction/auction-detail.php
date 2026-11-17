@@ -36,7 +36,9 @@ $sql = '
         a.start_at,
         a.end_at,
         a.auto_extend,
-        a.status
+        a.status,
+        a.winner_user_id,
+        a.winning_price
     FROM goods AS g
     INNER JOIN auctions AS a
         ON a.goods_id = g.goods_id
@@ -58,6 +60,16 @@ $seller_stmt = $pdo->prepare('SELECT user_name FROM users WHERE user_id = ?');
 $seller_stmt->execute([(int) $auction['seller_id']]);
 $seller = $seller_stmt->fetch(PDO::FETCH_ASSOC);
 $seller_name = $seller ? htmlspecialchars($seller['user_name'], ENT_QUOTES, 'UTF-8') : '不明';
+
+// 落札者名を取得
+if ($auction['winner_user_id'] === null) {
+    $winner_name = null;
+} else {
+    $winner_stmt = $pdo->prepare('SELECT user_name FROM users WHERE user_id = ?');
+    $winner_stmt->execute([(int) $auction['winner_user_id']]);
+    $winner = $winner_stmt->fetch(PDO::FETCH_ASSOC);
+    $winner_name = $winner ? $winner['user_name'] : '不明';
+}
 
 // 商品画像を取得
 $image_sql = '
@@ -226,7 +238,7 @@ $can_bid = isset($_SESSION['user_id'])
 
         <p>
             現在価格：
-            <?= number_format((int) $auction['current_price']) ?>円
+            <span id="current-price"><?= number_format((int) $auction['current_price']) ?></span>円
         </p>
 
         <p>
@@ -241,7 +253,7 @@ $can_bid = isset($_SESSION['user_id'])
 
         <p>
             終了日時：
-            <?= htmlspecialchars($auction['end_at'], ENT_QUOTES, 'UTF-8') ?>
+            <span id="end-time"><?= htmlspecialchars($auction['end_at'], ENT_QUOTES, 'UTF-8') ?></span>
         </p>
 
         <p>
@@ -255,7 +267,23 @@ $can_bid = isset($_SESSION['user_id'])
             <?= nl2br(htmlspecialchars($auction['description'], ENT_QUOTES, 'UTF-8')) ?>
         </p>
 
-        <?php if ((int) $auction['is_sold'] === 1 || $auction['status'] !== 'active'): ?>
+        <?php if ($auction['status'] === 'sold'): ?>
+
+            <p>落札成立</p>
+            <p>
+                落札者：
+                <?= htmlspecialchars($winner_name ?? '不明', ENT_QUOTES, 'UTF-8') ?>
+            </p>
+            <p>
+                落札価格：
+                <?= number_format((int) $auction['winning_price']) ?>円
+            </p>
+
+        <?php elseif ($auction['status'] === 'ended'): ?>
+
+            <p>入札がなかったため、落札者はいません。</p>
+
+        <?php elseif ((int) $auction['is_sold'] === 1 || $auction['status'] !== 'active'): ?>
 
             <p>このオークションは終了しています。</p>
 
@@ -267,13 +295,9 @@ $can_bid = isset($_SESSION['user_id'])
 
     <h2>入札履歴</h2>
 
-    <?php if (empty($bid_history)): ?>
+    <ul id="bid-history-list">
+        <?php if (!empty($bid_history)): ?>
 
-        <p>入札履歴はまだありません。</p>
-
-    <?php else: ?>
-
-        <ul>
             <?php foreach ($bid_history as $bid): ?>
 
                 <li>
@@ -283,13 +307,16 @@ $can_bid = isset($_SESSION['user_id'])
                 </li>
 
             <?php endforeach; ?>
-        </ul>
 
-    <?php endif; ?>
+        <?php endif; ?>
+    </ul>
 
     <hr>
 
     <h2>入札する</h2>
+
+    <!-- 入札結果メッセージ表示エリア -->
+    <div id="bid-message" class="bid-message"></div>
 
     <?php if (!isset($_SESSION['user_id'])): ?>
 
@@ -321,7 +348,12 @@ $can_bid = isset($_SESSION['user_id'])
 
     <?php else: ?>
 
-        <form action="bid-process.php" method="post" class="bid-form">
+        <form
+            id="bid-form"
+            action="bid-process.php"
+            method="post"
+            class="bid-form"
+        >
 
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="goods_id" value="<?= (int) $auction['goods_id'] ?>">
@@ -339,7 +371,13 @@ $can_bid = isset($_SESSION['user_id'])
                 >
             </div>
 
-            <button type="submit" class="bid-btn">入札する</button>
+            <button
+                type="submit"
+                id="bid-submit-btn"
+                class="bid-btn"
+            >
+                入札する
+            </button>
 
         </form>
 
@@ -352,5 +390,7 @@ $can_bid = isset($_SESSION['user_id'])
     </p>
 
 </main>
+
+<script src="../assets/js/auction-detail.js"></script>
 
 <?php require '../../meetory-footer.php'; ?>

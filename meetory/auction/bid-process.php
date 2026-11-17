@@ -191,6 +191,28 @@ try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$auction['auction_id'], $user_id, $bid_amount]);
 
+    // 挿入した入札の bid_at を取得
+    $bid_id = (int) $pdo->lastInsertId();
+    $bid_at = '';
+    if ($bid_id > 0) {
+        $bid_at_stmt = $pdo->prepare(
+            'SELECT bid_at FROM auction_bids WHERE bid_id = ?'
+        );
+        $bid_at_stmt->execute([$bid_id]);
+        $bid_at_row = $bid_at_stmt->fetch(PDO::FETCH_ASSOC);
+        if ($bid_at_row) {
+            $bid_at = $bid_at_row['bid_at'];
+        }
+    }
+
+    // ログイン中のユーザー名を取得
+    $user_name_stmt = $pdo->prepare(
+        'SELECT user_name FROM users WHERE user_id = ?'
+    );
+    $user_name_stmt->execute([$user_id]);
+    $user_name_row = $user_name_stmt->fetch(PDO::FETCH_ASSOC);
+    $user_name = $user_name_row ? $user_name_row['user_name'] : '';
+
     // 現在価格を更新
     $sql = 'UPDATE auctions SET current_price = ? WHERE auction_id = ?';
     $stmt = $pdo->prepare($sql);
@@ -222,7 +244,9 @@ try {
         'success' => true,
         'message' => $is_buyout ? '即決成立しました。' : '入札を受け付けました。',
         'is_buyout' => $is_buyout,
-        'new_end_at' => $new_end_at
+        'new_end_at' => $new_end_at,
+        'user_name' => $user_name,
+        'bid_at' => $bid_at
     ], JSON_UNESCAPED_UNICODE);
     exit;
 

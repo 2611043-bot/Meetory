@@ -372,11 +372,24 @@ $sql = "
         m.goods_id,
         m.sent_at,
         g.goods_name,
-        g.price
+        g.price,
+        g.description,
+        g.`condition`,
+        g.category_id,
+        c.category_name,
+        gi.image_path AS goods_image
     FROM messages AS m
 
     LEFT JOIN goods AS g
         ON m.goods_id = g.goods_id
+    LEFT JOIN categories AS c
+        ON g.category_id = c.category_id
+    LEFT JOIN (
+        SELECT goods_id, image_path
+        FROM goods_images
+        WHERE display_order = 1
+    ) AS gi
+        ON g.goods_id = gi.goods_id
 
     WHERE
         (
@@ -410,6 +423,9 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // 共通ヘッダー読み込み
 // 部分表示モードではヘッダー・フッターは出力しない
 // ========================================
+
+// メッセージページ用のbodyクラスを設定
+$body_class = 'message-page';
 
 if (!$is_partial) {
     require_once '../../meetory-header.php';
@@ -600,56 +616,54 @@ if (!$is_partial) {
 
                                 <div class="product-card">
 
-                                    <button
-                                        type="button"
-                                        class="product-card-header"
-                                        aria-expanded="false"
-                                    >
-
-                                        <span>
-                                            <i class="fa-solid fa-box"></i>
-                                            商品情報
-                                        </span>
-
-                                        <i class="fa-solid fa-chevron-down product-arrow"></i>
-
-                                    </button>
-
-                                    <div class="product-card-body" hidden>
-
-                                        <div class="product-information">
-
-                                            <div class="product-details">
-
-                                                <h3>
-                                                    <?= htmlspecialchars(
-                                                        $message['goods_name'] ?? '商品情報なし',
-                                                        ENT_QUOTES,
-                                                        'UTF-8'
-                                                    ) ?>
-                                                </h3>
-
-                                                <p class="product-price">
-                                                    ¥<?= number_format(
-                                                        (int)($message['price'] ?? 0)
-                                                    ) ?>
-                                                </p>
-
-                                                <?php if (!empty($message['goods_id'])): ?>
-
-                                                    <a
-                                                        href="../goods/goods-detail.php?goods_id=<?= (int)$message['goods_id'] ?>"
-                                                        class="product-detail-link"
-                                                    >
-                                                        商品詳細を見る
-                                                    </a>
-
-                                                <?php endif; ?>
-
+                                    <!-- 商品画像（クリックでモーダル表示） -->
+                                    <div class="product-card-image" data-image-src="<?= !empty($message['goods_image']) ? '/Meetory/' . htmlspecialchars($message['goods_image'], ENT_QUOTES, 'UTF-8') : '' ?>" data-image-alt="<?= htmlspecialchars($message['goods_name'] ?? '商品画像', ENT_QUOTES, 'UTF-8') ?>">
+                                        <?php if (!empty($message['goods_image'])): ?>
+                                            <img
+                                                src="/Meetory/<?= htmlspecialchars($message['goods_image'], ENT_QUOTES, 'UTF-8') ?>"
+                                                alt="<?= htmlspecialchars($message['goods_name'] ?? '商品画像', ENT_QUOTES, 'UTF-8') ?>"
+                                                loading="lazy"
+                                            >
+                                        <?php else: ?>
+                                            <div class="product-image-placeholder">
+                                                <i class="fa-solid fa-box"></i>
                                             </div>
+                                        <?php endif; ?>
+                                    </div>
 
+                                    <!-- 商品情報 -->
+                                    <div class="product-card-info">
+                                        <a href="../goods/goods-detail.php?goods_id=<?= (int)$message['goods_id'] ?>" class="product-card-name-link">
+                                            <h4 class="product-card-name">
+                                                <?= htmlspecialchars(
+                                                    $message['goods_name'] ?? '商品情報なし',
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                ) ?>
+                                            </h4>
+                                        </a>
+
+                                        <p class="product-card-price">
+                                            ¥<?= number_format((int)($message['price'] ?? 0)) ?>
+                                        </p>
+
+                                        <div class="product-card-meta">
+                                            <?php if (!empty($message['category_name'])): ?>
+                                                <span class="product-card-category">
+                                                    <?= htmlspecialchars($message['category_name'], ENT_QUOTES, 'UTF-8') ?>
+                                                </span>
+                                            <?php endif; ?>
+                                            <?php if (!empty($message['condition'])): ?>
+                                                <span class="product-card-condition">
+                                                    <?= htmlspecialchars($message['condition'], ENT_QUOTES, 'UTF-8') ?>
+                                                </span>
+                                            <?php endif; ?>
                                         </div>
 
+                                        <a href="../goods/goods-detail.php?goods_id=<?= (int)$message['goods_id'] ?>" class="product-detail-link">
+                                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                            商品詳細を見る
+                                        </a>
                                     </div>
 
                                 </div>
@@ -850,6 +864,17 @@ if (!$is_partial) {
         </form>
 
     </section>
+
+    <!-- 画像拡大モーダル -->
+    <div class="image-modal" id="imageModal" role="dialog" aria-modal="true" aria-label="商品画像拡大" hidden>
+        <div class="image-modal-overlay" tabindex="-1"></div>
+        <div class="image-modal-content">
+            <button type="button" class="image-modal-close" aria-label="閉じる">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img id="imageModalImg" src="" alt="">
+        </div>
+    </div>
 
 <?php if (!$is_partial): ?>
 </div>

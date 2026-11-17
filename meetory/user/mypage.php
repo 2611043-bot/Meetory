@@ -6,7 +6,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 
 // ログインしているか確認
-if (!isset($_SESSION['user_id'])) {
+if (
+    !isset($_SESSION['user_id']) ||
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false ||
+    (int) $_SESSION['user_id'] <= 0
+) {
     header('Location: login.php');
     exit;
 }
@@ -211,10 +215,10 @@ require_once __DIR__ . '/../../meetory-header.php';
                 <span>売却済みの商品</span>
                 <strong><?= (int) $listing_counts['sold_goods_count'] ?>件</strong>
             </a>
-            <div class="mypage-stat-card">
+            <a class="mypage-stat-card" href="../purchase/transaction-list.php">
                 <span>取引中の商品</span>
                 <strong><?= $in_progress_count ?>件</strong>
-            </div>
+            </a>
         </div>
     </section>
 

@@ -13,3 +13,20 @@
     border-radius: 50%;
 }
 
+/* 取引完了トリガーボタン */
+.complete-btn {
+    display: inline-block;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: bold;
+    background: #1a73e8;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.complete-btn:hover {
+    background: #0d47a1;
+}
+

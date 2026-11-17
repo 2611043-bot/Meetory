@@ -162,6 +162,9 @@ unset($talk);
 // 共通ヘッダー読み込み
 // ========================================
 
+// メッセージページ用のbodyクラスを設定
+$body_class = 'message-page';
+
 require_once '../../meetory-header.php';
 ?>
 
