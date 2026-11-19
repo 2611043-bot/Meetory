@@ -194,16 +194,6 @@ if (
                     </a>
                     <?php endif; ?>
 
-                    <!-- ハンバーガーメニューボタン -->
-                    <button
-                        type="button"
-                        class="icon-btn"
-                        id="hamburgerBtn"
-                        aria-label="メニューを開く"
-                    >
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
-
                     <!-- 通知ベル（未読件数バッジ付き） -->
                     <a
                         id="notificationBell"
@@ -212,8 +202,8 @@ if (
                         aria-label="通知（未読<?= $unreadNotificationCount ?>件）"
                         rel="nofollow"
                     >
-                        <i class="fa-solid fa-bell"></i>
-                        <?php if ($unreadNotificationCount > 0): ?>
+<i class="fa-solid fa-bell"></i>
+                    <?php if ($unreadNotificationCount > 0): ?>
                             <span
                                 id="notificationBadge"
                                 class="notification-badge"
@@ -223,6 +213,16 @@ if (
                             </span>
                         <?php endif; ?>
                     </a>
+
+                    <!-- ハンバーガーメニューボタン -->
+                    <button
+                        type="button"
+                        class="icon-btn"
+                        id="hamburgerBtn"
+                        aria-label="メニューを開く"
+                    >
+<i class="fa-solid fa-bars"></i>
+</button>
 
                 <?php else: ?>
 
@@ -247,8 +247,8 @@ if (
                         id="hamburgerBtn"
                         aria-label="メニューを開く"
                     >
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
+<i class="fa-solid fa-bars"></i>
+</button>
 
                 <?php endif; ?>
 
