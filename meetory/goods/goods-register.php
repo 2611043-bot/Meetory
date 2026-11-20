@@ -1,3 +1,4 @@
+
 <?php
 
 // ログイン状態を確認するためSESSIONを開始
@@ -433,14 +434,20 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v='
 
         <script src="/Meetory/meetory/assets/js/goods-register.js?v=<?= filemtime(__DIR__ . '/../assets/js/goods-register.js') ?>"></script>
 
-    <form action="../user/logout.php" method="post" style="margin-top: 24px; text-align: center;">
-    <input
-        type="hidden"
-        name="csrf_token"
-        value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
-    >
-    <button
-        type="submit"
-        style="display: inline-block; background-color: #ff5252; border: none; color: #ffffff; padding: 10px 28px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 8px rgba(255, 82, 82, 0.25);"
-    >ログアウト</button>
-</form>
+        <!-- ログアウト -->
+        <form action="../user/logout.php" method="post" style="margin-top: 24px; text-align: center;">
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
+            >
+            <button
+                type="submit"
+                style="display: inline-block; background-color: #ff5252; border: none; color: #ffffff; padding: 10px 28px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 8px rgba(255, 82, 82, 0.25);"
+            >ログアウト</button>
+        </form>
+
+    </div>
+</div>
+
+<?php require '../../meetory-footer.php'; ?>
