@@ -242,6 +242,9 @@ require '../../meetory-header.php';
             >
                 自分の開催中オークションを確認する
             </a>
+            <a class="mypage-action-card" href="sales.php">
+                売上・販売実績を確認する
+            </a>
         </div>
     </section>
 
