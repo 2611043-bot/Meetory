@@ -396,6 +396,13 @@ if (
                 <i class="fa-solid fa-user-shield"></i>
                 ユーザー制限管理
             </a>
+            <a
+                href="/Meetory/meetory/reports/admin/inquiries.php"
+                class="sidebar-link"
+            >
+                <i class="fa-solid fa-envelope"></i>
+                お問い合わせ管理
+            </a>
             <?php endif; ?>
 
             <!-- その他 -->
