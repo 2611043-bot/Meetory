@@ -1,63 +1,107 @@
-.profile-image-page {
-    width: min(100% - 32px, 920px);
-    margin: 28px auto;
+@charset "UTF-8";
+
+/* ==============================
+    プロフィールアイコン変更画面専用スタイルシート
+    profile-image.php で使用（PHP変更なし）
+   ============================== */
+
+body {
+    background-color: #f0f5fa;
+    margin: 0;
+    color: #1e293b;
 }
 
+.profile-image-page {
+    width: min(100% - 32px, 920px);
+    margin: 32px auto 100px;
+    box-sizing: border-box;
+}
+
+/* ==============================
+    見出しエリア
+   ============================== */
 .profile-image-heading {
     margin-bottom: 20px;
+    padding-left: 14px;
+    border-left: 5px solid #1976d2;
 }
 
 .profile-image-heading h1 {
-    margin-bottom: 8px;
-    color: #243447;
+    margin: 0 0 6px 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f2942;
 }
 
 .profile-image-heading p {
-    color: #667085;
+    margin: 0;
+    font-size: 13px;
+    color: #5b7083;
 }
 
+/* ==============================
+    メインカード（2カラム構成を維持）
+   ============================== */
 .profile-image-card {
     display: grid;
-    grid-template-columns: minmax(180px, 230px) minmax(0, 1fr);
+    grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
     gap: 28px;
-    padding: 24px;
-    border: 1px solid #e1e8ed;
-    border-radius: 12px;
-    background: #fff;
+    padding: 28px;
+    border: 1px solid #d5e3f0;
+    border-top: 4px solid #1976d2;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-sizing: border-box;
 }
 
+/* ==============================
+    左カラム：現在のアイコンプレビュー
+   ============================== */
 .profile-image-current {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 20px 12px;
-    border-radius: 10px;
-    background: #f7f9fc;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px 16px;
+    border: 1px solid #d5e3f0;
+    border-radius: 8px;
+    background-color: #f4f9fd;
     text-align: center;
 }
 
 .profile-image-current > p {
     margin: 0;
-    color: #667085;
-    font-size: 14px;
+    color: #4a6075;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.profile-image-current strong {
+    font-size: 15px;
+    color: #0f2942;
 }
 
 .profile-image-preview {
-    width: 112px;
-    height: 112px;
+    width: 116px;
+    height: 116px;
     overflow: hidden;
-    border: 3px solid #fff;
+    border: 3px solid #ffffff;
     border-radius: 50%;
-    box-shadow: 0 0 0 1px #dfe6ee;
+    box-shadow: 0 0 0 2px #90caf9;
+    background-color: #ffffff;
 }
 
 .profile-image-preview-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
 }
 
+/* ==============================
+    右カラム：初期アイコン選択・アップロード
+   ============================== */
 .profile-image-presets,
 .profile-image-upload {
     min-width: 0;
@@ -68,9 +112,23 @@
 
 .profile-image-presets legend,
 .profile-image-upload legend {
-    margin-bottom: 12px;
-    color: #344054;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    color: #0f2942;
+    font-size: 15px;
     font-weight: 700;
+}
+
+.profile-image-presets legend::before,
+.profile-image-upload legend::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 15px;
+    background-color: #1976d2;
+    border-radius: 2px;
 }
 
 .profile-image-grid {
@@ -84,25 +142,34 @@
     min-width: 0;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
-    padding: 10px 6px;
-    border: 1px solid #e1e8ed;
-    border-radius: 10px;
-    color: #475467;
+    gap: 6px;
+    padding: 12px 6px;
+    border: 1px solid #d5e3f0;
+    border-radius: 8px;
+    background-color: #fafdff;
+    color: #334155;
     cursor: pointer;
     font-size: 12px;
+    font-weight: 600;
     text-align: center;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.profile-image-option:hover {
+    border-color: #90caf9;
+    background-color: #f0f7ff;
 }
 
 .profile-image-option:has(input:checked) {
-    border-color: #1a73e8;
-    background: #f2f8fd;
-    box-shadow: 0 0 0 1px #1a73e8;
+    border-color: #1976d2;
+    background-color: #e8f3fe;
+    box-shadow: 0 0 0 1px #1976d2;
+    color: #0f2942;
 }
 
 .profile-image-option input,
 .profile-image-upload-choice input {
-    accent-color: #1a73e8;
+    accent-color: #1976d2;
 }
 
 .profile-image-option img {
@@ -110,101 +177,180 @@
     width: 56px;
     height: 56px;
     border-radius: 50%;
+    border: 1px solid #e2eff9;
+    background-color: #ffffff;
 }
 
 .profile-image-option span {
     overflow-wrap: anywhere;
 }
 
+/* ==============================
+    自分の画像を使う（アップロード欄）
+   ============================== */
 .profile-image-upload {
     display: grid;
     gap: 10px;
     margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid #e1e8ed;
+    padding-top: 22px;
+    border-top: 1px solid #e1ecf5;
 }
 
 .profile-image-upload-choice {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #344054;
+    color: #1e293b;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
 }
 
 .profile-image-upload input[type="file"] {
     width: 100%;
     min-width: 0;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid #d5e3f0;
+    border-radius: 8px;
+    background-color: #f7fbff;
+    color: #4a6075;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.profile-image-upload input[type="file"]:hover {
+    background-color: #f0f7ff;
+    border-color: #90caf9;
+}
+
+.profile-image-upload input[type="file"]::file-selector-button {
+    margin-right: 12px;
+    padding: 8px 16px;
+    border: 1px solid #90caf9;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #1565c0;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.profile-image-upload input[type="file"]::file-selector-button:hover {
+    background-color: #1976d2;
+    border-color: #1976d2;
+    color: #ffffff;
 }
 
 .profile-image-upload small {
-    color: #667085;
+    color: #5b7083;
+    font-size: 12px;
 }
 
 .profile-image-upload-error {
-    color: #b42318;
+    color: #dc2626;
     font-size: 13px;
+    font-weight: 600;
 }
 
+/* ==============================
+    保存・キャンセルボタン
+   ============================== */
 .profile-image-actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 12px;
     margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #e1ecf5;
 }
 
 .profile-image-actions button {
     min-height: 44px;
-    padding: 10px 22px;
+    padding: 10px 24px;
     border: 0;
-    border-radius: 8px;
-    background: #1a73e8;
-    color: #fff;
+    border-radius: 6px;
+    background-color: #1976d2;
+    color: #ffffff;
     cursor: pointer;
     font: inherit;
+    font-size: 14px;
     font-weight: 700;
+    transition: background-color 0.15s;
 }
 
 .profile-image-actions button:hover {
-    background: #0d5fbd;
+    background-color: #1565c0;
 }
 
 .profile-image-actions a {
-    color: #1769aa;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid #bfd7ed;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #1565c0;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    box-sizing: border-box;
+    transition: background-color 0.15s, border-color 0.15s;
 }
 
+.profile-image-actions a:hover {
+    background-color: #eef6fc;
+    border-color: #64b5f6;
+}
+
+/* ==============================
+    通知アラート（保存完了・エラー）
+   ============================== */
 .profile-image-alert,
 .profile-image-success {
     margin: 0 0 16px;
-    padding: 12px 14px;
+    padding: 12px 16px;
     border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .profile-image-alert {
-    background: #fff1f0;
-    color: #b42318;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
 }
 
 .profile-image-success {
-    background: #ecfdf3;
-    color: #027a48;
+    background-color: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #047857;
 }
 
+/* ==============================
+    レスポンシブ対応
+   ============================== */
 @media (max-width: 700px) {
     .profile-image-page {
-        width: min(100% - 20px, 920px);
-        margin: 18px auto;
+        width: min(100% - 24px, 920px);
+        margin: 20px auto 90px;
     }
 
     .profile-image-card {
         grid-template-columns: 1fr;
         gap: 20px;
-        padding: 16px;
+        padding: 18px;
     }
 
     .profile-image-current {
-        padding: 16px 12px;
+        padding: 18px 12px;
     }
 
     .profile-image-grid {
