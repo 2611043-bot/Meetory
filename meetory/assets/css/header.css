@@ -21,6 +21,10 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+.site-header.sidebar-open {
+    z-index: 10001;
+}
+
 /* メインヘッダーエリア */
 .header-main {
     width: 100%;
@@ -547,6 +551,8 @@ body {
     display: flex !important;
     flex-direction: column !important;
     overflow-y: auto !important;
+    padding-bottom: 40px !important;
+    padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)) !important;
     left: auto !important;
 }
 

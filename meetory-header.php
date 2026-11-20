@@ -354,14 +354,7 @@ if (
                 class="sidebar-link"
             >
                 <i class="fa-solid fa-history"></i>
-                購入履歴
-            </a>
-            <a
-                href="/Meetory/meetory/goods/my-goods.php"
-                class="sidebar-link"
-            >
-                <i class="fa-solid fa-box"></i>
-                出品履歴
+                マイページ
             </a>
                     <a
                         href="/Meetory/meetory/user/profile.php?user_id=<?= (int) $_SESSION['user_id'] ?>"
@@ -370,12 +363,37 @@ if (
                         <i class="fa-solid fa-user-gear"></i>
                         プロフィール・設定
                     </a>
+
+            <h2 class="sidebar-section-title">サポート</h2>
+            <a
+                href="/Meetory/meetory/user/contact.php"
+                class="sidebar-link"
+            >
+                <i class="fa-solid fa-envelope"></i>
+                お問い合わせ
+            </a>
+            <a
+                href="/Meetory/meetory/user/my-inquiries.php"
+                class="sidebar-link"
+            >
+                <i class="fa-solid fa-comment-dots"></i>
+                お問い合わせ履歴
+            </a>
+
+            <h2 class="sidebar-section-title">設定</h2>
             <a
                 href="/Meetory/meetory/user/notification-settings.php"
                 class="sidebar-link"
             >
                 <i class="fa-solid fa-bell"></i>
                 通知設定
+            </a>
+            <a
+                href="/Meetory/meetory/user/blocked-list.php"
+                class="sidebar-link"
+            >
+                <i class="fa-solid fa-user-slash"></i>
+                ブロック一覧
             </a>
             <?php endif; ?>
 
@@ -469,7 +487,7 @@ if (
 
     <!-- ヘッダー専用JavaScript -->
     <script
-        src="/Meetory/meetory/assets/js/header.js?v=2026110901"
+        src="/Meetory/meetory/assets/js/header.js?v=<?= filemtime(__DIR__ . '/meetory/assets/js/header.js') ?>"
         defer
     ></script>
     <script

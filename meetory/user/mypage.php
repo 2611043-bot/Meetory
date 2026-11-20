@@ -255,11 +255,6 @@ require '../../meetory-header.php';
             <a href="browsing-history.php">閲覧履歴</a>
             <a href="address-list.php">住所管理</a>
             <a href="../messages/message-center.php">メッセージ</a>
-            <a href="contact.php">お問い合わせ</a>
-            <a href="my-inquiries.php">お問い合わせ履歴</a>
-            <a href="notification-settings.php">通知設定</a>
-            <a href="blocked-list.php">ブロック一覧</a>
-            <a href="logout.php">ログアウト</a>
         </nav>
     </section>
 
