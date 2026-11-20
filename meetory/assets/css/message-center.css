@@ -100,6 +100,11 @@
     background: #f0f5fa;
 }
 
+.talk-item.active {
+    background: #e8f0fe;
+    border-left: 3px solid #1a73e8;
+}
+
 /* プロフィール画像の代わりのアイコン */
 .talk-avatar {
     display: flex;
@@ -133,10 +138,24 @@
     margin-bottom: 7px;
 }
 
+.talk-context {
+    display: block;
+    overflow: hidden;
+    margin: -3px 0 5px;
+    color: #788493;
+    font-size: 11px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 .talk-user-name {
+    min-width: 0;
+    overflow: hidden;
     font-size: 14px;
     font-weight: 600;
     color: #222;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .talk-time {
@@ -239,12 +258,15 @@
 @media (max-width: 700px) {
 
     .message-layout {
-        display: block;
-        height: auto;
+        display: flex;
+        height: calc(100dvh - 190px);
         min-height: 0;
     }
 
     .talk-sidebar {
+        display: flex;
+        width: 100%;
+        min-height: 0;
         border-right: none;
     }
 
@@ -257,14 +279,22 @@
         height: 44px;
     }
 
-    /* スマホでは未選択時の右側表示を隠す */
-    .talk-welcome {
+    #messageRoomPanel {
+        display: none;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+    }
+
+    .message-layout.is-room-open .talk-sidebar {
         display: none;
     }
 
-    /* 会話表示後は高さをビューポート基準にする */
-    #messageRoomPanel {
-        height: calc(100dvh - 190px);
-        min-height: 400px;
+    .message-layout.is-room-open #messageRoomPanel {
+        display: flex;
+    }
+
+    .talk-welcome {
+        display: none;
     }
 }

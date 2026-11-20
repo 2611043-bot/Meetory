@@ -1,10 +1,3 @@
-/* メッセージページ用：メインコンテナの幅を広げる */
-.message-page .main-container {
-    max-width: none;
-    padding: 0;
-    margin: 0;
-}
-
 .message-room {
     display: flex;
     flex-direction: column;
@@ -62,6 +55,28 @@
 .room-partner span {
     color: #999;
     font-size: 11px;
+}
+
+.room-context-meta {
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    padding: 9px 18px;
+    border-bottom: 1px solid #e8edf2;
+    background: #fff;
+    color: #666;
+    font-size: 12px;
+}
+
+.room-context-meta a {
+    color: #1a73e8;
+    text-decoration: none;
+}
+
+.room-context-meta a:hover {
+    text-decoration: underline;
 }
 
 /* メッセージ表示部分 */
@@ -606,181 +621,6 @@
         width: 32px;
         height: 32px;
         font-size: 14px;
-    }
-}
-
-/* =================================
-   PC版：トーク一覧＋トーク画面
-================================= */
-
-.message-layout-room {
-    display: grid;
-    grid-template-columns: 290px minmax(0, 1fr);
-    height: 650px;
-    min-height: 500px;
-    overflow: hidden;
-    border: 1px solid #dce2e9;
-    background: #fafbfd;
-}
-
-/* 左側のトーク一覧 */
-.room-sidebar {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    border-right: 1px solid #dce2e9;
-    background: #fff;
-}
-
-.room-sidebar-header {
-    padding: 20px 16px 12px;
-}
-
-.room-sidebar-header h2 {
-    font-size: 18px;
-}
-
-.room-sidebar-search {
-    padding: 8px 12px 14px;
-}
-
-.room-sidebar-search input {
-    width: 100%;
-    padding: 11px;
-    border: 1px solid #e1e8ed;
-    border-radius: 8px;
-    background: #f4f7fb;
-    outline: none;
-    font-size: 12px;
-}
-
-.room-sidebar-search input:focus {
-    border-color: #1a73e8;
-    background: #fff;
-}
-
-.room-talk-list {
-    flex: 1;
-    overflow-y: auto;
-}
-
-.room-talk-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 12px;
-    border-top: 1px solid #f0f2f5;
-    color: #333;
-    text-decoration: none;
-    transition: background 0.2s;
-}
-
-.room-talk-item:hover {
-    background: #f0f5fa;
-}
-
-.room-talk-item.active {
-    background: #e8f0fe;
-    border-left: 3px solid #1a73e8;
-}
-
-.room-talk-avatar {
-    display: flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: #e5efff;
-    color: #1a73e8;
-    font-weight: bold;
-}
-
-.room-talk-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.room-talk-name-row,
-.room-talk-message-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-}
-
-.room-talk-name-row {
-    margin-bottom: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #222;
-}
-
-.room-talk-name-row small {
-    flex-shrink: 0;
-    color: #888;
-    font-size: 10px;
-    font-weight: normal;
-}
-
-.room-talk-message-row p {
-    overflow: hidden;
-    color: #666;
-    font-size: 11px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-.room-unread {
-    display: flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    min-width: 19px;
-    height: 19px;
-    padding: 0 5px;
-    border-radius: 20px;
-    background: #1a73e8;
-    color: #fff;
-    font-size: 10px;
-}
-
-/* 右側のトーク画面 */
-.message-layout-room .message-room {
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    border: none;
-    border-radius: 0;
-}
-
-/* スマートフォン */
-@media (max-width: 700px) {
-
-    .message-layout-room {
-        display: block;
-        height: calc(100dvh - 170px);
-        min-height: 400px;
-        border: none;
-        border-radius: 0;
-    }
-
-    /* スマホでは一覧を隠す */
-    .room-sidebar {
-        display: none;
-    }
-
-    /* トーク画面を全画面表示 */
-    .message-layout-room .message-room {
-        height: 100%;
-        min-height: 0;
-        border: 1px solid #dce2e9;
-        border-radius: 0;
-    }
-
-    .message-layout-room .room-back {
-        display: block;
     }
 }
 

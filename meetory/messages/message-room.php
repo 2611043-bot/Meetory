@@ -72,8 +72,12 @@ if (!$partner) {
     exit('相手のユーザーが見つかりません。');
 }
 
+if (!$is_partial && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: message-center.php?user_id=' . $user_id);
+    exit;
+}
+
 $partner_name = $partner['user_name'];
-$partner_initial = mb_substr($partner_name, 0, 1, 'UTF-8');
 
 // ========================================
 // 自分が出品した商品を取得
@@ -320,125 +324,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // 通常アクセス時は従来通りリダイレクト（二重送信防止）
-    header('Location: message-room.php?user_id=' . $user_id);
+    header('Location: message-center.php?user_id=' . $user_id);
     exit;
 }
-
-// ========================================
-// トーク一覧（データベースから取得）
-// 部分表示モードでは一覧は不要なので取得しない
-// ========================================
-
-if (!$is_partial) {
-
-$sql = "
-    SELECT
-        m.message_id,
-        partner.user_id,
-        partner.user_name,
-        partner.profile_image_type,
-        partner.profile_image,
-        m.content,
-        m.message_type,
-        m.sent_at
-
-    FROM messages AS m
-
-    INNER JOIN users AS partner
-        ON partner.user_id = CASE
-            WHEN m.sender_id = ?
-            THEN m.receiver_id
-            ELSE m.sender_id
-        END
-
-    WHERE
-        (m.sender_id = ? OR m.receiver_id = ?)
-        AND m.sender_id <> m.receiver_id
-
-        AND m.message_id = (
-            SELECT m2.message_id
-            FROM messages AS m2
-
-            WHERE
-                (m2.sender_id = ? OR m2.receiver_id = ?)
-
-                AND (
-                    CASE
-                        WHEN m2.sender_id = ?
-                        THEN m2.receiver_id
-                        ELSE m2.sender_id
-                    END
-                ) = (
-                    CASE
-                        WHEN m.sender_id = ?
-                        THEN m.receiver_id
-                        ELSE m.sender_id
-                    END
-                )
-
-            ORDER BY
-                m2.sent_at DESC,
-                m2.message_id DESC
-
-            LIMIT 1
-        )
-
-    ORDER BY
-        m.sent_at DESC,
-        m.message_id DESC
-";
-
-$stmt = $pdo->prepare($sql);
-
-$stmt->execute([
-    $my_user_id,
-    $my_user_id,
-    $my_user_id,
-    $my_user_id,
-    $my_user_id,
-    $my_user_id,
-    $my_user_id
-]);
-
-$talks = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
-// トーク一覧の表示用データを整える
-foreach ($talks as &$talk) {
-
-    // 相手の名前の最初の1文字
-    $talk['initial'] = mb_substr(
-        $talk['user_name'],
-        0,
-        1,
-        'UTF-8'
-    );
-
-    // 最後のメッセージ
-    if ($talk['message_type'] === 'goods') {
-        $talk['last_message'] = '商品を紹介しました。';
-    } else {
-        $talk['last_message'] = $talk['content'];
-    }
-
-    // メッセージの日時
-    $sent_time = strtotime($talk['sent_at']);
-
-    if (date('Y-m-d', $sent_time) === date('Y-m-d')) {
-        $talk['time'] = date('H:i', $sent_time);
-    } else {
-        $talk['time'] = date('m/d', $sent_time);
-    }
-
-    // 未読管理はまだ実装していないため0
-    $talk['unread'] = 0;
-}
-
-unset($talk);
-
-} // if (!$is_partial)
-
-
 
 // ========================================
 // 2人の間のメッセージを取得
@@ -475,13 +363,20 @@ $sql = "
 
     WHERE
         (
-            m.sender_id = :my_id_1
-            AND m.receiver_id = :partner_id_1
+            (
+                m.sender_id = :my_id_1
+                AND m.receiver_id = :partner_id_1
+            )
+            OR
+            (
+                m.sender_id = :partner_id_2
+                AND m.receiver_id = :my_id_2
+            )
         )
-        OR
-        (
-            m.sender_id = :partner_id_2
-            AND m.receiver_id = :my_id_2
+        AND m.transaction_id IS NULL
+        AND (
+            m.goods_id IS NULL
+            OR m.message_type = 'goods'
         )
 
     ORDER BY
@@ -501,120 +396,9 @@ $stmt->execute([
 $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
-// ========================================
-// 共通ヘッダー読み込み
-// 部分表示モードではヘッダー・フッターは出力しない
-// ========================================
-
-// メッセージページ用のbodyクラスを設定
-$body_class = 'message-page';
-
-if (!$is_partial) {
-    require_once '../../meetory-header.php';
-}
 ?>
 
-<?php if (!$is_partial): ?>
-<link rel="stylesheet"
-        href="/Meetory/meetory/assets/css/message-room.css"
->
-<?php endif; ?>
-
-
-<?php if (!$is_partial): ?>
-<!-- ========================================
-    メッセージ画面
-======================================== -->
-
-<div class="message-layout-room">
-
-    <!-- 左側：トーク一覧 -->
-    <aside class="room-sidebar">
-
-        <div class="room-sidebar-header">
-            <h2>メッセージ</h2>
-        </div>
-
-        <!-- トーク検索 -->
-        <div class="room-sidebar-search">
-            <input
-                type="search"
-                id="roomTalkSearch"
-                placeholder="トークを検索..."
-            >
-        </div>
-
-        <!-- トーク一覧 -->
-        <div class="room-talk-list">
-
-            <?php foreach ($talks as $talk): ?>
-
-                <a
-                    href="message-room.php?user_id=<?= (int)$talk['user_id'] ?>"
-                    class="room-talk-item <?= (int)$talk['user_id'] === $user_id ? 'active' : '' ?>"
-                >
-
-                    <div class="room-talk-avatar">
-                        <?= renderProfileAvatar($talk, '', '') ?>
-                    </div>
-
-                    <div class="room-talk-info">
-
-                        <div class="room-talk-name-row">
-
-                            <span>
-                                <?= htmlspecialchars(
-                                    $talk['user_name'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
-                            </span>
-
-                            <small>
-                                <?= htmlspecialchars(
-                                    $talk['time'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
-                            </small>
-
-                        </div>
-
-                        <div class="room-talk-message-row">
-
-                            <p>
-                                <?= htmlspecialchars(
-                                    $talk['last_message'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
-                            </p>
-
-                            <?php if ($talk['unread'] > 0): ?>
-
-                                <span class="room-unread">
-                                    <?= (int)$talk['unread'] ?>
-                                </span>
-
-                            <?php endif; ?>
-
-                        </div>
-
-                    </div>
-
-                </a>
-
-            <?php endforeach; ?>
-
-        </div>
-
-    </aside>
-
-<?php endif; ?>
-
-
-    <!-- 右側：トーク画面 -->
-    <section class="message-room<?= $is_partial ? ' room-partial' : '' ?>">
+<section class="message-room room-partial">
 
         <!-- トーク画面のヘッダー -->
         <div class="room-header">
@@ -919,6 +703,7 @@ if (!$is_partial) {
         <form
             class="room-input-area"
             id="messageForm"
+            data-ajax-message-form
             method="POST"
         >
 
@@ -966,18 +751,3 @@ if (!$is_partial) {
             <img id="imageModalImg" src="" alt="">
         </div>
     </div>
-
-<?php if (!$is_partial): ?>
-</div>
-
-
-<script
-    src="/Meetory/meetory/assets/js/message-room.js"
-    defer
-></script>
-
-
-</main>
-
-<?php require_once '../../meetory-footer.php'; ?>
-<?php endif; ?>

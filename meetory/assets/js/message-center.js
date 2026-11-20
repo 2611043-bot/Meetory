@@ -1,114 +1,371 @@
-﻿// ========================================
-// 繝｡繝・そ繝ｼ繧ｸ繧ｻ繝ｳ繧ｿ繝ｼ・・PA鬚ｨ・・// 繝医・繧ｯ荳隕ｧ縺ｮ繧ｯ繝ｪ繝・け縺ｧ繝壹・繧ｸ驕ｷ遘ｻ縺帙★縲・// 蜿ｳ蛛ｴ縺ｮ莨夊ｩｱ繧ｨ繝ｪ繧｢縺縺代ｒ髱槫酔譛溘〒蛻・ｊ譖ｿ縺医ｋ縲・// ========================================
-
 (function () {
     'use strict';
 
-    // 莨夊ｩｱ陦ｨ遉ｺ繧ｨ繝ｪ繧｢・域悴驕ｸ謚樊凾縺ｯ譯亥・陦ｨ遉ｺ・・    const messageRoomPanel = document.getElementById('messageRoomPanel');
+    const layout = document.getElementById('messageLayout');
+    const messageRoomPanel = document.getElementById('messageRoomPanel');
     const talkList = document.getElementById('talkList');
     const searchInput = document.getElementById('talkSearch');
     const talkEmpty = document.getElementById('talkEmpty');
+    const noTalks = document.getElementById('noTalks');
 
-    // 迴ｾ蝨ｨ陦ｨ遉ｺ荳ｭ縺ｮ逶ｸ謇紀D
-    let currentUserId = null;
-
-    // 繝｢繝ｼ繝繝ｫ隕∫ｴ・亥虚逧・↓蜿門ｾ暦ｼ・    let imageModal = null;
-    let imageModalImg = null;
-    let imageModalClose = null;
-    let imageModalOverlay = null;
-
-    // ------------------------------------
-    // 繝｢繝ｼ繝繝ｫ髢｢騾｣
-    // ------------------------------------
-    function initModalElements() {
-        imageModal = document.getElementById('imageModal');
-        imageModalImg = imageModal ? document.getElementById('imageModalImg') : null;
-        imageModalClose = imageModal ? imageModal.querySelector('.image-modal-close') : null;
-        imageModalOverlay = imageModal ? imageModal.querySelector('.image-modal-overlay') : null;
+    if (!layout || !messageRoomPanel || !talkList) {
+        console.error('メッセージ画面の要素を読み込めませんでした。');
+        return;
     }
 
-    function openImageModal(imageSrc, imageAlt) {
-        initModalElements();
-        if (!imageModal || !imageModalImg || !imageSrc) {
-            return;
+    let currentConversation = null;
+    let loadController = null;
+    let loadSequence = 0;
+    let swipeStart = null;
+
+    function isMobile() {
+        return window.matchMedia('(max-width: 700px)').matches;
+    }
+
+    function updateAddressBar(conversation) {
+        const url = new URL(window.location.href);
+        ['user_id', 'goods_id', 'transaction_id', 'partner_id'].forEach(function (key) {
+            url.searchParams.delete(key);
+        });
+
+        if (conversation.type === 'direct') {
+            url.searchParams.set('user_id', conversation.partnerId);
+        } else {
+            url.searchParams.set(
+                conversation.type === 'goods' ? 'goods_id' : 'transaction_id',
+                conversation.contextId
+            );
+            url.searchParams.set('partner_id', conversation.partnerId);
         }
-        imageModalImg.src = imageSrc;
-        imageModalImg.alt = imageAlt || '';
-        imageModal.hidden = false;
-        document.body.style.overflow = 'hidden';
+
+        window.history.replaceState(null, '', url);
+    }
+
+    function conversationFromTalk(talkItem) {
+        const partnerId = Number.parseInt(talkItem.dataset.partnerId, 10);
+        const type = talkItem.dataset.conversationType;
+        const contextId = Number.parseInt(talkItem.dataset.contextId, 10);
+
+        if (!partnerId || !['direct', 'goods', 'transaction'].includes(type)) {
+            return null;
+        }
+
+        if (type !== 'direct' && !contextId) {
+            return null;
+        }
+
+        return {
+            type: type,
+            contextId: type === 'direct' ? null : contextId,
+            partnerId: partnerId
+        };
+    }
+
+    function updateSelectedTalk(conversation) {
+        talkList.querySelectorAll('.talk-item').forEach(function (item) {
+            const itemConversation = conversationFromTalk(item);
+            const isSelected = itemConversation &&
+                itemConversation.type === conversation.type &&
+                itemConversation.partnerId === conversation.partnerId &&
+                itemConversation.contextId === conversation.contextId;
+            item.classList.toggle('active', Boolean(isSelected));
+        });
+    }
+
+    function setRoomVisible(visible) {
+        layout.classList.toggle('is-room-open', visible);
+    }
+
+    function roomEndpoint(conversation) {
+        const url = new URL(
+            conversation.type === 'direct' ? 'message-room.php' : 'message-list.php',
+            window.location.href
+        );
+        url.searchParams.set('partial', '1');
+
+        if (conversation.type === 'direct') {
+            url.searchParams.set('user_id', conversation.partnerId);
+        } else {
+            url.searchParams.set(
+                conversation.type === 'goods' ? 'goods_id' : 'transaction_id',
+                conversation.contextId
+            );
+            url.searchParams.set('partner_id', conversation.partnerId);
+        }
+
+        return url;
     }
 
     function closeImageModal() {
-        initModalElements();
-        if (!imageModal) {
-            return;
+        const modal = messageRoomPanel.querySelector('#imageModal');
+        const image = messageRoomPanel.querySelector('#imageModalImg');
+
+        if (modal) {
+            modal.hidden = true;
         }
-        imageModal.hidden = true;
-        if (imageModalImg) {
-            imageModalImg.src = '';
+        if (image) {
+            image.src = '';
         }
         document.body.style.overflow = '';
     }
 
-    function setupModalEvents() {
-        initModalElements();
-        if (!imageModal) {
-            return;
+    function showRoomError(message) {
+        const error = document.createElement('div');
+        error.className = 'room-error';
+        const text = document.createElement('p');
+        text.textContent = message;
+        error.appendChild(text);
+        messageRoomPanel.replaceChildren(error);
+    }
+
+    async function loadConversation(conversation, options) {
+        const settings = options || {};
+        currentConversation = conversation;
+        updateSelectedTalk(conversation);
+        setRoomVisible(true);
+
+        if (!settings.keepAddress) {
+            updateAddressBar(conversation);
         }
 
-        // 髢峨§繧九・繧ｿ繝ｳ
-        if (imageModalClose) {
-            imageModalClose.addEventListener('click', function (e) {
-                e.stopPropagation();
-                closeImageModal();
+        if (loadController) {
+            loadController.abort();
+        }
+        loadController = new AbortController();
+        const sequence = ++loadSequence;
+
+        const loading = document.createElement('div');
+        loading.className = 'room-loading';
+        const loadingText = document.createElement('p');
+        loadingText.textContent = '会話を読み込み中...';
+        loading.appendChild(loadingText);
+        messageRoomPanel.replaceChildren(loading);
+
+        try {
+            const response = await fetch(roomEndpoint(conversation), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                signal: loadController.signal
+            });
+
+            if (!response.ok) {
+                throw new Error('会話を読み込めませんでした。');
+            }
+
+            const html = await response.text();
+            if (sequence !== loadSequence) {
+                return;
+            }
+
+            messageRoomPanel.innerHTML = html;
+            const roomMessages = messageRoomPanel.querySelector('#roomMessages');
+            if (roomMessages) {
+                roomMessages.scrollTop = roomMessages.scrollHeight;
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                return;
+            }
+            console.error(error);
+            if (sequence === loadSequence) {
+                showRoomError('会話を読み込めませんでした。時間をおいて再度お試しください。');
+            }
+        }
+    }
+
+    function closeRoom() {
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+        if (loadController) {
+            loadController.abort();
+            loadController = null;
+        }
+        loadSequence++;
+        closeImageModal();
+        currentConversation = null;
+        setRoomVisible(false);
+        updateSelectedTalk({ type: '', partnerId: 0, contextId: null });
+        messageRoomPanel.innerHTML =
+            '<div class="talk-welcome">' +
+            '<div class="welcome-icon"><i class="fa-regular fa-comments"></i></div>' +
+            '<h2>メッセージ</h2>' +
+            '<p>左側のトーク一覧から相手を選択すると、ここに会話が表示されます。</p>' +
+            '</div>';
+
+        const url = new URL(window.location.href);
+        ['user_id', 'goods_id', 'transaction_id', 'partner_id'].forEach(function (key) {
+            url.searchParams.delete(key);
+        });
+        window.history.replaceState(null, '', url);
+    }
+
+    function findTalk(conversation) {
+        return Array.from(talkList.querySelectorAll('.talk-item')).find(function (item) {
+            const itemConversation = conversationFromTalk(item);
+            return itemConversation &&
+                itemConversation.type === conversation.type &&
+                itemConversation.partnerId === conversation.partnerId &&
+                itemConversation.contextId === conversation.contextId;
+        });
+    }
+
+    function createTalkItem(conversation, preview) {
+        const room = messageRoomPanel.querySelector('.message-room');
+        const partnerNameElement = room && room.querySelector('.room-partner h1');
+        const partnerName = partnerNameElement
+            ? partnerNameElement.textContent.trim()
+            : 'メッセージ相手';
+        const contextElement = room && room.querySelector('.room-context-meta a');
+        const contextLabel = conversation.type === 'goods'
+            ? (contextElement ? contextElement.textContent.trim() : '商品へのDM')
+            : conversation.type === 'transaction'
+                ? '取引 #' + conversation.contextId
+                : 'メッセージ';
+
+        const item = document.createElement('a');
+        const url = new URL('message-center.php', window.location.href);
+        if (conversation.type === 'direct') {
+            url.searchParams.set('user_id', conversation.partnerId);
+        } else {
+            url.searchParams.set(
+                conversation.type === 'goods' ? 'goods_id' : 'transaction_id',
+                conversation.contextId
+            );
+            url.searchParams.set('partner_id', conversation.partnerId);
+        }
+
+        item.href = url.href;
+        item.className = 'talk-item active';
+        item.dataset.conversationType = conversation.type;
+        item.dataset.contextId = String(conversation.contextId || 0);
+        item.dataset.partnerId = String(conversation.partnerId);
+        item.dataset.name = partnerName + ' ' + contextLabel;
+
+        const avatar = document.createElement('div');
+        avatar.className = 'talk-avatar';
+        const roomAvatar = room && room.querySelector('.room-avatar');
+        if (roomAvatar) {
+            Array.from(roomAvatar.childNodes).forEach(function (child) {
+                avatar.appendChild(child.cloneNode(true));
             });
         }
 
-        // 繧ｪ繝ｼ繝舌・繝ｬ繧､繧ｯ繝ｪ繝・け
-        if (imageModalOverlay) {
-            imageModalOverlay.addEventListener('click', closeImageModal);
+        const info = document.createElement('div');
+        info.className = 'talk-info';
+        const nameRow = document.createElement('div');
+        nameRow.className = 'talk-name-row';
+        const name = document.createElement('span');
+        name.className = 'talk-user-name';
+        name.textContent = partnerName;
+        const time = document.createElement('span');
+        time.className = 'talk-time';
+        time.textContent = new Date().toLocaleTimeString('ja-JP', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        nameRow.append(name, time);
+
+        const context = document.createElement('span');
+        context.className = 'talk-context';
+        context.textContent = contextLabel;
+        const messageRow = document.createElement('div');
+        messageRow.className = 'talk-message-row';
+        const previewElement = document.createElement('p');
+        previewElement.className = 'talk-last-message';
+        previewElement.textContent = preview;
+        messageRow.appendChild(previewElement);
+        info.append(nameRow, context, messageRow);
+        item.append(avatar, info);
+
+        talkList.prepend(item);
+        if (noTalks) {
+            noTalks.hidden = true;
+        }
+        return item;
+    }
+
+    function updateTalkPreview(conversation, preview) {
+        const item = findTalk(conversation) || createTalkItem(conversation, preview);
+
+        const previewElement = item.querySelector('.talk-last-message');
+        const timeElement = item.querySelector('.talk-time');
+        if (previewElement) {
+            previewElement.textContent = preview;
+        }
+        if (timeElement) {
+            timeElement.textContent = new Date().toLocaleTimeString('ja-JP', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
 
-        // ESC繧ｭ繝ｼ
-        document.addEventListener('keydown', function (e) {
-            initModalElements();
-            if (e.key === 'Escape' && imageModal && !imageModal.hidden) {
-                closeImageModal();
+        talkList.prepend(item);
+    }
+
+    async function submitMessage(form, isProductMessage) {
+        const conversation = currentConversation;
+        if (!conversation) {
+            return;
+        }
+
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) {
+            submitButton.disabled = true;
+        }
+
+        const formData = new FormData(form);
+        let endpoint;
+
+        if (isProductMessage || conversation.type === 'direct') {
+            const url = new URL('message-room.php', window.location.href);
+            url.searchParams.set('partial', '1');
+            url.searchParams.set('user_id', conversation.partnerId);
+            endpoint = url;
+            formData.set('action', isProductMessage ? 'goods' : 'text');
+        } else {
+            endpoint = roomEndpoint(conversation);
+        }
+
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error('メッセージを送信できませんでした。');
             }
-        });
+
+            if (currentConversation !== conversation) {
+                return;
+            }
+
+            const preview = isProductMessage
+                ? '商品を紹介しました。'
+                : (formData.get('content') || '').toString().trim();
+            updateTalkPreview(conversation, preview);
+            await loadConversation(conversation, { keepAddress: true });
+        } catch (error) {
+            console.error(error);
+            window.alert('メッセージを送信できませんでした。入力内容や通信状態をご確認ください。');
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+            }
+        }
     }
 
-    // 蛻晄悄蛹匁凾縺ｫ繝｢繝ｼ繝繝ｫ繧､繝吶Φ繝医ｒ險ｭ螳・    setupModalEvents();
-
-    // ------------------------------------
-// HTMLエスケープ（動的挿入時のXSS対策）
-    // ------------------------------------
-    function escapeHTML(text) {
-        return String(text).replace(/[&<>"']/g, function (char) {
-            return {
-                '&': '&',
-                '<': '<',
-                '>': '>',
-                '"': '"',
-                "'": '&#039;'
-            }[char];
-        });
-    }
-
-    // ------------------------------------
-    // 繝医・繧ｯ讀懃ｴ｢
-    // ------------------------------------
-    if (searchInput && talkList) {
+    if (searchInput) {
         searchInput.addEventListener('input', function () {
-            const keyword = this.value.trim().toLowerCase();
+            const keyword = this.value.trim().toLocaleLowerCase();
             let visibleCount = 0;
 
             talkList.querySelectorAll('.talk-item').forEach(function (item) {
-                const name = (item.dataset.name || '').toLowerCase();
+                const name = (item.dataset.name || '').toLocaleLowerCase();
                 const isMatch = name.includes(keyword);
-
-                item.style.display = isMatch ? 'flex' : 'none';
-
+                item.hidden = !isMatch;
                 if (isMatch) {
                     visibleCount++;
                 }
@@ -120,309 +377,153 @@
         });
     }
 
-    // ------------------------------------
-    // 莨夊ｩｱ繧ｨ繝ｪ繧｢縺ｮHTML繧貞叙蠕励＠縺ｦ蟾ｮ縺玲崛縺・    // ------------------------------------
-    async function loadRoom(userId) {
-        if (!messageRoomPanel) {
-            console.error('messageRoomPanel 縺瑚ｦ九▽縺九ｊ縺ｾ縺帙ｓ');
+    talkList.addEventListener('click', function (event) {
+        const talkItem = event.target.closest('.talk-item');
+        if (!talkItem) {
             return;
         }
 
-        // 隱ｭ縺ｿ霎ｼ縺ｿ荳ｭ陦ｨ遉ｺ
-        messageRoomPanel.innerHTML =
-            '<div class="room-loading">' +
-            '<p>隱ｭ縺ｿ霎ｼ縺ｿ荳ｭ...</p>' +
-            '</div>';
-
-        try {
-            const url = new URL('message-room.php', window.location.href);
-            url.searchParams.set('user_id', userId);
-            url.searchParams.set('partial', '1');
-
-            const response = await fetch(url, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-
-            if (!response.ok) {
-                throw new Error('莨夊ｩｱ縺ｮ隱ｭ縺ｿ霎ｼ縺ｿ縺ｫ螟ｱ謨励＠縺ｾ縺励◆');
-            }
-
-            const html = await response.text();
-
-            messageRoomPanel.innerHTML = html;
-
-            // 繝｢繝ｼ繝繝ｫ隕∫ｴ繧貞・蛻晄悄蛹厄ｼ・TML縺悟・繧梧崛繧上ｋ縺溘ａ・・            setupModalEvents();
-
-            // 繝｡繝・そ繝ｼ繧ｸ谺・ｒ譛譁ｰ縺ｸ繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ
-            scrollToBottom();
-
-        } catch (error) {
-            console.error(error);
-            messageRoomPanel.innerHTML =
-                '<div class="room-error">' +
-                '<p>莨夊ｩｱ繧定ｪｭ縺ｿ霎ｼ繧√∪縺帙ｓ縺ｧ縺励◆縲・/p>' +
-                '</div>';
+        event.preventDefault();
+        const conversation = conversationFromTalk(talkItem);
+        if (!conversation) {
+            return;
         }
-    }
 
-    // ------------------------------------
-    // 繝医・繧ｯ逶ｸ謇九ｒ繧ｯ繝ｪ繝・け・医う繝吶Φ繝亥ｧ碑ｭｲ・・    // ------------------------------------
-    if (talkList) {
-        talkList.addEventListener('click', function (event) {
-            const talkItem = event.target.closest('.talk-item');
+        loadConversation(conversation);
+    });
 
-            if (!talkItem) {
-                return;
+    messageRoomPanel.addEventListener('click', function (event) {
+        const imageContainer = event.target.closest('.product-card-image');
+        if (imageContainer) {
+            const imageSource = imageContainer.dataset.imageSrc;
+            const modal = messageRoomPanel.querySelector('#imageModal');
+            const image = messageRoomPanel.querySelector('#imageModalImg');
+            if (imageSource && modal && image) {
+                image.src = imageSource;
+                image.alt = imageContainer.dataset.imageAlt || '';
+                modal.hidden = false;
+                document.body.style.overflow = 'hidden';
             }
+            return;
+        }
 
-            // 騾壼ｸｸ縺ｮ繝壹・繧ｸ驕ｷ遘ｻ繧呈ｭ｢繧√ｋ
+        if (
+            event.target.closest('.image-modal-close') ||
+            event.target.closest('.image-modal-overlay')
+        ) {
+            closeImageModal();
+            return;
+        }
+
+        const backLink = event.target.closest('.room-back');
+        if (backLink) {
             event.preventDefault();
-
-            const userId = parseInt(talkItem.dataset.userId, 10);
-
-            if (!userId) {
-                return;
-            }
-
-            currentUserId = userId;
-
-            // 驕ｸ謚樒憾諷九ｒ譖ｴ譁ｰ
-            talkList.querySelectorAll('.talk-item').forEach(function (item) {
-                item.classList.toggle('active', item === talkItem);
-            });
-
-            loadRoom(userId);
-        });
-    }
-
-    // ------------------------------------
-    // 莨夊ｩｱ繧ｨ繝ｪ繧｢蜀・・繧､繝吶Φ繝亥ｧ碑ｭｲ
-    // ・・etch縺ｧ蠕後°繧画諺蜈･縺輔ｌ縺溯ｦ∫ｴ縺ｫ繧ょｯｾ蠢懶ｼ・    // ------------------------------------
-    if (messageRoomPanel) {
-
-        // 繧ｯ繝ｪ繝・け邉ｻ・亥膚蜩∫判蜒上Δ繝ｼ繝繝ｫ繝ｻ蝠・刀驕ｸ謚槭・騾∽ｿ｡繝懊ち繝ｳ・・        messageRoomPanel.addEventListener('click', function (event) {
-
-            // 蝠・刀逕ｻ蜒上け繝ｪ繝・け縺ｧ繝｢繝ｼ繝繝ｫ陦ｨ遉ｺ
-            const imageContainer = event.target.closest('.product-card-image');
-            if (imageContainer) {
-                // 逕ｻ蜒上け繝ｪ繝・け譎ゅ・繝ｪ繝ｳ繧ｯ遘ｻ蜍輔ｒ髦ｲ縺・                event.preventDefault();
-                event.stopPropagation();
-
-                const imageSrc = imageContainer.dataset.imageSrc;
-                const imageAlt = imageContainer.dataset.imageAlt;
-
-                if (imageSrc) {
-                    openImageModal(imageSrc, imageAlt);
-                }
-                return;
-            }
-
-            // 蝠・刀驕ｸ謚樊ｬ・・髢矩哩
-            const openPicker = event.target.closest('#openProductPicker');
-            if (openPicker) {
-                const picker = document.getElementById('productPicker');
-
-                if (!picker) {
-                    return;
-                }
-
-                picker.hidden = !picker.hidden;
-                const isOpen = !picker.hidden;
-                openPicker.setAttribute(
-                    'aria-expanded',
-                    String(isOpen)
-                );
-                const label =
-                    openPicker.querySelector('.product-picker-toggle-label');
-                if (label) {
-                    label.textContent = isOpen
-                        ? '荳隕ｧ繧帝哩縺倥ｋ'
-                        : '蝠・刀繧帝√ｋ';
-                }
-                return;
-            }
-
-            // 繧ｹ繝槭・逕ｨ・壻ｸ隕ｧ縺ｫ謌ｻ繧具ｼ井ｼ夊ｩｱ繝代ロ繝ｫ繧帝哩縺倥ｋ・・            const backLink = event.target.closest('.room-back');
-            if (backLink) {
-                event.preventDefault();
-                closeRoomOnMobile();
-                return;
-            }
-        });
-
-        // 騾∽ｿ｡邉ｻ・磯壼ｸｸ繝｡繝・そ繝ｼ繧ｸ繝ｻ蝠・刀邏ｹ莉具ｼ・        messageRoomPanel.addEventListener('submit', function (event) {
-            const form = event.target;
-
-            // 騾壼ｸｸ繝｡繝・そ繝ｼ繧ｸ騾∽ｿ｡
-            if (form.id === 'messageForm') {
-                event.preventDefault();
-                sendTextMessage(form);
-                return;
-            }
-
-            // 蝠・刀邏ｹ莉矩∽ｿ｡
-            if (form.classList.contains('product-send-form')) {
-                event.preventDefault();
-                sendGoodsMessage(form);
-                return;
-            }
-        });
-    }
-
-    // ------------------------------------
-    // 繧ｹ繝槭・縺ｧ莨夊ｩｱ繧帝哩縺倥※荳隕ｧ縺ｫ謌ｻ繧・    // ------------------------------------
-    function closeRoomOnMobile() {
-        if (!messageRoomPanel) {
+            closeRoom();
             return;
         }
 
-        messageRoomPanel.innerHTML =
-            '<div class="talk-welcome">' +
-            '<div class="welcome-icon"><i class="fa-regular fa-comments"></i></div>' +
-            '<h2>繝｡繝・そ繝ｼ繧ｸ</h2>' +
-            '<p>蟾ｦ蛛ｴ縺ｮ繝医・繧ｯ荳隕ｧ縺九ｉ逶ｸ謇九ｒ驕ｸ謚槭☆繧九→縲√％縺薙↓莨夊ｩｱ縺瑚｡ｨ遉ｺ縺輔ｌ縺ｾ縺吶・/p>' +
-            '</div>';
+        const openPicker = event.target.closest('#openProductPicker');
+        if (openPicker) {
+            const picker = messageRoomPanel.querySelector('#productPicker');
+            if (!picker) {
+                return;
+            }
 
-        currentUserId = null;
-
-        if (talkList) {
-            talkList.querySelectorAll('.talk-item').forEach(function (item) {
-                item.classList.remove('active');
-            });
+            picker.hidden = !picker.hidden;
+            openPicker.setAttribute('aria-expanded', String(!picker.hidden));
+            const label = openPicker.querySelector('.product-picker-toggle-label');
+            if (label) {
+                label.textContent = picker.hidden ? '商品を送る' : '一覧を閉じる';
+            }
         }
-    }
+    });
 
-    // ------------------------------------
-    // 騾壼ｸｸ繝｡繝・そ繝ｼ繧ｸ騾∽ｿ｡・・etch・・    // ------------------------------------
-    async function sendTextMessage(form) {
-        if (!currentUserId) {
+    messageRoomPanel.addEventListener('submit', function (event) {
+        const form = event.target;
+        const isProductMessage = form.classList.contains('product-send-form');
+
+        if (!form.matches('[data-ajax-message-form]') && !isProductMessage) {
             return;
         }
 
-        const input = form.querySelector('#messageInput');
-        const content = input ? input.value.trim() : '';
+        event.preventDefault();
+        submitMessage(form, isProductMessage);
+    });
 
-        // 遨ｺ繝｡繝・そ繝ｼ繧ｸ縺ｮ諡貞凄
-        if (content === '') {
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            const modal = messageRoomPanel.querySelector('#imageModal');
+            if (modal && !modal.hidden) {
+                closeImageModal();
+            } else if (isMobile() && layout.classList.contains('is-room-open')) {
+                closeRoom();
+            }
+        }
+    });
+
+    messageRoomPanel.addEventListener('touchstart', function (event) {
+        if (
+            !isMobile() ||
+            !layout.classList.contains('is-room-open') ||
+            messageRoomPanel.querySelector('#imageModal:not([hidden])')
+        ) {
+            swipeStart = null;
             return;
         }
 
-        // 譁・ｭ玲焚蛻ｶ髯・        if (content.length > 2000) {
-            alert('繝｡繝・そ繝ｼ繧ｸ縺ｯ2000譁・ｭ嶺ｻ･蜀・〒蜈･蜉帙＠縺ｦ縺上□縺輔＞縲・);
+        const touch = event.changedTouches[0];
+        if (
+            touch.clientX > 28 ||
+            event.target.closest('input, textarea, select, button, [contenteditable="true"]')
+        ) {
+            swipeStart = null;
             return;
         }
 
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.disabled = true;
-        }
+        swipeStart = { x: touch.clientX, y: touch.clientY };
+    }, { passive: true });
 
-        try {
-            const formData = new FormData(form);
-            formData.set('action', 'text');
-
-            const response = await fetch(
-                'message-room.php?user_id=' + currentUserId + '&partial=1',
-                {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                }
-            );
-
-            const result = await response.json();
-
-            if (!response.ok || !result.success) {
-                throw new Error('騾∽ｿ｡縺ｫ螟ｱ謨励＠縺ｾ縺励◆');
-            }
-
-            // 蜈･蜉帙ｒ繧ｯ繝ｪ繧｢縺励※莨夊ｩｱ繧貞・隱ｭ縺ｿ霎ｼ縺ｿ
-            if (input) {
-                input.value = '';
-            }
-
-            await loadRoom(currentUserId);
-
-        } catch (error) {
-            console.error(error);
-            alert('繝｡繝・そ繝ｼ繧ｸ縺ｮ騾∽ｿ｡縺ｫ螟ｱ謨励＠縺ｾ縺励◆縲・);
-        } finally {
-            if (submitBtn) {
-                submitBtn.disabled = false;
-            }
-        }
-    }
-
-    // ------------------------------------
-    // 蝠・刀邏ｹ莉九Γ繝・そ繝ｼ繧ｸ騾∽ｿ｡・・etch・・    // ------------------------------------
-    async function sendGoodsMessage(form) {
-        if (!currentUserId) {
+    messageRoomPanel.addEventListener('touchend', function (event) {
+        if (!swipeStart || !isMobile()) {
+            swipeStart = null;
             return;
         }
 
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.disabled = true;
+        const touch = event.changedTouches[0];
+        const deltaX = touch.clientX - swipeStart.x;
+        const deltaY = Math.abs(touch.clientY - swipeStart.y);
+        swipeStart = null;
+
+        if (deltaX >= 80 && deltaY <= 60 && deltaX > deltaY * 1.4) {
+            closeRoom();
         }
+    }, { passive: true });
 
-        try {
-            const formData = new FormData(form);
-            formData.set('action', 'goods');
+    messageRoomPanel.addEventListener('touchcancel', function () {
+        swipeStart = null;
+    }, { passive: true });
 
-            const response = await fetch(
-                'message-room.php?user_id=' + currentUserId + '&partial=1',
-                {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                }
-            );
+    function initialConversationFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const partnerId = Number.parseInt(params.get('partner_id'), 10);
+        const transactionId = Number.parseInt(params.get('transaction_id'), 10);
+        const goodsId = Number.parseInt(params.get('goods_id'), 10);
+        const directUserId = Number.parseInt(params.get('user_id'), 10);
 
-            const result = await response.json();
-
-            if (!response.ok || !result.success) {
-                throw new Error('騾∽ｿ｡縺ｫ螟ｱ謨励＠縺ｾ縺励◆');
-            }
-
-            // 蝠・刀驕ｸ謚樊ｬ・ｒ髢峨§繧・            const picker = document.getElementById('productPicker');
-            if (picker) {
-                picker.hidden = true;
-            }
-            const openPickerButton =
-                document.getElementById('openProductPicker');
-            if (openPickerButton) {
-                openPickerButton.setAttribute('aria-expanded', 'false');
-                const label = openPickerButton.querySelector(
-                    '.product-picker-toggle-label'
-                );
-                if (label) {
-                    label.textContent = '蝠・刀繧帝√ｋ';
-                }
-            }
-
-            await loadRoom(currentUserId);
-
-        } catch (error) {
-            console.error(error);
-            alert('蝠・刀縺ｮ騾∽ｿ｡縺ｫ螟ｱ謨励＠縺ｾ縺励◆縲・);
-        } finally {
-            if (submitBtn) {
-                submitBtn.disabled = false;
-            }
+        if (transactionId > 0 && partnerId > 0) {
+            return { type: 'transaction', contextId: transactionId, partnerId: partnerId };
         }
+        if (goodsId > 0 && partnerId > 0) {
+            return { type: 'goods', contextId: goodsId, partnerId: partnerId };
+        }
+        if (directUserId > 0) {
+            return { type: 'direct', contextId: null, partnerId: directUserId };
+        }
+        return null;
     }
 
-    // ------------------------------------
-    // 譛譁ｰ繝｡繝・そ繝ｼ繧ｸ縺ｾ縺ｧ繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ
-    // ------------------------------------
-    function scrollToBottom() {
-        const roomMessages = document.getElementById('roomMessages');
-
-        if (roomMessages) {
-            roomMessages.scrollTop = roomMessages.scrollHeight;
-        }
+    const initialConversation = initialConversationFromUrl();
+    if (initialConversation) {
+        loadConversation(initialConversation, { keepAddress: true });
     }
-
 })();
-
-

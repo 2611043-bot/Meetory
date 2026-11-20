@@ -30,133 +30,94 @@ $my_user_id = (int)$my_user_id;
 
 
 // ========================================
-// トーク一覧をデータベースから取得
+// 会話ごとの最新メッセージを取得
 // ========================================
 
 $sql = "
     SELECT
         m.message_id,
-        partner.user_id,
-        partner.user_name,
-        partner.profile_image_type,
-        partner.profile_image,
+        m.transaction_id,
+        m.goods_id,
         m.content,
         m.message_type,
-        m.sent_at
-
+        m.sent_at,
+        g.goods_name,
+        partner.user_id AS partner_id,
+        partner.user_name,
+        partner.profile_image_type,
+        partner.profile_image
     FROM messages AS m
-
     INNER JOIN users AS partner
         ON partner.user_id = CASE
-            WHEN m.sender_id = ?
-            THEN m.receiver_id
+            WHEN m.sender_id = :sender_user_id THEN m.receiver_id
             ELSE m.sender_id
         END
-
+    LEFT JOIN goods AS g
+        ON g.goods_id = m.goods_id
     WHERE
-        (m.sender_id = ? OR m.receiver_id = ?)
-
-        AND NOT EXISTS (
-
-            SELECT 1
-            FROM messages AS newer
-
-            WHERE
-                (newer.sender_id = ? OR newer.receiver_id = ?)
-
-                AND (
-                    CASE
-                        WHEN newer.sender_id = ?
-                        THEN newer.receiver_id
-                        ELSE newer.sender_id
-                    END
-                ) = (
-                    CASE
-                        WHEN m.sender_id = ?
-                        THEN m.receiver_id
-                        ELSE m.sender_id
-                    END
-                )
-
-                AND (
-                    newer.sent_at > m.sent_at
-
-                    OR (
-                        newer.sent_at = m.sent_at
-                        AND newer.message_id > m.message_id
-                    )
-                )
-        )
-
-    ORDER BY
-        m.sent_at DESC,
-        m.message_id DESC
+        (m.sender_id = :filter_sender_id OR m.receiver_id = :filter_receiver_id)
+        AND m.sender_id <> m.receiver_id
+    ORDER BY m.sent_at DESC, m.message_id DESC
 ";
 
 $stmt = $pdo->prepare($sql);
-
 $stmt->execute([
-    $my_user_id,
-    $my_user_id,
-    $my_user_id,
-    $my_user_id,
-    $my_user_id,
-    $my_user_id,
-    $my_user_id
+    ':sender_user_id' => $my_user_id,
+    ':filter_sender_id' => $my_user_id,
+    ':filter_receiver_id' => $my_user_id,
 ]);
 
-$talks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$latestTalks = [];
 
+foreach ($messages as $message) {
+    $partnerId = (int) $message['partner_id'];
 
-// ========================================
-// トーク一覧の表示用データを作成
-// ========================================
-
-foreach ($talks as &$talk) {
-
-    // 相手の名前の最初の文字
-    $talk['initial'] = mb_substr(
-        $talk['user_name'],
-        0,
-        1,
-        'UTF-8'
-    );
-
-    // 最後のメッセージ
-    if ($talk['message_type'] === 'goods') {
-
-        $talk['last_message'] = '商品を紹介しました。';
-
-    } else {
-
-        $talk['last_message'] = $talk['content'];
-
-    }
-
-    // 送信日時
-    $sent_time = strtotime($talk['sent_at']);
-
-    if (date('Y-m-d', $sent_time) === date('Y-m-d')) {
-
-        $talk['time'] = date('H:i', $sent_time);
-
+    if ($message['transaction_id'] !== null) {
+        $contextType = 'transaction';
+        $contextId = (int) $message['transaction_id'];
+        $conversationKey = 'transaction_' . $contextId . '_partner_' . $partnerId;
+        $contextLabel = '取引 #' . $contextId;
     } elseif (
-        date('Y-m-d', $sent_time) === date('Y-m-d', strtotime('yesterday'))
+        $message['goods_id'] !== null &&
+        $message['message_type'] !== 'goods'
     ) {
-
-        $talk['time'] = '昨日';
-
+        $contextType = 'goods';
+        $contextId = (int) $message['goods_id'];
+        $conversationKey = 'goods_' . $contextId . '_partner_' . $partnerId;
+        $contextLabel = $message['goods_name'] ?? '商品へのDM';
     } else {
-
-        $talk['time'] = date('m/d', $sent_time);
-
+        $contextType = 'direct';
+        $contextId = null;
+        $conversationKey = 'direct_partner_' . $partnerId;
+        $contextLabel = 'メッセージ';
     }
 
-    // 未読件数（未読管理は今後実装）
-    $talk['unread'] = 0;
+    if (isset($latestTalks[$conversationKey])) {
+        continue;
+    }
+
+    $message['context_type'] = $contextType;
+    $message['context_id'] = $contextId;
+    $message['context_label'] = $contextLabel;
+    $message['last_message'] = $message['message_type'] === 'goods'
+        ? '商品を紹介しました。'
+        : $message['content'];
+
+    $sentTime = strtotime($message['sent_at']);
+    if (date('Y-m-d', $sentTime) === date('Y-m-d')) {
+        $message['time'] = date('H:i', $sentTime);
+    } elseif (date('Y-m-d', $sentTime) === date('Y-m-d', strtotime('yesterday'))) {
+        $message['time'] = '昨日';
+    } else {
+        $message['time'] = date('m/d', $sentTime);
+    }
+
+    $message['unread'] = 0;
+    $latestTalks[$conversationKey] = $message;
 }
 
-unset($talk);
+$talks = array_values($latestTalks);
 
 
 // ========================================
@@ -170,14 +131,14 @@ require_once '../../meetory-header.php';
 ?>
 
 <link rel="stylesheet"
-    href="/Meetory/meetory/assets/css/message-center.css">
+    href="/Meetory/meetory/assets/css/message-center.css?v=<?= filemtime(__DIR__ . '/../assets/css/message-center.css') ?>">
 <link rel="stylesheet"
-    href="/Meetory/meetory/assets/css/message-room.css">
+    href="/Meetory/meetory/assets/css/message-room.css?v=<?= filemtime(__DIR__ . '/../assets/css/message-room.css') ?>">
 
 
 <section class="message-center">
 
-    <div class="message-layout">
+    <div class="message-layout" id="messageLayout">
 
         <!-- 左側：トーク一覧 -->
         <aside class="talk-sidebar">
@@ -199,7 +160,7 @@ require_once '../../meetory-header.php';
 
                 <?php if (empty($talks)): ?>
 
-                    <p class="talk-empty">
+                <p class="talk-empty" id="noTalks">
                         まだトークはありません。
                     </p>
 
@@ -207,15 +168,28 @@ require_once '../../meetory-header.php';
 
                     <?php foreach ($talks as $talk): ?>
 
+                        <?php
+                        $partnerId = (int) $talk['partner_id'];
+                        if ($talk['context_type'] === 'transaction') {
+                            $talkUrl = 'message-center.php?transaction_id='
+                                . (int) $talk['context_id']
+                                . '&partner_id=' . $partnerId;
+                        } elseif ($talk['context_type'] === 'goods') {
+                            $talkUrl = 'message-center.php?goods_id='
+                                . (int) $talk['context_id']
+                                . '&partner_id=' . $partnerId;
+                        } else {
+                            $talkUrl = 'message-center.php?user_id=' . $partnerId;
+                        }
+                        ?>
+
                         <a
-                            href="message-room.php?user_id=<?= (int)$talk['user_id'] ?>"
-                            class="talk-item room-talk-item"
-                            data-user-id="<?= (int)$talk['user_id'] ?>"
-                            data-name="<?= htmlspecialchars(
-                                $talk['user_name'],
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>"
+                            href="<?= htmlspecialchars($talkUrl, ENT_QUOTES, 'UTF-8') ?>"
+                            class="talk-item"
+                            data-conversation-type="<?= htmlspecialchars($talk['context_type'], ENT_QUOTES, 'UTF-8') ?>"
+                            data-context-id="<?= (int) ($talk['context_id'] ?? 0) ?>"
+                            data-partner-id="<?= $partnerId ?>"
+                            data-name="<?= htmlspecialchars($talk['user_name'] . ' ' . $talk['context_label'], ENT_QUOTES, 'UTF-8') ?>"
                         >
 
                             <div class="talk-avatar">
@@ -243,6 +217,14 @@ require_once '../../meetory-header.php';
                                     </span>
 
                                 </div>
+
+                                <span class="talk-context">
+                                    <?= htmlspecialchars(
+                                        $talk['context_label'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>
+                                </span>
 
                                 <div class="talk-message-row">
 

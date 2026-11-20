@@ -108,7 +108,7 @@ $transaction_id = $stmt->fetchColumn();
 
 if ($transaction_id !== false) {
     header(
-        'Location: message-list.php?transaction_id='
+        'Location: message-center.php?transaction_id='
         . (int) $transaction_id
         . '&partner_id='
         . $seller_id
@@ -118,7 +118,7 @@ if ($transaction_id !== false) {
 
 // 購入前のDM画面へ移動
 header(
-    'Location: message-list.php?goods_id='
+    'Location: message-center.php?goods_id='
     . $goods_id
     . '&partner_id='
     . $seller_id
