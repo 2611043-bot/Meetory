@@ -269,6 +269,33 @@ function isValidReportStatus(string $status): bool
     return array_key_exists($status, getReportStatuses());
 }
 
+function getInquiryCategories(): array
+{
+    return [
+        'アカウントについて',
+        '商品・出品について',
+        '購入・取引について',
+        '支払いについて',
+        'トラブル・違反報告',
+        'その他',
+    ];
+}
+
+function getInquiryStatuses(): array
+{
+    return [
+        '未対応' => '未対応',
+        '対応中' => '対応中',
+        '回答済み' => '回答済み',
+        '完了' => '完了',
+    ];
+}
+
+function isValidInquiryStatus(string $status): bool
+{
+    return array_key_exists($status, getInquiryStatuses());
+}
+
 function getReportTargetTypeLabel(string $target_type): string
 {
     return $target_type === 'user' ? 'ユーザー' : '商品';
