@@ -455,6 +455,30 @@ function getUserRestrictionSummary(PDO $pdo, int $user_id): array
 }
 
 /**
+ * 利用可能な管理者数を取得する。
+ * role = 'admin' で、かつアカウント停止中ではない管理者をカウントする。
+ * 期限切れ・解除済みの制限は有効な停止として扱わない。
+ */
+function countAvailableAdmins(PDO $pdo): int
+{
+    $stmt = $pdo->prepare("
+        SELECT COUNT(DISTINCT u.user_id) AS admin_count
+        FROM users AS u
+        WHERE u.role = 'admin'
+          AND NOT EXISTS (
+              SELECT 1 FROM account_restrictions AS r
+              WHERE r.user_id = u.user_id
+                AND r.restriction_type = 'suspend'
+                AND r.status = 'active'
+                AND r.starts_at <= NOW()
+                AND (r.ends_at IS NULL OR r.ends_at > NOW())
+          )
+    ");
+    $stmt->execute();
+    return (int) $stmt->fetchColumn();
+}
+
+/**
  * 制限を新規作成し、履歴にも記録する。
  * 同種類の有効な制限があれば先に解除する。
  * 作成した restriction_id を返す。
@@ -478,6 +502,11 @@ function createRestriction(
         throw new InvalidArgumentException('実行者は必須です。');
     }
 
+    // 管理者自身のアカウント停止を防止（suspend種別のみ）
+    if ($restriction_type === RESTRICTION_TYPE_SUSPEND && $user_id === $created_by) {
+        throw new InvalidArgumentException('自分自身を停止することはできません。');
+    }
+
     $now = date('Y-m-d H:i:s');
     if ($starts_at === null || $starts_at === '') {
         $starts_at = $now;
@@ -485,6 +514,42 @@ function createRestriction(
 
     $pdo->beginTransaction();
     try {
+        // 最後の管理者停止を防止（suspend種別かつ対象が管理者の場合）
+        if ($restriction_type === RESTRICTION_TYPE_SUSPEND) {
+            // 全管理者の行をロックして同時停止を防止（ロック順序を統一）
+            $stmt = $pdo->prepare(
+                'SELECT user_id FROM users WHERE role = :role ORDER BY user_id FOR UPDATE'
+            );
+            $stmt->bindValue(':role', 'admin', PDO::PARAM_STR);
+            $stmt->execute();
+
+            // 対象ユーザーの行をロックして役割を確認
+            $stmt = $pdo->prepare(
+                'SELECT role FROM users WHERE user_id = :user_id LIMIT 1 FOR UPDATE'
+            );
+            $stmt->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt->execute();
+            $targetUser = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($targetUser && $targetUser['role'] === 'admin') {
+                // 対象ユーザーの有効な制限レコードもロック
+                $stmt = $pdo->prepare(
+                    'SELECT restriction_id FROM account_restrictions
+                     WHERE user_id = :user_id AND status = :status FOR UPDATE'
+                );
+                $stmt->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+                $stmt->bindValue(':status', 'active', PDO::PARAM_STR);
+                $stmt->execute();
+
+                $availableAdmins = countAvailableAdmins($pdo);
+
+                if ($availableAdmins <= 1) {
+                    $pdo->rollBack();
+                    throw new InvalidArgumentException('最後の管理者を停止することはできません。');
+                }
+            }
+        }
+
         // 同種類の有効な制限を解除する（重複を防ぐ）
         $stmt = $pdo->prepare("
             UPDATE account_restrictions

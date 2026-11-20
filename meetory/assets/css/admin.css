@@ -1,0 +1,278 @@
+/* ============================================================
+   管理者ダッシュボード専用CSS
+   ============================================================ */
+
+.admin-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    background: #f8fafc;
+    min-height: calc(100vh - 200px);
+}
+
+/* ページタイトル */
+.admin-page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 16px;
+}
+
+/* パンくずナビゲーション */
+.admin-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #64748b;
+    margin: 0 0 24px;
+}
+
+.admin-breadcrumb a {
+    color: #1a3a5c;
+    text-decoration: none;
+}
+
+.admin-breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.admin-breadcrumb-separator {
+    color: #94a3b8;
+}
+
+/* 統計カードセクション */
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.admin-stat-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.admin-stat-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    margin: 0 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.admin-stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a3a5c;
+    margin: 0;
+}
+
+/* ショートカットセクション */
+.admin-shortcuts {
+    margin-bottom: 32px;
+}
+
+.admin-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 16px;
+}
+
+.admin-shortcut-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.admin-shortcut-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px;
+    text-decoration: none;
+    color: #1e293b;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.admin-shortcut-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: #1a3a5c;
+}
+
+.admin-shortcut-card i {
+    font-size: 20px;
+    color: #1a3a5c;
+}
+
+.admin-shortcut-card span {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* ウィジェットセクション（ダッシュボード詳細用） */
+.admin-widget {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.admin-widget-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 16px;
+}
+
+.admin-widget-placeholder {
+    background: #f1f5f9;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 32px 24px;
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* レスポンシブ対応（スマートフォン） */
+@media (max-width: 768px) {
+    .admin-container {
+        padding: 16px;
+    }
+
+    .admin-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-shortcut-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-widget {
+        padding: 16px;
+    }
+
+    .admin-chart-container {
+        height: 250px !important;
+    }
+}
+
+/* チャートコンテナ */
+.admin-chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.admin-chart-container canvas {
+    max-width: 100%;
+    height: auto !important;
+}
+
+/* ============================================================
+   最近の活動テーブル
+   ============================================================ */
+
+.admin-activity-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.admin-activity-table th {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    text-align: left;
+}
+
+.admin-activity-table td {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #334155;
+}
+
+.admin-activity-table tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-activity-table tr:hover {
+    background: #f8fafc;
+}
+
+/* 活動種別バッジ */
+.admin-activity-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.admin-activity-registration {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.admin-activity-listing {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.admin-activity-purchase {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.admin-activity-shipping {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.admin-activity-completion {
+    background: #ccfbf1;
+    color: #0f766e;
+}
+
+.admin-activity-restriction_created,
+.admin-activity-restriction_revoked {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* 活動テーブルのレスポンシブ対応 */
+.admin-widget > .admin-activity-table {
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .admin-widget {
+        overflow-x: auto;
+    }
+
+    .admin-activity-table {
+        min-width: 600px;
+    }
+}
