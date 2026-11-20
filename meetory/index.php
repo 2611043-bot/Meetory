@@ -65,10 +65,10 @@ $auction_stmt->execute();
 $auction_list = $auction_stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<!-- CSSを読み込む -->
-<link rel="stylesheet" href="/Meetory/meetory/assets/css/home.css">
-
 <?php require_once __DIR__ . '/../meetory-header.php'; ?>
+
+<!-- CSSを読み込む -->
+<link rel="stylesheet" href="/Meetory/meetory/assets/css/home.css?v=2">
 
 <main class="home-main">
     <section class="home-intro">
