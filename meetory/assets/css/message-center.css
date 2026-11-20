@@ -254,6 +254,24 @@
     line-height: 1.8;
 }
 
+#messageSwipeDebug {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 20000;
+    max-width: calc(100vw - 16px);
+    max-height: 35vh;
+    overflow: hidden;
+    margin: 0;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: rgba(15, 23, 42, 0.94);
+    color: #fff;
+    font: 12px/1.45 monospace;
+    white-space: pre-wrap;
+    pointer-events: none;
+}
+
 /* スマートフォン */
 @media (max-width: 700px) {
 
@@ -261,6 +279,16 @@
         display: flex;
         height: calc(100dvh - 190px);
         min-height: 0;
+    }
+
+    .message-layout.is-room-open {
+        touch-action: pan-y;
+        overscroll-behavior-x: contain;
+    }
+
+    #messageSwipeDebug {
+        top: 132px;
+        left: 8px;
     }
 
     .talk-sidebar {

@@ -17,9 +17,142 @@
     let loadController = null;
     let loadSequence = 0;
     let swipeStart = null;
+    let swipeDebugStart = null;
+    const swipeDebugEnabled = new URLSearchParams(window.location.search).get('swipeDebug') === '1';
+    const swipeDebugState = {
+        documentEvent: '未受信',
+        layoutEvent: '未開始',
+        target: '—',
+        start: '—',
+        current: '—',
+        distance: '—',
+        decision: '未判定',
+        closeRoom: '未呼出'
+    };
+    let swipeDebugPanel = null;
 
     function isMobile() {
         return window.matchMedia('(max-width: 700px)').matches;
+    }
+
+    function formatPoint(x, y) {
+        return Math.round(x) + ', ' + Math.round(y);
+    }
+
+    function hasTextSelection() {
+        const selection = window.getSelection();
+        return Boolean(selection && !selection.isCollapsed);
+    }
+
+    function describeTouchTarget(target) {
+        if (!(target instanceof Element)) {
+            return '不明';
+        }
+
+        const className = typeof target.className === 'string'
+            ? target.className.trim().split(/\s+/).slice(0, 2).join('.')
+            : '';
+        return target.tagName.toLowerCase() +
+            (target.id ? '#' + target.id : '') +
+            (className ? '.' + className : '');
+    }
+
+    function renderSwipeDebug() {
+        if (!swipeDebugEnabled || !swipeDebugPanel) {
+            return;
+        }
+
+        swipeDebugPanel.textContent = [
+            'スワイプ診断（Touch Events）',
+            'document: ' + swipeDebugState.documentEvent,
+            'layout: ' + swipeDebugState.layoutEvent,
+            '対象: ' + swipeDebugState.target,
+            '開始: ' + swipeDebugState.start + ' / 現在: ' + swipeDebugState.current,
+            '移動: ' + swipeDebugState.distance,
+            '判定: ' + swipeDebugState.decision,
+            '戻る処理: ' + swipeDebugState.closeRoom
+        ].join('\n');
+    }
+
+    function updateSwipeDebug(values) {
+        if (!swipeDebugEnabled) {
+            return;
+        }
+
+        Object.assign(swipeDebugState, values);
+        renderSwipeDebug();
+    }
+
+    if (swipeDebugEnabled) {
+        swipeDebugPanel = document.getElementById('messageSwipeDebug');
+        if (!swipeDebugPanel) {
+            swipeDebugPanel = document.createElement('pre');
+            swipeDebugPanel.id = 'messageSwipeDebug';
+            swipeDebugPanel.setAttribute('aria-label', 'スワイプ操作の診断情報');
+            document.body.appendChild(swipeDebugPanel);
+        }
+
+        ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(function (eventName) {
+            document.addEventListener(eventName, function (event) {
+                const touch = event.changedTouches[0] ||
+                    (event.touches.length ? event.touches[0] : null);
+                const inLayout = event.target instanceof Node && layout.contains(event.target);
+                const targetName = describeTouchTarget(event.target);
+
+                if (eventName === 'touchstart' && touch) {
+                    swipeDebugStart = { x: touch.clientX, y: touch.clientY };
+                    updateSwipeDebug({
+                        documentEvent: 'touchstart 受信',
+                        layoutEvent: inLayout ? 'layoutへ伝播待ち' : 'layout外で開始',
+                        target: targetName + (inLayout ? '（layout内）' : '（layout外）'),
+                        start: formatPoint(touch.clientX, touch.clientY),
+                        current: formatPoint(touch.clientX, touch.clientY),
+                        distance: '0, 0',
+                        decision: '未判定',
+                        closeRoom: '未呼出'
+                    });
+                    return;
+                }
+
+                if (touch && swipeDebugStart) {
+                    const deltaX = touch.clientX - swipeDebugStart.x;
+                    const deltaY = touch.clientY - swipeDebugStart.y;
+                    const absX = Math.abs(deltaX);
+                    const absY = Math.abs(deltaY);
+                    let decision = '移動中・未判定';
+
+                    if (deltaX < -12) {
+                        decision = '左方向の移動を検知';
+                    } else if (absY > 14 && absY > absX * 1.1) {
+                        decision = '縦方向の移動を検知';
+                    } else if (deltaX > 12 && absX > absY * 1.1) {
+                        decision = '右方向の横移動を検知';
+                    }
+
+                    updateSwipeDebug({
+                        documentEvent: eventName + ' 受信',
+                        target: targetName + (inLayout ? '（layout内）' : '（layout外）'),
+                        current: formatPoint(touch.clientX, touch.clientY),
+                        distance: Math.round(deltaX) + ', ' + Math.round(deltaY),
+                        decision: decision
+                    });
+                } else {
+                    updateSwipeDebug({
+                        documentEvent: eventName + ' 受信',
+                        target: targetName + (inLayout ? '（layout内）' : '（layout外）'),
+                        decision: eventName === 'touchcancel'
+                            ? 'touchcancel: ブラウザー側で中断'
+                            : swipeDebugState.decision
+                    });
+                }
+
+                if (eventName === 'touchend' || eventName === 'touchcancel') {
+                    swipeDebugStart = null;
+                }
+            }, { passive: true, capture: true });
+        });
+
+        renderSwipeDebug();
     }
 
     function updateAddressBar(conversation) {
@@ -172,7 +305,10 @@
         }
     }
 
-    function closeRoom() {
+    function closeRoom(reason) {
+        updateSwipeDebug({
+            closeRoom: 'closeRoom()呼出: ' + (reason || '不明')
+        });
         if (document.activeElement instanceof HTMLElement) {
             document.activeElement.blur();
         }
@@ -197,6 +333,16 @@
             url.searchParams.delete(key);
         });
         window.history.replaceState(null, '', url);
+
+        if (swipeDebugEnabled) {
+            requestAnimationFrame(function () {
+                updateSwipeDebug({
+                    closeRoom: layout.classList.contains('is-room-open')
+                        ? '呼出済み・一覧切替失敗'
+                        : '呼出済み・一覧表示中'
+                });
+            });
+        }
     }
 
     function findTalk(conversation) {
@@ -418,7 +564,7 @@
         const backLink = event.target.closest('.room-back');
         if (backLink) {
             event.preventDefault();
-            closeRoom();
+            closeRoom('戻るボタン');
             return;
         }
 
@@ -456,52 +602,152 @@
             if (modal && !modal.hidden) {
                 closeImageModal();
             } else if (isMobile() && layout.classList.contains('is-room-open')) {
-                closeRoom();
+                closeRoom('Escape');
             }
         }
     });
 
-    messageRoomPanel.addEventListener('touchstart', function (event) {
+    layout.addEventListener('touchstart', function (event) {
+        const touch = event.changedTouches[0];
         if (
             !isMobile() ||
             !layout.classList.contains('is-room-open') ||
             messageRoomPanel.querySelector('#imageModal:not([hidden])')
         ) {
             swipeStart = null;
+            updateSwipeDebug({
+                layoutEvent: 'touchstart受信・対象外（端末幅/画面状態/画像表示）'
+            });
+            return;
+        }
+
+        const target = event.target instanceof Element ? event.target : null;
+        if (!touch) {
+            swipeStart = null;
+            updateSwipeDebug({ layoutEvent: 'touchstart受信・座標なし' });
+            return;
+        }
+
+        updateSwipeDebug({
+            layoutEvent: 'touchstart受信',
+            target: describeTouchTarget(event.target) + '（layout内）',
+            start: formatPoint(touch.clientX, touch.clientY),
+            current: formatPoint(touch.clientX, touch.clientY),
+            distance: '0, 0',
+            decision: '未判定',
+            closeRoom: '未呼出'
+        });
+
+        const startsInRoom = target && messageRoomPanel.contains(target);
+        const startsOnControl = target && target.closest(
+            'a:not(.room-back), button, input, textarea, select, ' +
+            '[contenteditable="true"], [role="button"], [role="link"], .product-card-image'
+        );
+        if (!startsInRoom || startsOnControl || hasTextSelection()) {
+            swipeStart = null;
+            updateSwipeDebug({
+                layoutEvent: 'touchstart受信・会話外または操作要素のため除外',
+                decision: '対象外'
+            });
+            return;
+        }
+
+        swipeStart = {
+            x: touch.clientX,
+            y: touch.clientY,
+            maxVerticalDistance: 0,
+            cancelled: false
+        };
+    }, { passive: true, capture: true });
+
+    layout.addEventListener('touchmove', function (event) {
+        if (!swipeStart || !isMobile()) {
+            if (swipeDebugEnabled) {
+                updateSwipeDebug({ layoutEvent: 'touchmove受信・有効な開始なし' });
+            }
             return;
         }
 
         const touch = event.changedTouches[0];
-        if (
-            touch.clientX > 28 ||
-            event.target.closest('input, textarea, select, button, [contenteditable="true"]')
-        ) {
-            swipeStart = null;
+        if (!touch) {
+            updateSwipeDebug({ layoutEvent: 'touchmove受信・座標なし' });
             return;
         }
+        const deltaX = touch.clientX - swipeStart.x;
+        const deltaY = touch.clientY - swipeStart.y;
+        const verticalDistance = Math.abs(deltaY);
+        swipeStart.maxVerticalDistance = Math.max(
+            swipeStart.maxVerticalDistance,
+            verticalDistance
+        );
 
-        swipeStart = { x: touch.clientX, y: touch.clientY };
-    }, { passive: true });
+        if (
+            deltaX < -12 ||
+            (verticalDistance > 14 && verticalDistance > Math.abs(deltaX) * 1.1) ||
+            hasTextSelection()
+        ) {
+            swipeStart.cancelled = true;
+        }
 
-    messageRoomPanel.addEventListener('touchend', function (event) {
+        updateSwipeDebug({
+            layoutEvent: 'touchmove受信',
+            current: formatPoint(touch.clientX, touch.clientY),
+            distance: Math.round(deltaX) + ', ' + Math.round(deltaY),
+            decision: swipeStart.cancelled
+                ? (hasTextSelection()
+                    ? 'テキスト選択のため除外'
+                    : deltaX < -12
+                        ? '左方向のため除外'
+                        : '縦スクロールのため除外')
+                : '移動中・未確定'
+        });
+    }, { passive: true, capture: true });
+
+    layout.addEventListener('touchend', function (event) {
         if (!swipeStart || !isMobile()) {
             swipeStart = null;
+            updateSwipeDebug({ layoutEvent: 'touchend受信・有効な開始なし' });
             return;
         }
 
         const touch = event.changedTouches[0];
-        const deltaX = touch.clientX - swipeStart.x;
-        const deltaY = Math.abs(touch.clientY - swipeStart.y);
-        swipeStart = null;
-
-        if (deltaX >= 80 && deltaY <= 60 && deltaX > deltaY * 1.4) {
-            closeRoom();
+        if (!touch) {
+            swipeStart = null;
+            updateSwipeDebug({ layoutEvent: 'touchend受信・座標なし' });
+            return;
         }
-    }, { passive: true });
-
-    messageRoomPanel.addEventListener('touchcancel', function () {
+        const deltaX = touch.clientX - swipeStart.x;
+        const deltaY = Math.max(
+            swipeStart.maxVerticalDistance,
+            Math.abs(touch.clientY - swipeStart.y)
+        );
+        const cancelled = swipeStart.cancelled;
         swipeStart = null;
-    }, { passive: true });
+
+        const shouldClose =
+            !cancelled &&
+            !hasTextSelection() &&
+            deltaX >= 72 &&
+            deltaX > deltaY * 1.35;
+        updateSwipeDebug({
+            layoutEvent: 'touchend受信',
+            current: formatPoint(touch.clientX, touch.clientY),
+            distance: Math.round(deltaX) + ', ' + Math.round(deltaY),
+            decision: shouldClose ? '右スワイプ条件成立' : '条件不成立'
+        });
+
+        if (shouldClose) {
+            closeRoom('右スワイプ');
+        }
+    }, { passive: true, capture: true });
+
+    layout.addEventListener('touchcancel', function () {
+        swipeStart = null;
+        updateSwipeDebug({
+            layoutEvent: 'touchcancel受信',
+            decision: 'ブラウザー等によりキャンセル'
+        });
+    }, { passive: true, capture: true });
 
     function initialConversationFromUrl() {
         const params = new URLSearchParams(window.location.search);

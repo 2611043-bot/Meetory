@@ -287,6 +287,11 @@ require_once '../../meetory-header.php';
 
 </section>
 
+<?php if (isset($_GET['swipeDebug']) && $_GET['swipeDebug'] === '1'): ?>
+    <pre id="messageSwipeDebug" aria-label="スワイプ操作の診断情報">
+診断用JavaScriptを読み込み中...
+    </pre>
+<?php endif; ?>
 
 <script
     src="/Meetory/meetory/assets/js/message-center.js?v=<?= filemtime(__DIR__ . '/../assets/js/message-center.js') ?>"
