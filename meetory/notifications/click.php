@@ -78,7 +78,7 @@ switch ($type) {
     case 'message':
         // related_id = message_id。メッセージの相手ユーザーIDを取得して会話画面へ。
         $stmtMsg = $pdo->prepare(
-            'SELECT sender_id, receiver_id
+            'SELECT sender_id, receiver_id, transaction_id, goods_id, message_type
              FROM messages
              WHERE message_id = :message_id
                AND (sender_id = :user_id OR receiver_id = :user_id)
@@ -94,7 +94,20 @@ switch ($type) {
             $partnerId = ((int) $message['sender_id'] === $user_id)
                 ? (int) $message['receiver_id']
                 : (int) $message['sender_id'];
-            $redirectUrl = '../messages/message-room.php?user_id=' . $partnerId;
+            if ($message['transaction_id'] !== null) {
+                $redirectUrl = '../messages/message-center.php?transaction_id='
+                    . (int) $message['transaction_id']
+                    . '&partner_id=' . $partnerId;
+            } elseif (
+                $message['goods_id'] !== null &&
+                $message['message_type'] !== 'goods'
+            ) {
+                $redirectUrl = '../messages/message-center.php?goods_id='
+                    . (int) $message['goods_id']
+                    . '&partner_id=' . $partnerId;
+            } else {
+                $redirectUrl = '../messages/message-center.php?user_id=' . $partnerId;
+            }
         }
         break;
 
