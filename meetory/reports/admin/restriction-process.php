@@ -101,6 +101,14 @@ if ($action === 'create') {
 
     try {
         createRestriction($pdo, $user_id, $restriction_type, $reason, $starts_at, $ends_at, $admin_id);
+        // 管理者操作履歴を記録
+        createAdminOperationLog(
+            $admin_id,
+            'restriction_create',
+            'user',
+            $user_id,
+            "ユーザーID {$user_id} に制限「{$restriction_type}」を設定（理由：{$reason}）"
+        );
         $_SESSION['restriction_flash'] = '制限を設定しました。';
     } catch (Throwable $e) {
         error_log('restriction-process create: ' . $e->getMessage());
@@ -127,6 +135,14 @@ if ($action === 'create') {
 
     try {
         if (revokeRestriction($pdo, $restriction_id, $admin_id)) {
+            // 管理者操作履歴を記録
+            createAdminOperationLog(
+                $admin_id,
+                'restriction_revoke',
+                'user',
+                (int) $restriction['user_id'],
+                "ユーザーID {$restriction['user_id']} の制限「{$restriction['restriction_type']}」を解除"
+            );
             $_SESSION['restriction_flash'] = '制限を解除しました。';
         } else {
             $_SESSION['restriction_flash'] = '制限の解除に失敗しました。';

@@ -118,6 +118,15 @@ try {
             'message' => $reply
         ]);
 
+        // 管理者操作履歴を記録
+        createAdminOperationLog(
+            (int) $_SESSION['user_id'],
+            'inquiry_reply',
+            'inquiry',
+            $inquiry_id,
+            "問い合わせID {$inquiry_id} に返信を投稿"
+        );
+
         $update_sql = $mark_answered
             ? 'UPDATE inquiries SET status = :status, updated_at = CURRENT_TIMESTAMP
                WHERE inquiry_id = :inquiry_id'
@@ -131,6 +140,12 @@ try {
         $update_stmt->execute($update_params);
         $_SESSION['inquiry_admin_flash'] = '返信を保存しました。';
     } else {
+        // 変更前のステータスを取得
+        $stmt = $pdo->prepare('SELECT status FROM inquiries WHERE inquiry_id = ? LIMIT 1');
+        $stmt->execute([$inquiry_id]);
+        $oldStatusRow = $stmt->fetch(PDO::FETCH_ASSOC);
+        $oldStatus = $oldStatusRow['status'] ?? '';
+
         $update_stmt = $pdo->prepare(
             'UPDATE inquiries
              SET status = :status, updated_at = CURRENT_TIMESTAMP
@@ -140,6 +155,15 @@ try {
             'status' => $status,
             'inquiry_id' => $inquiry_id
         ]);
+
+        // 管理者操作履歴を記録
+        createAdminOperationLog(
+            (int) $_SESSION['user_id'],
+            'inquiry_status_change',
+            'inquiry',
+            $inquiry_id,
+            "ステータスを「{$oldStatus}」から「{$status}」に変更"
+        );
         $_SESSION['inquiry_admin_flash'] = '対応状況を更新しました。';
     }
 

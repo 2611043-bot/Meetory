@@ -47,6 +47,12 @@ if (!$stmt->fetchColumn()) {
     exit('通報が見つかりません。');
 }
 
+// 変更前のステータスを取得
+$stmt = $pdo->prepare('SELECT status FROM reports WHERE report_id = ? LIMIT 1');
+$stmt->execute([$report_id]);
+$oldStatusRow = $stmt->fetch(PDO::FETCH_ASSOC);
+$oldStatus = $oldStatusRow['status'] ?? '';
+
 try {
     $stmt = $pdo->prepare(
         'UPDATE reports
@@ -61,6 +67,15 @@ try {
     if ($stmt->rowCount() === 0) {
         exit('対応状況の更新に失敗しました。');
     }
+
+    // 管理者操作履歴を記録
+    createAdminOperationLog(
+        (int) $_SESSION['user_id'],
+        'report_status_change',
+        'report',
+        $report_id,
+        "ステータスを「{$oldStatus}」から「{$status}」に変更"
+    );
 } catch (Throwable $e) {
     error_log('report status update error: ' . $e->getMessage());
     exit('対応状況の更新に失敗しました。');

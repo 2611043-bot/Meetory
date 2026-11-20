@@ -53,6 +53,21 @@ if ($user && password_verify($password, $user['password'])) {
     // セッションIDを新しくする
     session_regenerate_id(true);
 
+    // ログイン成功を記録
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO login_logs (user_id, user_name, ip_address, success, attempted_at)
+            VALUES (:user_id, :user_name, :ip_address, 1, NOW())
+        ");
+        $stmt->execute([
+            ':user_id'    => (int) $user['user_id'],
+            ':user_name'  => $user['user_name'],
+            ':ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
+        ]);
+    } catch (Throwable $e) {
+        error_log('login_logs insert error: ' . $e->getMessage());
+    }
+
     // ログイン状態を保存
     $_SESSION['user_id'] = $user['user_id'];
     $_SESSION['user_name'] = $user['user_name'];
@@ -71,6 +86,21 @@ if ($user && password_verify($password, $user['password'])) {
     exit;
 
 } else {
+
+    // ログイン失敗を記録
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO login_logs (user_id, user_name, ip_address, success, attempted_at)
+            VALUES (:user_id, :user_name, :ip_address, 0, NOW())
+        ");
+        $stmt->execute([
+            ':user_id'    => null,
+            ':user_name'  => $user_name,
+            ':ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
+        ]);
+    } catch (Throwable $e) {
+        error_log('login_logs insert error: ' . $e->getMessage());
+    }
 
     // ログイン失敗：ログイン画面へ戻る（エラーフラグとユーザー名を保持）
     $redirect_url = 'login.php?error=1&user_name=' . urlencode($user_name);

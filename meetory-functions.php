@@ -754,4 +754,44 @@ function searchRestrictedUsers(PDO $pdo, string $keyword = ''): array
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+/**
+ * 管理者操作履歴を記録する。
+ * 記録に失敗しても呼び出し元の処理を停止させない。
+ *
+ * @param int $admin_id 操作した管理者のユーザーID
+ * @param string $action_type 操作種別
+ * @param string|null $target_type 対象種別
+ * @param int|null $target_id 対象ID
+ * @param string|null $details 操作の詳細
+ * @return void
+ */
+function createAdminOperationLog(
+    int $admin_id,
+    string $action_type,
+    ?string $target_type = null,
+    ?int $target_id = null,
+    ?string $details = null
+): void {
+    $pdo = getPDO();
+
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO admin_operation_logs
+            (admin_id, action_type, target_type, target_id, details, ip_address, created_at)
+            VALUES
+            (:admin_id, :action_type, :target_type, :target_id, :details, :ip_address, CURRENT_TIMESTAMP)
+        ");
+        $stmt->execute([
+            ':admin_id'    => $admin_id,
+            ':action_type' => $action_type,
+            ':target_type' => $target_type,
+            ':target_id'   => $target_id,
+            ':details'     => $details,
+            ':ip_address'  => $_SERVER['REMOTE_ADDR'] ?? null,
+        ]);
+    } catch (Throwable $e) {
+        error_log('admin_operation_logs insert error: ' . $e->getMessage());
+    }
+}
+
 ?>
