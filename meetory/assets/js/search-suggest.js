@@ -4,18 +4,74 @@
     const searchInput = document.getElementById('searchInput');
     const searchForm = searchInput ? searchInput.closest('form') : null;
     const suggestions = document.getElementById('searchSuggestions');
-    const mobileViewport = window.matchMedia('(max-width: 800px)');
 
     if (!searchInput || !searchForm || !suggestions) {
         return;
     }
 
+    const STORAGE_KEY = 'meetory_search_history';
+    const MAX_HISTORY = 10;
+    const DEBOUNCE_MS = 300;
+
     let debounceTimer = null;
     let requestSequence = 0;
+    let closeTimer = null;
 
-    function getProductLimit() {
-        return mobileViewport.matches ? 3 : 5;
+    /* ---------- 検索履歴（localStorage） ---------- */
+
+    function loadHistory() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) {
+                return [];
+            }
+            const arr = JSON.parse(raw);
+            if (!Array.isArray(arr)) {
+                return [];
+            }
+            return arr.filter(function (item) {
+                return typeof item === 'string' && item.trim() !== '';
+            });
+        } catch (error) {
+            return [];
+        }
     }
+
+    function saveHistory(history) {
+        try {
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(history.slice(0, MAX_HISTORY))
+            );
+        } catch (error) {
+            // プライベートモードや容量制限などで保存できない場合は無視
+        }
+    }
+
+    function addHistory(keyword) {
+        keyword = keyword.trim();
+        if (keyword === '') {
+            return;
+        }
+        const history = loadHistory().filter(function (item) {
+            return item !== keyword;
+        });
+        history.unshift(keyword);
+        saveHistory(history);
+    }
+
+    function removeHistory(keyword) {
+        const history = loadHistory().filter(function (item) {
+            return item !== keyword;
+        });
+        saveHistory(history);
+    }
+
+    function clearHistory() {
+        saveHistory([]);
+    }
+
+    /* ---------- 候補パネルの開閉 ---------- */
 
     function setExpanded(isExpanded) {
         suggestions.hidden = !isExpanded;
@@ -28,15 +84,86 @@
             clearTimeout(debounceTimer);
             debounceTimer = null;
         }
+        if (closeTimer !== null) {
+            clearTimeout(closeTimer);
+            closeTimer = null;
+        }
         suggestions.replaceChildren();
         setExpanded(false);
     }
+
+    /* ---------- レンダリング ---------- */
 
     function appendHeading(group, title) {
         const heading = document.createElement('h2');
         heading.className = 'search-suggestion-heading';
         heading.textContent = title;
         group.appendChild(heading);
+    }
+
+    function renderHistory(history) {
+        suggestions.replaceChildren();
+
+        if (history.length === 0) {
+            setExpanded(false);
+            return;
+        }
+
+        const heading = document.createElement('h2');
+        heading.className = 'search-suggestion-heading';
+        heading.textContent = '検索履歴';
+        suggestions.appendChild(heading);
+
+        const list = document.createElement('ul');
+        list.className = 'search-history-list';
+
+        history.forEach(function (keyword) {
+            const item = document.createElement('li');
+            item.className = 'search-history-item';
+
+            const keywordBtn = document.createElement('button');
+            keywordBtn.type = 'button';
+            keywordBtn.className = 'search-history-keyword';
+            keywordBtn.textContent = keyword;
+            keywordBtn.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                addHistory(keyword);
+                searchInput.value = keyword;
+                searchForm.submit();
+            });
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'search-history-delete';
+            deleteBtn.setAttribute('aria-label', keyword + ' を削除');
+            deleteBtn.textContent = '×';
+            deleteBtn.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                removeHistory(keyword);
+                renderHistory(loadHistory());
+            });
+
+            item.appendChild(keywordBtn);
+            item.appendChild(deleteBtn);
+            list.appendChild(item);
+        });
+        suggestions.appendChild(list);
+
+        const clearBtn = document.createElement('button');
+        clearBtn.type = 'button';
+        clearBtn.className = 'search-history-clear';
+        clearBtn.textContent = '全件削除';
+        clearBtn.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            clearHistory();
+            clearSuggestions();
+        });
+        suggestions.appendChild(clearBtn);
+
+        setExpanded(true);
     }
 
     function renderProducts(products, group) {
@@ -129,7 +256,7 @@
         if (products.length === 0 && categories.length === 0) {
             const message = document.createElement('p');
             message.className = 'search-suggestion-message';
-            message.textContent = '候補が見つかりませんでした。';
+            message.textContent = '該当する商品がありません。';
             suggestions.appendChild(message);
         }
 
@@ -143,6 +270,11 @@
         message.textContent = '検索候補を読み込めませんでした。';
         suggestions.appendChild(message);
         setExpanded(true);
+    }
+
+    function getProductLimit() {
+        const mobileViewport = window.matchMedia('(max-width: 800px)');
+        return mobileViewport.matches ? 3 : 5;
     }
 
     async function loadSuggestions(query, sequence) {
@@ -177,6 +309,14 @@
         }
     }
 
+    /* ---------- イベント ---------- */
+
+    searchInput.addEventListener('focus', function () {
+        if (searchInput.value.trim() === '') {
+            renderHistory(loadHistory());
+        }
+    });
+
     searchInput.addEventListener('input', function () {
         const query = searchInput.value.trim();
         const sequence = ++requestSequence;
@@ -185,16 +325,19 @@
             clearTimeout(debounceTimer);
             debounceTimer = null;
         }
+        if (closeTimer !== null) {
+            clearTimeout(closeTimer);
+            closeTimer = null;
+        }
 
         if (query === '') {
-            suggestions.replaceChildren();
-            setExpanded(false);
+            renderHistory(loadHistory());
             return;
         }
 
         debounceTimer = setTimeout(function () {
             loadSuggestions(query, sequence);
-        }, 180);
+        }, DEBOUNCE_MS);
     });
 
     searchInput.addEventListener('keydown', function (event) {
@@ -203,9 +346,23 @@
         }
     });
 
-    searchForm.addEventListener('submit', clearSuggestions);
+    searchInput.addEventListener('blur', function () {
+        closeTimer = setTimeout(clearSuggestions, 150);
+    });
+
+    searchForm.addEventListener('submit', function () {
+        const keyword = searchInput.value.trim();
+        if (keyword !== '') {
+            addHistory(keyword);
+        }
+        clearSuggestions();
+    });
 
     document.addEventListener('pointerdown', function (event) {
+        if (closeTimer !== null) {
+            clearTimeout(closeTimer);
+            closeTimer = null;
+        }
         if (!searchForm.contains(event.target)) {
             clearSuggestions();
         }
@@ -223,6 +380,7 @@
         loadSuggestions(searchInput.value.trim(), sequence);
     }
 
+    const mobileViewport = window.matchMedia('(max-width: 800px)');
     if (typeof mobileViewport.addEventListener === 'function') {
         mobileViewport.addEventListener('change', refreshForViewportChange);
     } else if (typeof mobileViewport.addListener === 'function') {

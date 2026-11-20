@@ -80,6 +80,7 @@ if (mb_strlen($comment, 'UTF-8') > 1000) {
 
 // データベース接続
 require_once '../../meetory-functions.php';
+require_once '../notifications/create-notification.php';
 
 $pdo = getPDO();
 
@@ -177,6 +178,37 @@ try {
 
     // 保存確定
     $pdo->commit();
+
+    // 評価されたユーザーへ通知を作成（重複は作成しない）
+    $revieweeId = (int) $transaction['seller_id'];
+    $reviewerId = $user_id;
+
+    // 評価者のユーザー名を取得
+    $stmtReviewer = $pdo->prepare(
+        'SELECT user_name FROM users WHERE user_id = :user_id'
+    );
+    $stmtReviewer->execute([
+        ':user_id' => $reviewerId
+    ]);
+    $reviewerName = $stmtReviewer->fetchColumn();
+
+    $stmtNotify = $pdo->prepare(
+        'SELECT COUNT(*) FROM notifications
+         WHERE user_id = ? AND type = ? AND related_id = ?'
+    );
+    $stmtNotify->execute([$revieweeId, 'review', $transaction_id]);
+    $alreadyNotified = $stmtNotify->fetchColumn() > 0;
+
+    if (!$alreadyNotified && $reviewerName !== false && $reviewerName !== '') {
+        createNotification(
+            $pdo,
+            $revieweeId,
+            'review',
+            '新しい評価が届きました',
+            $reviewerName . 'さんから評価が届きました',
+            $transaction_id
+        );
+    }
 
     // 取引詳細画面へ戻る
     header(

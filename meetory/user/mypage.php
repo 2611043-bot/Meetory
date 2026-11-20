@@ -1,3 +1,4 @@
+
 <?php
 
 // セッションを開始
@@ -16,7 +17,7 @@ if (
 }
 
 // DB接続用の共通ファイルを読み込む
-require_once __DIR__ . '/../../meetory-functions.php';
+require_once '../../meetory-functions.php';
 
 // ログイン中のユーザーIDを取得
 $user_id = (int) $_SESSION['user_id'];
@@ -160,7 +161,7 @@ $in_progress_stmt->execute([
 $in_progress_count = (int) $in_progress_stmt->fetchColumn();
 
 // 共通ヘッダー
-require_once __DIR__ . '/../../meetory-header.php';
+require '../../meetory-header.php';
 
 ?>
 
@@ -245,7 +246,11 @@ require_once __DIR__ . '/../../meetory-header.php';
         <h2>その他</h2>
         <nav class="mypage-link-list" aria-label="その他のメニュー">
             <a href="favorites.php">ほしいものリスト</a>
+            <a href="browsing-history.php">閲覧履歴</a>
+            <a href="address-list.php">住所管理</a>
             <a href="../messages/message-center.php">メッセージ</a>
+            <a href="notification-settings.php">通知設定</a>
+            <a href="blocked-list.php">ブロック一覧</a>
             <a href="logout.php">ログアウト</a>
         </nav>
     </section>
@@ -253,101 +258,114 @@ require_once __DIR__ . '/../../meetory-header.php';
     <section class="mypage-panel" id="purchase-history">
         <h2>購入履歴</h2>
 
-        <?php if (empty($purchase_history)): ?>
+<?php if (empty($purchase_history)): ?>
 
-            <p>購入履歴はまだありません。</p>
+    <p>購入履歴はまだありません。</p>
 
-        <?php else: ?>
+<?php else: ?>
 
-            <?php foreach ($purchase_history as $transaction_id => $purchase): ?>
+    <?php foreach ($purchase_history as $transaction_id => $purchase): ?>
 
-                <article class="mypage-purchase-card">
-                    <h3>
-                        取引番号：
-                        <?= htmlspecialchars((string) $transaction_id, ENT_QUOTES, 'UTF-8') ?>
-                    </h3>
+        <article class="mypage-purchase-card">
+            <h3>
+                取引番号：
+                <?= htmlspecialchars((string) $transaction_id, ENT_QUOTES, 'UTF-8') ?>
+            </h3>
 
-                    <p>
-                        購入日時：
-                        <?= htmlspecialchars(
-                            date('Y年m月d日 H:i:s', strtotime($purchase['purchased_at'])),
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </p>
+            <p>
+                購入日時：
+                <?= htmlspecialchars(
+                    date('Y年m月d日H:i:s', strtotime($purchase['purchased_at'])),
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) ?>
+            </p>
 
-                    <p>
-                        取引状況：
-                        <?= htmlspecialchars($purchase['transaction_status'], ENT_QUOTES, 'UTF-8') ?>
-                    </p>
+            <p>
+                取引状況：
+                <?= htmlspecialchars($purchase['transaction_status'], ENT_QUOTES, 'UTF-8') ?>
+            </p>
 
-                    <h4>購入した商品</h4>
+            <h4>購入した商品</h4>
 
-                    <?php if (empty($purchase['items'])): ?>
+            <?php if (empty($purchase['items'])): ?>
 
-                        <p>商品情報を確認できません。</p>
+                <p>商品情報を確認できません。</p>
 
-                    <?php else: ?>
+            <?php else: ?>
 
-                        <ul>
-                            <?php foreach ($purchase['items'] as $item): ?>
+                <ul>
+                <?php foreach ($purchase['items'] as $item): ?>
 
-                                <li>
-                                    <?php if (!empty($item['image_path'])): ?>
-                                        <div>
-                                            <img
-                                                src="/Meetory/<?= htmlspecialchars(
-                                                    ltrim($item['image_path'], '/'),
-                                                    ENT_QUOTES,
-                                                    'UTF-8'
-                                                ) ?>"
-                                                alt="<?= htmlspecialchars(
-                                                    $item['goods_name'] ?? '商品画像',
-                                                    ENT_QUOTES,
-                                                    'UTF-8'
-                                                ) ?>"
-                                                width="200"
-                                                loading="lazy"
-                                            >
-                                        </div>
-                                    <?php else: ?>
-                                        <p>画像はありません</p>
-                                    <?php endif; ?>
+                    <li>
+                        <!-- 商品画像 -->
+                        <?php
+                        $item_image_path = $item['image_path'] ?? '';
+                        $is_valid_item_image = is_string($item_image_path)
+                            && preg_match(
+                                '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
+                                $item_image_path
+                            )
+                            && is_file(__DIR__ . '/../../' . $item_image_path);
+                        ?>
+                        <?php if ($is_valid_item_image): ?>
+                            <div class="goods-image">
+                                <img
+                                    src="/Meetory/<?= htmlspecialchars(
+                                        ltrim($item_image_path, '/'),
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                    alt="<?= htmlspecialchars(
+                                        $item['goods_name'] ?? '商品画像',
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                    width="200"
+                                    loading="lazy"
+                                >
+                            </div>
+                        <?php else: ?>
+                            <p>画像はありません</p>
+                        <?php endif; ?>
 
-                                    <p>
-                                        商品名：
-                                        <?= htmlspecialchars(
-                                            $item['goods_name'] ?? '商品情報なし',
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>
-                                    </p>
+                        <!-- 商品名 -->
+                        <p>
+                            商品名：
+                            <?= htmlspecialchars(
+                                $item['goods_name'] ?? '商品情報なし',
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+                        </p>
 
-                                    <p>
-                                        購入時の価格：
-                                        <?= number_format((int) $item['purchase_price']) ?>円
-                                    </p>
-                                </li>
+                        <!-- 購入時の価格 -->
+                        <p>
+                            購入時の価格：
+                            <?= number_format((int) $item['purchase_price']) ?>円
+                        </p>
+                    </li>
 
-                            <?php endforeach; ?>
-                        </ul>
+                <?php endforeach; ?>
+                </ul>
 
-                    <?php endif; ?>
+            <?php endif; ?>
 
-                    <p>
-                        購入合計金額：
-                        <?= number_format((int) $purchase['total_price']) ?>円
-                    </p>
+            <p>
+                購入合計金額：
+                <?= number_format((int) $purchase['total_price']) ?>円
+            </p>
 
-                    <a href="../purchase/transaction-detail.php?transaction_id=<?= (int) $transaction_id ?>">
-                        取引詳細を見る
-                    </a>
-                </article>
+            <a href="../purchase/transaction-detail.php?transaction_id=<?= (int) $transaction_id ?>">
+                取引詳細を見る
+            </a>
+        </article>
 
-            <?php endforeach; ?>
+    <?php endforeach; ?>
 
-        <?php endif; ?>
+<?php endif; ?>
+
     </section>
 </div>
 
-<?php require_once __DIR__ . '/../../meetory-footer.php'; ?>
+<?php require '../../meetory-footer.php'; ?>

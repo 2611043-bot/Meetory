@@ -202,6 +202,83 @@ body {
     font-size: 13px;
 }
 
+/* 検索履歴 */
+.search-history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.search-history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+}
+
+.search-history-item:last-child {
+    border-bottom: none;
+}
+
+.search-history-keyword {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 14px;
+    color: #333;
+    text-decoration: none;
+}
+
+.search-history-keyword:hover {
+    color: #1a73e8;
+    text-decoration: underline;
+}
+
+.search-history-delete {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    color: #999;
+    font-size: 18px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.search-history-delete:hover {
+    color: #d32f2f;
+    background: #ffe5e5;
+}
+
+.search-history-clear {
+    width: 100%;
+    padding: 10px 14px;
+    background: none;
+    border: none;
+    color: #777;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.search-history-clear:hover {
+    background: #f4f7fb;
+    color: #d32f2f;
+    text-decoration: underline;
+}
+
 /* 右側メニュー */
 .header-actions {
     display: flex;
@@ -229,6 +306,33 @@ body {
 .icon-btn:hover {
     background-color: #f0f4f9;
     color: #1a73e8;
+}
+
+/* 通知ベル：バッジを重ねるため position: relative */
+.notification-bell-btn {
+    position: relative;
+}
+
+/* 未読件数バッジ */
+.notification-badge {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    background: #d32f2f;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    border: 2px solid #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    z-index: 2;
 }
 
 /* 出品ボタン */
@@ -268,13 +372,92 @@ body {
     justify-content: center;
 }
 
-.nav-link:hover {
+/* ヘッダーのユーザー名表示 */
+.header-user-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #444;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 7px 14px 7px 10px;
+    border-radius: 20px;
+    border: 1px solid #d0d7de;
+    background-color: transparent;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.header-user-name:hover {
     background-color: #f0f4f9;
     border-color: #1a73e8;
     color: #1a73e8;
 }
 
-/* 検索時のオーバーレイ */
+.header-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    background-color: #f0f2f5;
+}
+
+.header-user-name span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 150px;
+}
+
+/* スマートフォン対応 */
+@media (max-width: 800px) {
+    .header-main {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .header-search-form {
+        order: 3;
+        flex-basis: 100%;
+        margin: 0;
+    }
+
+    .header-actions {
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .nav-link {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .btn-sell {
+        padding: 7px 12px;
+        font-size: 12px;
+    }
+
+    .header-user-name {
+        padding: 6px 10px 6px 8px;
+        font-size: 12px;
+        max-width: 160px;
+        gap: 6px;
+    }
+
+    .header-user-avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .header-user-name span {
+        max-width: 110px;
+    }
+}
 .search-overlay {
     position: fixed;
     top: 0;

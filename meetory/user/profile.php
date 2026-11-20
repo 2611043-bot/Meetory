@@ -10,6 +10,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 require_once '../../meetory-functions.php';
 
 $pdo = getPDO();
+if (empty($_SESSION['csrf_token'])) { $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); }
 
 // URLからプロフィールを表示するユーザーIDを取得
 $profile_user_id = filter_input(
@@ -289,6 +290,23 @@ require '../../meetory-header.php';
                 <a href="mypage.php">マイページへ戻る</a>
                 <a href="profile-image.php">アイコンを変更する</a>
             </p>
+        <?php elseif ($viewer_user_id !== false && $viewer_user_id !== null && (int)$viewer_user_id > 0): ?>
+            <?php
+            $is_blocked = isUserBlocked($pdo, (int)$viewer_user_id, (int)$profile_user_id);
+            ?>
+            <?php if ($is_blocked): ?>
+            <form method="POST" action="unblock-user.php" style="display:inline">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="target_id" value="<?= (int)$profile_user_id ?>">
+                <input type="hidden" name="redirect" value="profile.php?user_id=<?= (int)$profile_user_id ?>">
+                <button type="submit">ブロック解除</button>
+            </form>
+            <?php else: ?>
+            <a href="block-confirm.php?target_id=<?= (int)$profile_user_id ?>"><button type="button">ブロックする</button></a>
+            <?php endif; ?>
+            <p class="profile-report-link">
+                <a href="../reports/report.php?target_type=user&amp;target_id=<?= (int)$profile_user_id ?>">このユーザーを通報する</a>
+            </p>
         <?php endif; ?>
     </section>
 
@@ -428,10 +446,19 @@ require '../../meetory-header.php';
                 <?php foreach ($listed_goods as $goods): ?>
                     <article class="profile-goods-card">
                         <a href="../goods/goods-detail.php?goods_id=<?= (int) $goods['goods_id'] ?>">
-                            <?php if (!empty($goods['image_path'])): ?>
+                            <?php
+                            $prof_image_path = $goods['image_path'] ?? '';
+                            $is_valid_prof_image = is_string($prof_image_path)
+                                && preg_match(
+                                    '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
+                                    $prof_image_path
+                                )
+                                && is_file(__DIR__ . '/../../' . $prof_image_path);
+                            ?>
+                            <?php if ($is_valid_prof_image): ?>
                                 <img
                                     src="/Meetory/<?= htmlspecialchars(
-                                        ltrim($goods['image_path'], '/'),
+                                        ltrim($prof_image_path, '/'),
                                         ENT_QUOTES,
                                         'UTF-8'
                                     ) ?>"
@@ -486,10 +513,19 @@ require '../../meetory-header.php';
                         class="profile-auction-card"
                         href="../auction/auction-detail.php?goods_id=<?= (int) $auction['goods_id'] ?>"
                     >
-                        <?php if (!empty($auction['image_path'])): ?>
+                        <?php
+                        $auc_image_path = $auction['image_path'] ?? '';
+                        $is_valid_auc_image = is_string($auc_image_path)
+                            && preg_match(
+                                '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
+                                $auc_image_path
+                            )
+                            && is_file(__DIR__ . '/../../' . $auc_image_path);
+                        ?>
+                        <?php if ($is_valid_auc_image): ?>
                             <img
                                 src="/Meetory/<?= htmlspecialchars(
-                                    $auction['image_path'],
+                                    $auc_image_path,
                                     ENT_QUOTES,
                                     'UTF-8'
                                 ) ?>"

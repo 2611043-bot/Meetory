@@ -17,9 +17,11 @@ if (
 
 // 共通処理
 require_once '../../meetory-functions.php';
+require_once '../notifications/create-notification.php';
 
 $pdo = getPDO();
 $user_id = (int) $_SESSION['user_id'];
+$sender_name = $_SESSION['user_name'] ?? '';
 
 // GETまたはPOSTからIDを取得
 $source = $_SERVER['REQUEST_METHOD'] === 'POST'
@@ -239,24 +241,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($is_pre_purchase) {
         // 購入前DM：取引IDはNULL、商品IDを保存
-        $sql = '
-            INSERT INTO messages (
-                transaction_id,
-                sender_id,
-                receiver_id,
-                content,
-                goods_id
-            )
-            VALUES (NULL, ?, ?, ?, ?)
-        ';
+        try {
+            $pdo->beginTransaction();
 
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            $user_id,
-            $partner_id,
-            $content,
-            $goods_id
-        ]);
+            $sql = '
+                INSERT INTO messages (
+                    transaction_id,
+                    sender_id,
+                    receiver_id,
+                    content,
+                    goods_id
+                )
+                VALUES (NULL, ?, ?, ?, ?)
+            ';
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $user_id,
+                $partner_id,
+                $content,
+                $goods_id
+            ]);
+
+            $messageId = (int) $pdo->lastInsertId();
+
+            // 受信者へ通知を作成（重複は作成しない）
+            $stmtNotify = $pdo->prepare(
+                'SELECT COUNT(*) FROM notifications
+                 WHERE user_id = ? AND type = ? AND related_id = ?'
+            );
+            $stmtNotify->execute([$partner_id, 'message', $messageId]);
+            $alreadyNotified = $stmtNotify->fetchColumn() > 0;
+
+            if (!$alreadyNotified) {
+                createNotification(
+                    $pdo,
+                    $partner_id,
+                    'message',
+                    '新しいメッセージ',
+                    $sender_name . 'さんからメッセージが届きました。',
+                    $messageId
+                );
+            }
+
+            $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('message-list: メッセージ送信エラー: ' . $e->getMessage());
+            exit('メッセージの送信に失敗しました。');
+        }
 
         header(
             'Location: message-list.php?goods_id='
@@ -268,23 +303,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     } else {
         // 購入後の取引メッセージ
-        $sql = '
-            INSERT INTO messages (
-                transaction_id,
-                sender_id,
-                receiver_id,
-                content
-            )
-            VALUES (?, ?, ?, ?)
-        ';
+        try {
+            $pdo->beginTransaction();
 
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            $transaction_id,
-            $user_id,
-            $partner_id,
-            $content
-        ]);
+            $sql = '
+                INSERT INTO messages (
+                    transaction_id,
+                    sender_id,
+                    receiver_id,
+                    content
+                )
+                VALUES (?, ?, ?, ?)
+            ';
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $transaction_id,
+                $user_id,
+                $partner_id,
+                $content
+            ]);
+
+            $messageId = (int) $pdo->lastInsertId();
+
+            // 受信者へ通知を作成（重複は作成しない）
+            $stmtNotify = $pdo->prepare(
+                'SELECT COUNT(*) FROM notifications
+                 WHERE user_id = ? AND type = ? AND related_id = ?'
+            );
+            $stmtNotify->execute([$partner_id, 'message', $messageId]);
+            $alreadyNotified = $stmtNotify->fetchColumn() > 0;
+
+            if (!$alreadyNotified) {
+                createNotification(
+                    $pdo,
+                    $partner_id,
+                    'message',
+                    '新しいメッセージ',
+                    $sender_name . 'さんからメッセージが届きました。',
+                    $messageId
+                );
+            }
+
+            $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('message-list: メッセージ送信エラー: ' . $e->getMessage());
+            exit('メッセージの送信に失敗しました。');
+        }
 
         header(
             'Location: message-list.php?transaction_id='

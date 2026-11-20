@@ -22,6 +22,79 @@ $is_auth_page = in_array(
     ['login.php', 'register.php', 'password-reset.php'],
     true
 );
+
+// 通知ベル：ログインユーザーの未読件数（COUNTで効率的に取得）
+$unreadNotificationCount = 0;
+if (
+    isset($_SESSION['user_id']) &&
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) !== false &&
+    (int) $_SESSION['user_id'] > 0
+) {
+    // 既存のDB接続を再利用し、なければ共通関数で取得（重複接続を避ける）
+    $pdoNotif = isset($pdo) && $pdo instanceof PDO ? $pdo : getPDO();
+    $user_id = (int) $_SESSION['user_id'];
+
+    // 通知設定を取得
+    $settings = getNotificationSettings($pdoNotif, $user_id);
+    $notificationsEnabled = (int) $settings['enabled'] === 1;
+
+    // 許可されている通知タイプを設定から構築
+    $allowedTypeKeys = [];
+    $typeColumnMap = [
+        'message'    => 'type_message',
+        'purchase'   => 'type_purchase',
+        'shipping'   => 'type_shipping',
+        'received'   => 'type_received',
+        'review'     => 'type_review',
+        'favorite'   => 'type_favorite',
+        'price_down' => 'type_price_down',
+        'follow'     => 'type_follow',
+        'admin'      => 'type_admin',
+    ];
+
+    foreach ($typeColumnMap as $typeKey => $colName) {
+        if ((int) $settings[$colName] === 1) {
+            $allowedTypeKeys[] = $typeKey;
+        }
+    }
+
+    // 通知全体がONかつ有効なタイプがある場合のみカウント
+    if ($notificationsEnabled && !empty($allowedTypeKeys)) {
+        $typePlaceholders = implode(',', array_map(fn($i) => ":type_$i", array_keys($allowedTypeKeys)));
+        $stmtUnread = $pdoNotif->prepare(
+            'SELECT COUNT(*) FROM notifications WHERE user_id = :user_id AND is_read = 0 AND type IN (' . $typePlaceholders . ')'
+        );
+        $stmtUnread->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+        foreach ($allowedTypeKeys as $i => $typeKey) {
+            $stmtUnread->bindValue(":type_$i", $typeKey, PDO::PARAM_STR);
+        }
+        $stmtUnread->execute();
+        $unreadNotificationCount = (int) $stmtUnread->fetchColumn();
+    }
+}
+
+// ログインユーザーのプロフィール画像を取得
+$profileAvatarUrl = '/Meetory/meetory/assets/images/profile-icons/preset-01.svg';
+if (
+    isset($_SESSION['user_id']) &&
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) !== false &&
+    (int) $_SESSION['user_id'] > 0
+) {
+    // 既存のDB接続を再利用し、なければ共通関数で取得
+    $pdoAvatar = isset($pdo) && $pdo instanceof PDO ? $pdo : getPDO();
+    $user_id = (int) $_SESSION['user_id'];
+
+    $stmtAvatar = $pdoAvatar->prepare(
+        'SELECT profile_image_type, profile_image FROM users WHERE user_id = :user_id LIMIT 1'
+    );
+    $stmtAvatar->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+    $stmtAvatar->execute();
+    $avatarData = $stmtAvatar->fetch(PDO::FETCH_ASSOC);
+
+    if ($avatarData) {
+        $profileAvatarUrl = getProfileAvatarUrl($avatarData);
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -42,6 +115,9 @@ $is_auth_page = in_array(
         rel="stylesheet"
         href="/Meetory/meetory/assets/css/header.css?v=<?= filemtime(__DIR__ . '/meetory/assets/css/header.css') ?>"
     >
+
+    <!-- サイトのアイコン -->
+    <link rel="icon" type="image/png" href="/Meetory/meetory/image/logo_white.png">
 </head>
 
 <body class="<?= isset($body_class) ? htmlspecialchars($body_class, ENT_QUOTES, 'UTF-8') : '' ?>">
@@ -52,7 +128,7 @@ $is_auth_page = in_array(
         <!-- ロゴ -->
         <a href="/Meetory/meetory/index.php" class="header-logo">
             <img
-                src="/Meetory/meetory/user/logo.png"
+                src="/Meetory/meetory/image/logo.png"
                 alt="Meetory"
                 class="logo-img"
             >
@@ -101,6 +177,43 @@ $is_auth_page = in_array(
 
                 <?php if (isset($_SESSION['user_id'])): ?>
 
+                    <!-- ユーザー名表示（マイページへリンク） -->
+                    <?php if (isset($_SESSION['user_name'])): ?>
+                    <a
+                        href="/Meetory/meetory/user/mypage.php"
+                        class="header-user-name"
+                        aria-label="マイページへ"
+                    >
+                        <img
+                            src="<?= htmlspecialchars($profileAvatarUrl, ENT_QUOTES, 'UTF-8') ?>"
+                            alt=""
+                            class="header-user-avatar"
+                            loading="lazy"
+                        >
+                        <span><?= htmlspecialchars($_SESSION['user_name'], ENT_QUOTES, 'UTF-8') ?></span>
+                    </a>
+                    <?php endif; ?>
+
+                    <!-- 通知ベル（未読件数バッジ付き） -->
+                    <a
+                        id="notificationBell"
+                        href="/Meetory/meetory/notifications/index.php"
+                        class="icon-btn notification-bell-btn"
+                        aria-label="通知（未読<?= $unreadNotificationCount ?>件）"
+                        rel="nofollow"
+                    >
+<i class="fa-solid fa-bell"></i>
+                    <?php if ($unreadNotificationCount > 0): ?>
+                            <span
+                                id="notificationBadge"
+                                class="notification-badge"
+                                aria-hidden="true"
+                            >
+                                <?= $unreadNotificationCount >= 100 ? '99+' : $unreadNotificationCount ?>
+                            </span>
+                        <?php endif; ?>
+                    </a>
+
                     <!-- ハンバーガーメニューボタン -->
                     <button
                         type="button"
@@ -108,8 +221,8 @@ $is_auth_page = in_array(
                         id="hamburgerBtn"
                         aria-label="メニューを開く"
                     >
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
+<i class="fa-solid fa-bars"></i>
+</button>
 
                 <?php else: ?>
 
@@ -134,8 +247,8 @@ $is_auth_page = in_array(
                         id="hamburgerBtn"
                         aria-label="メニューを開く"
                     >
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
+<i class="fa-solid fa-bars"></i>
+</button>
 
                 <?php endif; ?>
 
@@ -207,6 +320,25 @@ $is_auth_page = in_array(
                         <i class="fa-solid fa-user-gear"></i>
                         プロフィール・設定
                     </a>
+            <a
+                href="/Meetory/meetory/user/notification-settings.php"
+                class="sidebar-link"
+            >
+                <i class="fa-solid fa-bell"></i>
+                通知設定
+            </a>
+            <?php endif; ?>
+
+            <!-- 管理（管理者のみ） -->
+            <?php if (isset($_SESSION['user_id']) && isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+            <h2 class="sidebar-section-title">管理</h2>
+            <a
+                href="/Meetory/meetory/reports/admin/index.php"
+                class="sidebar-link"
+            >
+                <i class="fa-solid fa-flag"></i>
+                通報管理
+            </a>
             <?php endif; ?>
 
             <!-- その他 -->
@@ -274,6 +406,10 @@ $is_auth_page = in_array(
     <!-- ヘッダー専用JavaScript -->
     <script
         src="/Meetory/meetory/assets/js/header.js?v=2026110901"
+        defer
+    ></script>
+    <script
+        src="/Meetory/meetory/assets/js/notifications.js?v=<?= filemtime(__DIR__ . '/meetory/assets/js/notifications.js') ?>"
         defer
     ></script>
     <script

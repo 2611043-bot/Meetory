@@ -1,60 +1,339 @@
 /* ==============================
     商品一覧ページ専用スタイルシート
-    goods-list.php で class="goods-list", "goods-item", "goods-image" を使用
+    goods-list.php で使用
     他ページのスタイルと競合しないよう、セレクタはページ固有のクラス名に限定
    ============================== */
 
-/* 商品カードの一覧コンテナ */
+/* ページ全体の淡いブルー背景 */
+.goods-list-page {
+    min-height: calc(100vh - 120px);
+    padding: 36px 20px 110px;
+    background: linear-gradient(135deg, #eef8ff, #f8fbff);
+    box-sizing: border-box;
+}
+
+/* 中央の最大幅コンテナ */
+.goods-list-container {
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.goods-list-container h1 {
+    margin: 0 0 22px 0;
+    font-size: 26px;
+    font-weight: bold;
+    color: #1976d2;
+}
+
+/* ==============================
+    検索フォーム（白い横長カード）
+   ============================== */
+.goods-search-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    background-color: #ffffff;
+    border: 1px solid #d9eaf7;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(30, 136, 229, 0.08);
+    box-sizing: border-box;
+}
+
+.goods-search-form .search-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 180px;
+}
+
+.goods-search-form .search-price {
+    flex: 1 1 150px;
+    position: relative;
+}
+
+.goods-search-form label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #34495e;
+}
+
+.goods-search-form input[type="text"],
+.goods-search-form input[type="number"],
+.goods-search-form select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid #cddfea;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #333;
+    background-color: #fafdff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.goods-search-form input[type="text"]:focus,
+.goods-search-form input[type="number"]:focus,
+.goods-search-form select:focus {
+    border-color: #2196f3;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.12);
+}
+
+.goods-search-form .search-price span {
+    display: none;
+}
+
+.goods-search-form .search-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+}
+
+.goods-search-form button[type="submit"] {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(25, 118, 210, 0.2);
+    transition: 0.2s;
+}
+
+.goods-search-form button[type="submit"]:hover {
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+}
+
+.goods-search-form .search-actions a {
+    display: inline-block;
+    padding: 9px 16px;
+    border: 1px solid #cddfea;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.goods-search-form .search-actions a:hover {
+    border-color: #90caf9;
+    color: #1976d2;
+    background-color: #f5faff;
+}
+
+/* ==============================
+    商品カードの一覧コンテナ
+   ============================== */
 .goods-list {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    margin-top: 20px;
+}
+
+/* カード間に挟まっていた元の <hr> を非表示 */
+.goods-list hr {
+    display: none;
 }
 
 /* 個別の商品カード */
 .goods-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
     flex: 0 0 calc((100% - 60px) / 4);
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    border: 1px solid #e1f0fa;
+    border-radius: 14px;
     padding: 16px;
     box-sizing: border-box;
-    background: #fff;
+    background: #ffffff;
+    box-shadow: 0 4px 16px rgba(30, 136, 229, 0.08);
+    transition: transform 0.15s, box-shadow 0.15s;
 }
 
+.goods-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(30, 136, 229, 0.14);
+}
+
+.goods-item .favorite-form {
+    margin-bottom: 8px;
+}
+
+/* 商品画像のラッパー */
+.goods-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 180px;
+    margin-bottom: 12px;
+    background-color: #fafdff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.goods-image img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+/* 画像なし時のボックス */
+.no-image-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 180px;
+    margin: 0 0 12px 0;
+    background-color: #f1f6fb;
+    border: 1px dashed #cddfea;
+    border-radius: 8px;
+    color: #7b8fa3;
+    font-size: 13px;
+}
+
+/* 商品名 */
+.goods-item h2 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #1e293b;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 価格 */
+.goods-price {
+    margin: 0 0 8px 0;
+    font-size: 17px;
+    font-weight: bold;
+    color: #1976d2;
+}
+
+/* 商品の状態バッジ */
+.goods-condition {
+    align-self: flex-start;
+    margin: 0 0 10px 0;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #1565c0;
+    background-color: #e3f2fd;
+    border-radius: 20px;
+}
+
+/* 出品者情報 */
 .goods-seller {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 12px 0;
+    margin: 4px 0 10px 0;
     color: #475467;
     font-size: 13px;
     text-decoration: none;
 }
 
+.goods-seller:hover {
+    color: #1976d2;
+}
+
 .goods-seller-avatar {
-    flex: 0 0 32px;
-    width: 32px;
-    height: 32px;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
     overflow: hidden;
     border-radius: 50%;
 }
 
-/* 商品画像のラッパー */
-.goods-image {
+/* 商品説明文 */
+.goods-description {
+    margin: 0 0 14px 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #64748b;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 商品詳細を見るボタン */
+.goods-detail-link {
+    margin-top: auto;
+    display: block;
     text-align: center;
-    margin-bottom: 12px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.2s;
 }
 
-/* 商品画像（カード内で幅を制限） */
-.goods-image img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 4px;
+.goods-detail-link:hover {
+    background: linear-gradient(135deg, #1976d2, #1565c0);
 }
 
-/* スマートフォン対応：カードを1列に */
+/* 商品0件時のメッセージ */
+.goods-empty {
+    text-align: center;
+    padding: 48px 20px;
+    background-color: #ffffff;
+    border: 1px solid #d9eaf7;
+    border-radius: 14px;
+    color: #64748b;
+    font-size: 15px;
+}
+
+/* ==============================
+    レスポンシブ対応
+   ============================== */
+@media (max-width: 992px) {
+    .goods-item {
+        flex: 0 0 calc((100% - 40px) / 3);
+    }
+}
+
 @media (max-width: 768px) {
+    .goods-list-page {
+        padding: 20px 12px 100px;
+    }
+
+    .goods-search-form {
+        padding: 16px;
+    }
+
+    .goods-search-form .search-field,
+    .goods-search-form .search-price,
+    .goods-search-form .search-actions {
+        flex: 1 1 100%;
+    }
+
+    .goods-search-form .search-actions button,
+    .goods-search-form .search-actions a {
+        flex: 1;
+        text-align: center;
+    }
+
     .goods-item {
         flex: 0 0 calc((100% - 20px) / 2);
     }

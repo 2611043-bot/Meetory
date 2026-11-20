@@ -16,7 +16,7 @@ if (
 }
 
 // ログイン中のユーザーIDを取得
-$user_id = $_SESSION['user_id'];
+$user_id =$_SESSION['user_id'];
 
 // データベースに接続
 $pdo = getPDO();
@@ -30,55 +30,62 @@ $sql = 'SELECT goods_id, goods_name, description, price, `condition`, listed_at
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$user_id]);
 
-$goods_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$goods_list =$stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// ページ固有CSS
+$page_css = '/Meetory/meetory/assets/css/my-goods.css?v=' . filemtime(__DIR__ . '/../assets/css/my-goods.css');
 ?>
+
+<link rel="stylesheet" href="<?= htmlspecialchars($page_css, ENT_QUOTES, 'UTF-8') ?>">
 
 <?php require '../../meetory-header.php'; ?>
 
-<main>
-    <h1>自分の出品商品</h1>
+<div class="my-goods-page">
+    <main class="my-goods-container">
+        <h1>自分の出品商品</h1>
 
-    <?php if (count($goods_list) > 0): ?>
+        <?php if (count($goods_list) > 0): ?>
 
-        <?php foreach ($goods_list as $goods): ?>
+            <?php foreach ($goods_list as$goods): ?>
 
-            <article>
-                <h2>
-                    <?= htmlspecialchars($goods['goods_name'], ENT_QUOTES, 'UTF-8') ?>
-                </h2>
+                <article class="my-goods-item">
+                    <h2>
+                        <?= htmlspecialchars($goods['goods_name'], ENT_QUOTES, 'UTF-8') ?>
+                    </h2>
 
-                <p>
-                    価格：
-                    <?= number_format((int)$goods['price']) ?>円
-                </p>
+                    <p class="my-goods-price">
+                        価格：
+                        <?= number_format((int)$goods['price']) ?>円
+                    </p>
 
-                <p>
-                    商品の状態：
-                    <?= htmlspecialchars($goods['condition'], ENT_QUOTES, 'UTF-8') ?>
-                </p>
+                    <p class="my-goods-condition">
+                        商品の状態：
+                        <?= htmlspecialchars($goods['condition'], ENT_QUOTES, 'UTF-8') ?>
+                    </p>
 
-                <p>
-                    <?= nl2br(htmlspecialchars($goods['description'], ENT_QUOTES, 'UTF-8')) ?>
-                </p>
+                    <p class="my-goods-description">
+                        <?= nl2br(htmlspecialchars($goods['description'], ENT_QUOTES, 'UTF-8')) ?>
+                    </p>
 
-                <a href="goods-detail.php?goods_id=<?= (int)$goods['goods_id'] ?>">
-                    商品詳細を見る
-                </a>
-            </article>
+                    <a href="goods-detail.php?goods_id=<?= (int)$goods['goods_id'] ?>" class="my-goods-detail-link">
+                        商品詳細を見る
+                    </a>
+                </article>
 
-            <hr>
+                <hr>
 
-        <?php endforeach; ?>
+            <?php endforeach; ?>
 
-    <?php else: ?>
+        <?php else: ?>
 
-        <p>まだ商品を出品していません。</p>
+            <p class="my-goods-empty">まだ商品を出品していません。</p>
 
-    <?php endif; ?>
+        <?php endif; ?>
 
-    <p>
-        <a href="goods-list.php">すべての商品を見る</a>
-    </p>
-</main>
+        <p class="my-goods-all-link">
+            <a href="goods-list.php">すべての商品を見る</a>
+        </p>
+    </main>
+</div>
 
 <?php require '../../meetory-footer.php'; ?>

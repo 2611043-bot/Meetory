@@ -2,7 +2,8 @@
 <?php
 session_start();
 
-require '../../meetory-functions.php';
+require '../meetory-functions.php';
+require '../notifications/create-notification.php';
 
 // ログイン確認
 if (!isset($_SESSION['user_id'])) {
@@ -97,8 +98,8 @@ if (
 
 $pdo = getPDO();
 
-// 商品の出品者を確認
-$sql = 'SELECT seller_id
+// 商品の出品者・現在の価格・商品名・売却状態を確認
+$sql = 'SELECT seller_id, price AS old_price, goods_name, is_sold
         FROM goods
         WHERE goods_id = ?';
 
@@ -111,6 +112,11 @@ $product = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$product) {
     exit('商品が見つかりません。');
 }
+
+$oldPrice = (int) $product['old_price'];
+$sellerId = (int) $product['seller_id'];
+$goodsName = $product['goods_name'];
+$isSold = (int) $product['is_sold'];
 
 // 管理者でなく、出品者本人でもない場合は拒否
 if (
@@ -150,6 +156,37 @@ $stmt->execute([
     $category_id,
     $goods_id
 ]);
+
+// 価格が値下げされた場合、お気に入り登録者へ通知を作成
+if ($price < $oldPrice && $isSold === 0) {
+    // お気に入り登録者（出品者本人を除く）を取得
+    $stmtFav = $pdo->prepare(
+        'SELECT user_id
+        FROM favorites
+        WHERE goods_id = ?
+          AND user_id <> ?'
+    );
+    $stmtFav->execute([$goods_id, $sellerId]);
+    $favoritedUserIds = $stmtFav->fetchAll(PDO::FETCH_COLUMN);
+
+    foreach ($favoritedUserIds as $favoritedUserId) {
+        // 通知設定を確認（type_price_down = 0 の場合はスキップ）
+        $settings = getNotificationSettings($pdo, (int) $favoritedUserId);
+        if ((int) $settings['type_price_down'] !== 1) {
+            continue;
+        }
+
+        createNotification(
+            $pdo,
+            (int) $favoritedUserId,
+            'price_down',
+            'お気に入り商品の価格が下がりました',
+            'お気に入り登録している「' . $goodsName . '」が' .
+            number_format($oldPrice) . '円から' . number_format($price) . '円に値下げされました',
+            $goods_id
+        );
+    }
+}
 
 // 商品詳細画面へ戻る
 header('Location: goods-detail.php?goods_id=' . $goods_id);

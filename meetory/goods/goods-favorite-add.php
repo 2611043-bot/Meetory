@@ -24,7 +24,8 @@ if (
 }
 
 // 共通処理を読み込む
-require_once '../../meetory-functions.php';
+require_once '../meetory-functions.php';
+require_once '../notifications/create-notification.php';
 
 // データベース接続
 $pdo = getPDO();
@@ -65,15 +66,20 @@ if (!preg_match('~\A/Meetory/meetory/.*\z~', $return_url)) {
 try {
     // 商品の存在確認
     $stmt = $pdo->prepare(
-        'SELECT goods_id
+        'SELECT goods_id, seller_id, goods_name
         FROM goods
         WHERE goods_id = ?'
     );
     $stmt->execute([$goods_id]);
 
-    if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+    $goods = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$goods) {
         exit('商品が見つかりません。');
     }
+
+    $sellerId = (int) $goods['seller_id'];
+    $goodsName = $goods['goods_name'];
 
     // すでに保存済みか確認
     $stmt = $pdo->prepare(
@@ -96,6 +102,27 @@ try {
         VALUES (?, ?)'
     );
     $stmt->execute([$user_id, $goods_id]);
+
+    // 出品者へお気に入り通知を作成（重複・自分自身への通知は作成しない）
+    if ($sellerId !== $user_id) {
+        $stmtNotify = $pdo->prepare(
+            'SELECT COUNT(*) FROM notifications
+             WHERE user_id = ? AND type = ? AND related_id = ?'
+        );
+        $stmtNotify->execute([$sellerId, 'favorite', $goods_id]);
+        $alreadyNotified = $stmtNotify->fetchColumn() > 0;
+
+        if (!$alreadyNotified) {
+            createNotification(
+                $pdo,
+                $sellerId,
+                'favorite',
+                '商品がお気に入り登録されました',
+                '出品した「' . $goodsName . '」がお気に入り登録されました',
+                $goods_id
+            );
+        }
+    }
 
     // 元の商品ページへ戻す
     header('Location: ' . $return_url);

@@ -12,8 +12,6 @@ if (empty($_SESSION['csrf_token'])) {
 
 // ログインしていない場合
 if (!isset($_SESSION['user_id'])) {
-
-    // ログイン画面へ移動
     header('Location: ../user/login.php');
     exit;
 }
@@ -35,7 +33,7 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $errors = $_SESSION['goods_register_errors'] ?? [];
 $old = $_SESSION['goods_register_old'] ?? [];
 
-// エラーと保持値をクリア（次のリクエストのため）
+// エラーと保持値をクリア
 unset($_SESSION['goods_register_errors']);
 unset($_SESSION['goods_register_old']);
 
@@ -51,189 +49,303 @@ $old_buyout_price = $old['buyout_price'] ?? '';
 $old_end_at = $old['end_at'] ?? '';
 $old_auto_extend = $old['auto_extend'] ?? '1';
 
+// ページ固有CSS
+$page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DIR__ . '/../assets/css/goods-register.css');
+
 ?>
+
+<link rel="stylesheet" href="<?= htmlspecialchars($page_css, ENT_QUOTES, 'UTF-8') ?>">
 
 <?php require_once '../../meetory-header.php'; ?>
 
-<link rel="stylesheet" href="../assets/css/goods-register.css">
+<div class="goods-register-page">
+    <div class="goods-register-container">
 
-<h1>商品出品</h1>
+        <h1>商品出品</h1>
 
-<?php if (!empty($errors)): ?>
-    <div class="register-errors">
-        <?php foreach ($errors as $error): ?>
-            <p><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
-        <?php endforeach; ?>
-    </div>
-<?php endif; ?>
-
-<form action="goods-register-process.php" method="post" enctype="multipart/form-data" class="register-form">
-
-    <!-- CSRF対策：トークンを送信 -->
-    <input
-        type="hidden"
-        name="csrf_token"
-        value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
-    >
-
-    <!-- 共通入力項目 -->
-    <fieldset class="common-fields">
-        <legend>商品情報</legend>
-
-        <p>
-            商品名
-            <input type="text" name="goods_name" value="<?= htmlspecialchars($old_goods_name, ENT_QUOTES, 'UTF-8') ?>" required>
-        </p>
-
-        <p>
-            商品説明
-            <textarea name="description" required><?= htmlspecialchars($old_description, ENT_QUOTES, 'UTF-8') ?></textarea>
-        </p>
-
-        <p>
-            商品状態
-            <select name="goods_condition" required>
-                <option value="">選択してください</option>
-                <option value="新品" <?= $old_goods_condition === '新品' ? 'selected' : '' ?>>新品</option>
-                <option value="未使用" <?= $old_goods_condition === '未使用' ? 'selected' : '' ?>>未使用</option>
-                <option value="目立った傷や汚れなし" <?= $old_goods_condition === '目立った傷や汚れなし' ? 'selected' : '' ?>>目立った傷や汚れなし</option>
-                <option value="やや傷や汚れあり" <?= $old_goods_condition === 'やや傷や汚れあり' ? 'selected' : '' ?>>やや傷や汚れあり</option>
-                <option value="傷や汚れあり" <?= $old_goods_condition === '傷や汚れあり' ? 'selected' : '' ?>>傷や汚れあり</option>
-            </select>
-        </p>
-
-        <p>
-            カテゴリ
-            <select name="category_id" required>
-                <option value="">選択してください</option>
-                <?php foreach ($categories as $category): ?>
-                    <option value="<?= htmlspecialchars($category['category_id'], ENT_QUOTES, 'UTF-8') ?>" <?= $old_category_id == $category['category_id'] ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($category['category_name'], ENT_QUOTES, 'UTF-8') ?>
-                    </option>
+        <?php if (!empty($errors)): ?>
+            <div class="register-errors">
+                <?php foreach ($errors as $error): ?>
+                    <p><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
                 <?php endforeach; ?>
-            </select>
-        </p>
+            </div>
+        <?php endif; ?>
 
-        <p>
-            <label for="goods_image">商品画像</label>
-            <input type="file" id="goods_image" name="goods_image" accept="image/*">
+        <form action="goods-register-process.php" method="post" enctype="multipart/form-data" class="register-form">
+
+            <!-- CSRF対策：トークンを送信 -->
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
+            >
+
+            <!-- 共通入力項目 -->
+            <fieldset class="common-fields">
+                <legend>商品情報</legend>
+
+                <p>
+                    商品名
+                    <input
+                        type="text"
+                        id="goods_name"
+                        name="goods_name"
+                        value="<?= htmlspecialchars($old_goods_name, ENT_QUOTES, 'UTF-8') ?>"
+                        required
+                    >
+                </p>
+
+                <p>
+                    商品説明
+                    <textarea
+                        id="description"
+                        name="description"
+                        required
+                    ><?= htmlspecialchars($old_description, ENT_QUOTES, 'UTF-8') ?></textarea>
+                </p>
+
+                <p>
+                    商品状態
+                    <select id="goods_condition" name="goods_condition" required>
+                        <option value="">選択してください</option>
+                        <option value="新品" <?= $old_goods_condition === '新品' ? 'selected' : '' ?>>新品</option>
+                        <option value="未使用" <?= $old_goods_condition === '未使用' ? 'selected' : '' ?>>未使用</option>
+                        <option value="目立った傷や汚れなし" <?= $old_goods_condition === '目立った傷や汚れなし' ? 'selected' : '' ?>>目立った傷や汚れなし</option>
+                        <option value="やや傷や汚れあり" <?= $old_goods_condition === 'やや傷や汚れあり' ? 'selected' : '' ?>>やや傷や汚れあり</option>
+                        <option value="傷や汚れあり" <?= $old_goods_condition === '傷や汚れあり' ? 'selected' : '' ?>>傷や汚れあり</option>
+                    </select>
+                </p>
+
+                <p>
+                    カテゴリ
+                    <select id="category_id" name="category_id" required>
+                        <option value="">選択してください</option>
+                        <?php foreach ($categories as $category): ?>
+                            <option
+                                value="<?= htmlspecialchars($category['category_id'], ENT_QUOTES, 'UTF-8') ?>"
+                                <?= $old_category_id == $category['category_id'] ? 'selected' : '' ?>
+                            >
+                                <?= htmlspecialchars($category['category_name'], ENT_QUOTES, 'UTF-8') ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </p>
+
+               <div class="image-upload-group">
+            <span class="field-label">商品画像</span>
+
+            <!-- 元のinput（機能・プレビュー連携はそのまま維持） -->
+            <input type="file" id="goods_image" name="goods_image" accept="image/*" class="hidden-file-input">
+
+            <!-- カメラアイコン付きの「写真を選択する」ボタン -->
+            <label for="goods_image" class="image-upload-box">
+                <svg class="camera-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#1976d2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+                <span class="upload-main-text">写真を選択する</span>
+                <span class="upload-sub-text">クリックして端末から画像を選択</span>
+            </label>
+
             <img id="preview">
-        </p>
-
-    </fieldset>
-
-    <!-- 出品タイプ選択パネル -->
-    <fieldset class="listing-type-panel">
-        <legend>出品方法を選択</legend>
-
-        <div class="listing-type-options">
-            <label class="listing-type-option">
-                <input type="radio" name="listing_type" value="normal" <?= $old_listing_type === 'normal' ? 'checked' : '' ?>>
-                <span class="option-label">通常出品</span>
-            </label>
-
-            <label class="listing-type-option">
-                <input type="radio" name="listing_type" value="auction" <?= $old_listing_type === 'auction' ? 'checked' : '' ?>>
-                <span class="option-label">オークション出品</span>
-            </label>
         </div>
-    </fieldset>
+            </fieldset>
 
-    <!-- 通常出品入力欄 -->
-    <fieldset class="listing-fields normal-fields" data-listing-type="normal">
-        <legend>通常出品情報</legend>
+            <!-- AIアシスト利用選択 -->
+            <fieldset class="ai-mode-panel">
+                <legend>出品サポート</legend>
 
-        <p>
-            販売価格
-            <input type="number" name="price" min="1" value="<?= htmlspecialchars($old_price, ENT_QUOTES, 'UTF-8') ?>" required>
-        </p>
+                <div class="ai-mode-options">
+                    <label class="ai-mode-option">
+                        <input
+                            type="radio"
+                            name="listing_assist_mode"
+                            value="normal"
+                            checked
+                        >
+                        <span>通常入力</span>
+                    </label>
 
-    </fieldset>
+                    <label class="ai-mode-option">
+                        <input
+                            type="radio"
+                            name="listing_assist_mode"
+                            value="ai"
+                        >
+                        <span>AIアシストを利用する</span>
+                    </label>
+                </div>
 
-    <!-- オークション出品入力欄 -->
-    <fieldset class="listing-fields auction-fields" data-listing-type="auction">
-        <legend>オークション出品情報</legend>
+                <p class="ai-mode-description">
+                    AIとの会話を通じて、商品名や商品説明文の作成をサポートします。
+                </p>
+            </fieldset>
 
-        <p>
-            開始価格
-            <input type="number" name="start_price" min="1" value="<?= htmlspecialchars($old_start_price, ENT_QUOTES, 'UTF-8') ?>" required>
-        </p>
+            <!-- AIチャット欄 -->
+            <section id="ai-assist-panel" class="ai-assist-panel is-hidden">
 
-        <p>
-            即決価格（任意）
-            <input type="number" name="buyout_price" min="1" value="<?= htmlspecialchars($old_buyout_price, ENT_QUOTES, 'UTF-8') ?>">
-        </p>
+                <h2>Meetory AI出品アシスタント</h2>
 
-        <p>
-            終了日時
-            <input type="datetime-local" name="end_at" value="<?= htmlspecialchars($old_end_at, ENT_QUOTES, 'UTF-8') ?>" required>
-        </p>
+                <p class="ai-assist-intro">
+                    入力された商品情報をもとに、AIが不足している情報を質問します。
+                    回答を確認しながら、商品名と商品説明文を一緒に作成しましょう。
+                </p>
 
-        <p>
-            自動延長
-            <select name="auto_extend" required>
-                <option value="1" <?= $old_auto_extend === '1' ? 'selected' : '' ?>>ON</option>
-                <option value="0" <?= $old_auto_extend === '0' ? 'selected' : '' ?>>OFF</option>
-            </select>
-        </p>
+                <div
+                    id="ai-chat-messages"
+                    class="ai-chat-messages"
+                    aria-live="polite"
+                >
+                    <div class="ai-chat-message model-message">
+                        こんにちは！MeetoryのAI出品アシスタントです。
+                        商品情報を確認して、出品に必要な情報を一緒に整理していきましょう！
+                    </div>
+                </div>
 
-    </fieldset>
+                <div class="ai-chat-input-area">
+                    <textarea
+                        id="ai-chat-input"
+                        placeholder="AIへのメッセージを入力してください"
+                        rows="3"
+                        maxlength="5000"
+                    ></textarea>
 
-    <input type="submit" value="出品する">
+                    <button type="button" id="ai-chat-send">
+                        送信
+                    </button>
+                </div>
 
-</form>
+                <p id="ai-chat-status" class="ai-chat-status" aria-live="polite"></p>
 
-<script src="../assets/js/goods-register.js"></script>
-<script>
-// 出品タイプ切り替え
-(function() {
-    const normalFields = document.querySelector('.normal-fields');
-    const auctionFields = document.querySelector('.auction-fields');
+                <!-- AI提案の商品名 -->
+                <div id="ai-title-result" class="ai-suggestion is-hidden">
+                    <h3>AIが提案した商品名</h3>
+                    <p id="ai-suggested-title"></p>
+                    <button type="button" id="ai-apply-title">
+                        商品名に反映する
+                    </button>
+                </div>
 
-    function toggleFields() {
-        const checked = document.querySelector('input[name="listing_type"]:checked');
-        if (!checked) return;
+                <!-- AI提案の商品説明文 -->
+                <div id="ai-description-result" class="ai-suggestion is-hidden">
+                    <h3>AIが提案した商品説明文</h3>
+                    <p id="ai-suggested-description"></p>
+                    <button type="button" id="ai-apply-description">
+                        商品説明文に反映する
+                    </button>
+                </div>
 
-        if (checked.value === 'normal') {
-            normalFields.style.display = '';
-            auctionFields.style.display = 'none';
-            // オークション必須項目を一時的に不要にする
-            auctionFields.querySelectorAll('[required]').forEach(function(el) {
-                el.removeAttribute('required');
-            });
-            normalFields.querySelector('input[name="price"]').setAttribute('required', '');
-        } else {
-            auctionFields.style.display = '';
-            normalFields.style.display = 'none';
-            // 通常必須項目を一時的に不要にする
-            normalFields.querySelectorAll('[required]').forEach(function(el) {
-                el.removeAttribute('required');
-            });
-            auctionFields.querySelectorAll('input[name="start_price"], input[name="end_at"], select[name="auto_extend"]').forEach(function(el) {
-                el.setAttribute('required', '');
-            });
-        }
-    }
+            </section>
 
-    document.querySelectorAll('input[name="listing_type"]').forEach(function(radio) {
-        radio.addEventListener('change', toggleFields);
-    });
+            <!-- 出品タイプ選択パネル -->
+            <fieldset class="listing-type-panel">
+                <legend>出品方法を選択</legend>
 
-    // 初期表示
-    toggleFields();
-})();
-</script>
+                <div class="listing-type-options">
+                    <label class="listing-type-option">
+                        <input
+                            type="radio"
+                            name="listing_type"
+                            value="normal"
+                            <?= $old_listing_type === 'normal' ? 'checked' : '' ?>
+                        >
+                        <span class="option-label">通常出品</span>
+                    </label>
 
-<form action="../user/logout.php" method="post">
+                    <label class="listing-type-option">
+                        <input
+                            type="radio"
+                            name="listing_type"
+                            value="auction"
+                            <?= $old_listing_type === 'auction' ? 'checked' : '' ?>
+                        >
+                        <span class="option-label">オークション出品</span>
+                    </label>
+                </div>
+            </fieldset>
 
+            <!-- 通常出品入力欄 -->
+            <fieldset
+                class="listing-fields normal-fields<?= $old_listing_type === 'auction' ? ' is-hidden' : '' ?>"
+                data-listing-type="normal"
+            >
+                <legend>通常出品情報</legend>
+
+                <p>
+                    販売価格
+                    <input
+                        type="number"
+                        name="price"
+                        min="1"
+                        value="<?= htmlspecialchars($old_price, ENT_QUOTES, 'UTF-8') ?>"
+                        required
+                    >
+                </p>
+
+            </fieldset>
+
+            <!-- オークション出品入力欄 -->
+            <fieldset
+                class="listing-fields auction-fields<?= $old_listing_type === 'normal' ? ' is-hidden' : '' ?>"
+                data-listing-type="auction"
+            >
+                <legend>オークション出品情報</legend>
+
+                <p>
+                    開始価格
+                    <input
+                        type="number"
+                        name="start_price"
+                        min="1"
+                        value="<?= htmlspecialchars($old_start_price, ENT_QUOTES, 'UTF-8') ?>"
+                        required
+                    >
+                </p>
+
+                <p>
+                    即決価格（任意）
+                    <input
+                        type="number"
+                        name="buyout_price"
+                        min="1"
+                        value="<?= htmlspecialchars($old_buyout_price, ENT_QUOTES, 'UTF-8') ?>"
+                    >
+                </p>
+
+                <p>
+                    終了日時
+                    <input
+                        type="datetime-local"
+                        name="end_at"
+                        value="<?= htmlspecialchars($old_end_at, ENT_QUOTES, 'UTF-8') ?>"
+                        required
+                    >
+                </p>
+
+                <p>
+                    自動延長
+                    <select name="auto_extend" required>
+                        <option value="1" <?= $old_auto_extend === '1' ? 'selected' : '' ?>>ON</option>
+                        <option value="0" <?= $old_auto_extend === '0' ? 'selected' : '' ?>>OFF</option>
+                    </select>
+                </p>
+
+            </fieldset>
+
+            <input type="submit" value="出品する">
+
+        </form>
+
+        <script src="/Meetory/meetory/assets/js/goods-register.js?v=<?= filemtime(__DIR__ . '/../assets/js/goods-register.js') ?>"></script>
+
+       <form action="../user/logout.php" method="post" style="margin-top: 24px; text-align: center;">
     <input
         type="hidden"
         name="csrf_token"
         value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
     >
-
-    <button type="submit">ログアウト</button>
-
+    <button
+        type="submit"
+        style="display: inline-block; background-color: #ff5252; border: none; color: #ffffff; padding: 10px 28px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 8px rgba(255, 82, 82, 0.25);"
+    >ログアウト</button>
 </form>
-
-<?php require '../../meetory-footer.php'; ?>

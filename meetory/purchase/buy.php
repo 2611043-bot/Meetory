@@ -65,6 +65,38 @@ if (
 }
 
 $csrf_token = $_SESSION['csrf_token'];
+
+// 過去の配送先情報を初期値として取得（最新の購入取引から）
+$initial_shipping = [
+    'shipping_name' => '',
+    'shipping_postal_code' => '',
+    'shipping_prefecture' => '',
+    'shipping_city' => '',
+    'shipping_address_line' => '',
+    'shipping_building' => '',
+    'shipping_phone' => ''
+];
+$stmtInitial = $pdo->prepare(
+    'SELECT
+        shipping_name,
+        shipping_postal_code,
+        shipping_prefecture,
+        shipping_city,
+        shipping_address_line,
+        shipping_building,
+        shipping_phone
+    FROM buy
+    WHERE buyer_id = :buyer_id
+    ORDER BY purchased_at DESC
+    LIMIT 1'
+);
+$stmtInitial->execute(['buyer_id' => (int) $_SESSION['user_id']]);
+$pastShipping = $stmtInitial->fetch(PDO::FETCH_ASSOC);
+if ($pastShipping) {
+    foreach ($initial_shipping as $key => $default) {
+        $initial_shipping[$key] = $pastShipping[$key] ?? $default;
+    }
+}
 ?>
 
 <?php require_once '../../meetory-header.php'; ?>
@@ -103,16 +135,114 @@ $csrf_token = $_SESSION['csrf_token'];
         value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>"
     >
 
-    <h3>配送先住所</h3>
+    <h3>配送先情報</h3>
 
-    <label for="address">住所を入力してください</label><br>
-    <input
-        type="text"
-        id="address"
-        name="address"
-        maxlength="255"
-        required
-    >
+    <div class="form-group">
+        <label for="address_id">登録済み住所</label><br>
+        <select id="address_id" name="address_id">
+            <option value="">新しく入力する</option>
+<?php
+$addrStmt = $pdo->prepare('SELECT * FROM user_addresses WHERE user_id = ? ORDER BY is_default DESC, address_id DESC');
+$addrStmt->execute([(int)$_SESSION['user_id']]);
+$regAddrs = $addrStmt->fetchAll(PDO::FETCH_ASSOC);
+foreach ($regAddrs as $ra): ?>
+            <option value="<?= (int)$ra['address_id'] ?>" <?= $ra['is_default']?'selected':'' ?>
+                data-name="<?= htmlspecialchars($ra['recipient_name'], ENT_QUOTES, 'UTF-8') ?>"
+                data-postal="<?= htmlspecialchars($ra['postal_code'], ENT_QUOTES, 'UTF-8') ?>"
+                data-pref="<?= htmlspecialchars($ra['prefecture'], ENT_QUOTES, 'UTF-8') ?>"
+                data-city="<?= htmlspecialchars($ra['city'], ENT_QUOTES, 'UTF-8') ?>"
+                data-line="<?= htmlspecialchars($ra['address_line'], ENT_QUOTES, 'UTF-8') ?>"
+                data-building="<?= htmlspecialchars($ra['building'], ENT_QUOTES, 'UTF-8') ?>"
+                data-phone="<?= htmlspecialchars($ra['phone'], ENT_QUOTES, 'UTF-8') ?>">
+                <?= htmlspecialchars($ra['recipient_name'].' '.$ra['prefecture'].$ra['city'].$ra['address_line'], ENT_QUOTES, 'UTF-8') ?>
+            </option>
+<?php endforeach; ?>
+        </select>
+    </div>
+
+
+    <div class="form-group">
+        <label for="shipping_name">配送先氏名</label><br>
+        <input
+            type="text"
+            id="shipping_name"
+            name="shipping_name"
+            maxlength="100"
+            required
+            value="<?= htmlspecialchars($initial_shipping['shipping_name'], ENT_QUOTES, 'UTF-8') ?>"
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="shipping_postal_code">郵便番号</label><br>
+        <input
+            type="text"
+            id="shipping_postal_code"
+            name="shipping_postal_code"
+            maxlength="20"
+            required
+            value="<?= htmlspecialchars($initial_shipping['shipping_postal_code'], ENT_QUOTES, 'UTF-8') ?>"
+        > <button type="button" id="zipSearchBtnBuy">住所検索</button> <button type="button" id="zipRevBtnBuy">郵便番号検索</button>
+    </div>
+
+    <div class="form-group">
+        <label for="shipping_prefecture">都道府県</label><br>
+        <input
+            type="text"
+            id="shipping_prefecture"
+            name="shipping_prefecture"
+            maxlength="50"
+            required
+            value="<?= htmlspecialchars($initial_shipping['shipping_prefecture'], ENT_QUOTES, 'UTF-8') ?>"
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="shipping_city">市区町村</label><br>
+        <input
+            type="text"
+            id="shipping_city"
+            name="shipping_city"
+            maxlength="100"
+            required
+            value="<?= htmlspecialchars($initial_shipping['shipping_city'], ENT_QUOTES, 'UTF-8') ?>"
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="shipping_address_line">町名・番地</label><br>
+        <input
+            type="text"
+            id="shipping_address_line"
+            name="shipping_address_line"
+            maxlength="255"
+            required
+            value="<?= htmlspecialchars($initial_shipping['shipping_address_line'], ENT_QUOTES, 'UTF-8') ?>"
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="shipping_building">建物名・部屋番号（任意）</label><br>
+        <input
+            type="text"
+            id="shipping_building"
+            name="shipping_building"
+            maxlength="255"
+            value="<?= htmlspecialchars($initial_shipping['shipping_building'], ENT_QUOTES, 'UTF-8') ?>"
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="shipping_phone">電話番号</label><br>
+        <input
+            type="text"
+            id="shipping_phone"
+            name="shipping_phone"
+            maxlength="20"
+            required
+            value="<?= htmlspecialchars($initial_shipping['shipping_phone'], ENT_QUOTES, 'UTF-8') ?>"
+        >
+    </div>
 
     <h3>支払い方法</h3>
 
@@ -135,4 +265,63 @@ $csrf_token = $_SESSION['csrf_token'];
     </a>
 </p>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var revBtn = document.getElementById('zipRevBtnBuy');
+  if (revBtn) {
+    revBtn.addEventListener('click', function() {
+      var pref = document.getElementById('shipping_prefecture').value;
+      var city = document.getElementById('shipping_city').value;
+      var line = document.getElementById('shipping_address_line').value;
+      var q = encodeURIComponent((pref + ' ' + city + ' ' + line).trim());
+      if (!q) { alert('住所を入力してください'); return; }
+      revBtn.disabled = true; revBtn.textContent = '検索中...';
+      fetch('https://zipcoda.net/api?address=' + q)
+        .then(function(r){ if (!r.ok) throw new Error('HTTP'); return r.json(); })
+        .then(function(d){
+          if (!d.items || !d.items.length) { alert('該当郵便番号が見つかりません'); return; }
+          if (d.items.length === 1) { document.getElementById('shipping_postal_code').value = d.items[0].zipcode; return; }
+          var sel = document.createElement('select');
+          d.items.slice(0, 20).forEach(function(it){ var o = document.createElement('option'); o.value = it.zipcode; o.textContent = it.zipcode + ' ' + it.address; sel.appendChild(o); });
+          sel.onchange = function(){ document.getElementById('shipping_postal_code').value = sel.value; };
+          revBtn.parentNode.appendChild(sel);
+        })
+        .catch(function(){ alert('APIに接続できませんでした'); })
+        .finally(function(){ revBtn.disabled = false; revBtn.textContent = '郵便番号検索'; });
+    });
+  }
+  var zipBtn = document.getElementById('zipSearchBtnBuy');
+  if (zipBtn) {
+    zipBtn.addEventListener('click', function() {
+      var pc = document.getElementById('shipping_postal_code').value.replace(/[^0-9]/g, '');
+      if (pc.length !== 7) { alert('郵便番号は7桁で入力してください'); return; }
+      zipBtn.disabled = true; zipBtn.textContent = '検索中...';
+      fetch('https://zipcloud.ibsnet.co.jp/api/search?zipcode=' + pc)
+        .then(function(r){ if (!r.ok) throw new Error('HTTP'); return r.json(); })
+        .then(function(d){
+          if (!d.results || !d.results.length) { alert('該当住所が見つかりません'); return; }
+          var r = d.results[0];
+          document.getElementById('shipping_prefecture').value = r.address1 || '';
+          document.getElementById('shipping_city').value = r.address2 || '';
+          document.getElementById('shipping_address_line').value = r.address3 || '';
+        })
+        .catch(function(){ alert('APIに接続できませんでした'); })
+        .finally(function(){ zipBtn.disabled = false; zipBtn.textContent = '住所検索'; });
+    });
+  }
+  var sel = document.getElementById('address_id');
+  if (sel) {
+    var fields = ['shipping_name','shipping_postal_code','shipping_prefecture','shipping_city','shipping_address_line','shipping_building','shipping_phone'];
+    var map = {'shipping_name':'name','shipping_postal_code':'postal','shipping_prefecture':'pref','shipping_city':'city','shipping_address_line':'line','shipping_building':'building','shipping_phone':'phone'};
+    function setReadonly(ro){ fields.forEach(function(id){ var el = document.getElementById(id); if (el) el.readOnly = ro; }); }
+    function fill(opt){
+      if (!opt || !opt.value) { fields.forEach(function(id){ var el = document.getElementById(id); if (el) el.value = ''; }); setReadonly(false); return; }
+      Object.keys(map).forEach(function(id){ var el = document.getElementById(id); if (el) el.value = opt.getAttribute('data-' + map[id]) || ''; });
+      setReadonly(true);
+    }
+    sel.addEventListener('change', function(){ fill(sel.options[sel.selectedIndex]); });
+    fill(sel.options[sel.selectedIndex]);
+  }
+});
+</script>
 <?php require_once '../../meetory-footer.php'; ?>

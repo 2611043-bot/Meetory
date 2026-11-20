@@ -31,21 +31,21 @@ if ($auction_stmt->fetch(PDO::FETCH_ASSOC) !== false) {
 
 // 商品情報を取得
 $sql = 'SELECT
-            goods_id,
-            seller_id,
-            goods_name,
-            description,
-            price,
-            `condition`,
-            listed_at,
-            is_sold,
-            seller.user_name AS seller_name,
-            seller.profile_image_type,
-            seller.profile_image
-        FROM goods
-        INNER JOIN users AS seller
-            ON seller.user_id = goods.seller_id
-        WHERE goods_id = ?';
+    goods_id,
+    seller_id,
+    goods_name,
+    description,
+    price,
+    `condition`,
+    listed_at,
+    is_sold,
+    seller.user_name AS seller_name,
+    seller.profile_image_type,
+    seller.profile_image
+FROM goods
+INNER JOIN users AS seller
+    ON seller.user_id = goods.seller_id
+WHERE goods_id = ?';
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$goods_id]);
@@ -55,6 +55,30 @@ $goods = $stmt->fetch(PDO::FETCH_ASSOC);
 // 商品が見つからない場合
 if ($goods === false) {
     exit('商品が見つかりません。');
+}
+
+// 閲覧履歴を保存（ログイン中の場合のみ）
+if (
+    isset($_SESSION['user_id']) &&
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) !== false &&
+    (int) $_SESSION['user_id'] > 0
+) {
+    try {
+        $login_user_id = (int) $_SESSION['user_id'];
+        $history_sql = '
+            INSERT INTO browsing_history (user_id, goods_id, viewed_at)
+            VALUES (:user_id, :goods_id, CURRENT_TIMESTAMP)
+            ON DUPLICATE KEY UPDATE viewed_at = CURRENT_TIMESTAMP
+        ';
+        $history_stmt = $pdo->prepare($history_sql);
+        $history_stmt->execute([
+            ':user_id' => $login_user_id,
+            ':goods_id' => $goods_id,
+        ]);
+    } catch (Throwable $e) {
+        // 閲覧履歴の保存に失敗してもページ表示を妨げない
+        error_log($e->getMessage());
+    }
 }
 
 // 商品画像を取得
@@ -79,7 +103,8 @@ foreach ($goods_images as &$image) {
         !preg_match(
             '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
             $image_path
-        )
+        ) ||
+        !is_file(__DIR__ . '/../../' . $image_path)
     ) {
         $image['image_path'] = '';
     }
@@ -94,8 +119,6 @@ if (
 ) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
-
-$csrf_token = $_SESSION['csrf_token'];
 
 $csrf_token = $_SESSION['csrf_token'];
 
@@ -137,8 +160,8 @@ if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $
 
     <article>
 
-<!-- 商品画像 -->
-<div class="goods-images">
+    <!-- 商品画像 -->
+    <div class="goods-images">
 
     <?php if (!empty($goods_images)): ?>
 
@@ -329,6 +352,14 @@ if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $
     <p>
         <a href="goods-list.php">商品一覧に戻る</a>
     </p>
+
+    <?php if (isset($_SESSION['user_id']) && !$is_owner): ?>
+        <p>
+            <a href="../reports/report.php?target_type=goods&amp;target_id=<?= (int) $goods['goods_id'] ?>">
+                この商品を通報する
+            </a>
+        </p>
+    <?php endif; ?>
 
     <?php if ($is_admin || $is_owner): ?>
 

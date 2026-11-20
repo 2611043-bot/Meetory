@@ -136,182 +136,186 @@ if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $
 
 <?php require '../../meetory-header.php'; ?>
 
-<!-- ページ固有のスタイルシートを読み込む（商品一覧専用） -->
-<link rel="stylesheet" href="../assets/css/goods-list.css">
+<!-- ページ固有のスタイルシートを読み込む（キャッシュ自動更新付き） -->
+<link rel="stylesheet" href="../assets/css/goods-list.css?v=<?= filemtime(__DIR__ . '/../assets/css/goods-list.css') ?>">
 <link rel="stylesheet" href="../assets/css/favorites.css">
 
-<main>
-    <h1>商品一覧</h1>
+<div class="goods-list-page">
+    <main class="goods-list-container">
+        <h1>商品一覧</h1>
 
-<!-- 商品検索フォーム -->
-<form action="goods-list.php" method="get">
+        <!-- 商品検索フォーム -->
+        <form action="goods-list.php" method="get" class="goods-search-form">
 
-    <?php if ($category_id !== ''): ?>
-        <input
-            type="hidden"
-            name="category_id"
-            value="<?= (int) $category_id ?>"
-        >
-    <?php endif; ?>
+            <?php if ($category_id !== ''): ?>
+                <input
+                    type="hidden"
+                    name="category_id"
+                    value="<?= (int) $category_id ?>"
+                >
+            <?php endif; ?>
 
-    <div>
-        <label for="keyword">商品名：</label>
-        <input
-            type="text"
-            id="keyword"
-            name="keyword"
-            value="<?= htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8') ?>"
-            placeholder="商品名を入力してください"
-        >
-    </div>
-
-    <div>
-        <label for="min_price">最低価格：</label>
-        <input
-            type="number"
-            id="min_price"
-            name="min_price"
-            min="0"
-            value="<?= htmlspecialchars($min_price, ENT_QUOTES, 'UTF-8') ?>"
-            placeholder="例：1000"
-        >
-        円
-    </div>
-
-    <div>
-        <label for="max_price">最高価格：</label>
-        <input
-            type="number"
-            id="max_price"
-            name="max_price"
-            min="0"
-            value="<?= htmlspecialchars($max_price, ENT_QUOTES, 'UTF-8') ?>"
-            placeholder="例：10000"
-        >
-        円
-    </div>
-
-<div>
-    <label for="condition">商品状態：</label>
-
-    <select id="condition" name="condition">
-        <option value="">すべて</option>
-
-        <option value="新品"
-            <?= $condition === '新品' ? 'selected' : '' ?>>
-            新品
-        </option>
-
-        <option value="未使用"
-            <?= $condition === '未使用' ? 'selected' : '' ?>>
-            未使用
-        </option>
-
-        <option value="目立った傷や汚れなし"
-            <?= $condition === '目立った傷や汚れなし' ? 'selected' : '' ?>>
-            目立った傷や汚れなし
-        </option>
-
-        <option value="やや傷や汚れあり"
-            <?= $condition === 'やや傷や汚れあり' ? 'selected' : '' ?>>
-            やや傷や汚れあり
-        </option>
-
-        <option value="傷や汚れあり"
-            <?= $condition === '傷や汚れあり' ? 'selected' : '' ?>>
-            傷や汚れあり
-        </option>
-    </select>
-</div>
-
-    <button type="submit">検索</button>
-
-    <a href="goods-list.php">検索をリセット</a>
-
-</form>
-
-<?php if (count($goods_list) > 0): ?>
-
-    <div class="goods-list">
-
-<?php foreach ($goods_list as $goods): ?>
-
-    <?php
-    // 商品画像のパスを取得
-    $image_path = $goods['image_path'] ?? '';
-
-    // 想定した保存先・ファイル名か確認
-    if (
-        !is_string($image_path) ||
-        !preg_match(
-            '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
-            $image_path
-        )
-    ) {
-        $image_path = '';
-    }
-    ?>
-
-    <article class="goods-item">
-
-        <!-- ほしいものリストボタン -->
-        <form
-            action="<?= in_array((int) $goods['goods_id'], $favorited_goods_ids, true)
-                ? '../goods/goods-favorite-delete.php'
-                : '../goods/goods-favorite-add.php' ?>"
-            method="post"
-            class="favorite-form"
-        >
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
-            <input type="hidden" name="goods_id" value="<?= (int) $goods['goods_id'] ?>">
-            <input type="hidden" name="return_url" value="goods-list.php?<?= http_build_query(['keyword' => $keyword, 'min_price' => $min_price, 'max_price' => $max_price, 'condition' => $condition, 'category_id' => $category_id]) ?>">
-            <button
-                type="submit"
-                class="js-favorite-btn favorite-btn<?= in_array((int) $goods['goods_id'], $favorited_goods_ids, true) ? ' is-favorited' : '' ?>"
-                data-goods-id="<?= (int) $goods['goods_id'] ?>"
-                data-is-logged-in="<?= isset($_SESSION['user_id']) ? '1' : '0' ?>"
-                data-csrf-token="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>"
-            >
-                <i class="fa-solid fa-heart<?= in_array((int) $goods['goods_id'], $favorited_goods_ids, true) ? '' : '-o' ?>"></i>
-            </button>
-        </form>
-
-        <!-- 商品画像 -->
-        <?php if ($image_path !== ''): ?>
-
-            <div class="goods-image">
-                <img
-                    src="/Meetory/<?= htmlspecialchars(
-                        $image_path,
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) ?>"
-                    alt="<?= htmlspecialchars(
-                        $goods['goods_name'],
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) ?>"
-                    width="200"
-                    loading="lazy"
+            <div class="search-field">
+                <label for="keyword">商品名：</label>
+                <input
+                    type="text"
+                    id="keyword"
+                    name="keyword"
+                    value="<?= htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8') ?>"
+                    placeholder="商品名を入力してください"
                 >
             </div>
 
-        <?php else: ?>
+            <div class="search-field search-price">
+                <label for="min_price">最低価格：</label>
+                <input
+                    type="number"
+                    id="min_price"
+                    name="min_price"
+                    min="0"
+                    value="<?= htmlspecialchars($min_price, ENT_QUOTES, 'UTF-8') ?>"
+                    placeholder="例：1000"
+                >
+                <span>円</span>
+            </div>
 
-            <p>画像はありません</p>
+            <div class="search-field search-price">
+                <label for="max_price">最高価格：</label>
+                <input
+                    type="number"
+                    id="max_price"
+                    name="max_price"
+                    min="0"
+                    value="<?= htmlspecialchars($max_price, ENT_QUOTES, 'UTF-8') ?>"
+                    placeholder="例：10000"
+                >
+                <span>円</span>
+            </div>
 
-        <?php endif; ?>
-            <!-- 商品名 -->
+            <div class="search-field">
+                <label for="condition">商品状態：</label>
+
+                <select id="condition" name="condition">
+                    <option value="">すべて</option>
+
+                    <option value="新品"
+                        <?= $condition === '新品' ? 'selected' : '' ?>>
+                        新品
+                    </option>
+
+                    <option value="未使用"
+                        <?= $condition === '未使用' ? 'selected' : '' ?>>
+                        未使用
+                    </option>
+
+                    <option value="目立った傷や汚れなし"
+                        <?= $condition === '目立った傷や汚れなし' ? 'selected' : '' ?>>
+                        目立った傷や汚れなし
+                    </option>
+
+                    <option value="やや傷や汚れあり"
+                        <?= $condition === 'やや傷や汚れあり' ? 'selected' : '' ?>>
+                        やや傷や汚れあり
+                    </option>
+
+                    <option value="傷や汚れあり"
+                        <?= $condition === '傷や汚れあり' ? 'selected' : '' ?>>
+                        傷や汚れあり
+                    </option>
+                </select>
+            </div>
+
+            <div class="search-actions">
+                <button type="submit">検索</button>
+                <a href="goods-list.php">検索をリセット</a>
+            </div>
+
+        </form>
+
+        <?php if (count($goods_list) > 0): ?>
+
+            <div class="goods-list">
+
+        <?php foreach ($goods_list as $goods): ?>
+
+            <?php
+            // 商品画像のパスを取得
+            $image_path = $goods['image_path'] ?? '';
+
+            // 想定した保存先・ファイル名か確認
+            if (
+                !is_string($image_path) ||
+                !preg_match(
+                    '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
+                    $image_path
+                ) ||
+                !is_file(__DIR__ . '/../../' . $image_path)
+            ) {
+                $image_path = '';
+            }
+            ?>
+
+            <article class="goods-item">
+
+                <!-- ほしいものリストボタン -->
+                <form
+                    action="<?= in_array((int) $goods['goods_id'], $favorited_goods_ids, true)
+                        ? '../goods/goods-favorite-delete.php'
+                        : '../goods/goods-favorite-add.php' ?>"
+                    method="post"
+                    class="favorite-form"
+                >
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="goods_id" value="<?= (int) $goods['goods_id'] ?>">
+                    <input type="hidden" name="return_url" value="goods-list.php?<?= http_build_query(['keyword' => $keyword, 'min_price' => $min_price, 'max_price' => $max_price, 'condition' => $condition, 'category_id' => $category_id]) ?>">
+                    <button
+                        type="submit"
+                        class="js-favorite-btn favorite-btn<?= in_array((int) $goods['goods_id'], $favorited_goods_ids, true) ? ' is-favorited' : '' ?>"
+                        data-goods-id="<?= (int) $goods['goods_id'] ?>"
+                        data-is-logged-in="<?= isset($_SESSION['user_id']) ? '1' : '0' ?>"
+                        data-csrf-token="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>"
+                    >
+                        <i class="fa-solid fa-heart<?= in_array((int) $goods['goods_id'], $favorited_goods_ids, true) ? '' : '-o' ?>"></i>
+                    </button>
+                </form>
+
+                <!-- 商品画像 -->
+                <?php if ($image_path !== ''): ?>
+
+                    <div class="goods-image">
+                        <img
+                            src="/Meetory/<?= htmlspecialchars(
+                                $image_path,
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>"
+                            alt="<?= htmlspecialchars(
+                                $goods['goods_name'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>"
+                            width="200"
+                            loading="lazy"
+                        >
+                    </div>
+
+                <?php else: ?>
+
+                    <p class="no-image-box">画像はありません</p>
+
+                <?php endif; ?>
+
+                <!-- 商品名 -->
                 <h2>
                     <?= htmlspecialchars($goods['goods_name'], ENT_QUOTES, 'UTF-8') ?>
                 </h2>
 
-                <p>
+                <p class="goods-price">
                     価格：
                     <?= number_format((int)$goods['price']) ?>円
                 </p>
 
-                <p>
+                <p class="goods-condition">
                     商品の状態：
                     <?= htmlspecialchars($goods['condition'], ENT_QUOTES, 'UTF-8') ?>
                 </p>
@@ -329,11 +333,11 @@ if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $
                     </span>
                 </a>
 
-                <p>
+                <p class="goods-description">
                     <?= nl2br(htmlspecialchars($goods['description'], ENT_QUOTES, 'UTF-8')) ?>
                 </p>
 
-                <a href="goods-detail.php?goods_id=<?= (int)$goods['goods_id'] ?>">
+                <a href="goods-detail.php?goods_id=<?= (int)$goods['goods_id'] ?>" class="goods-detail-link">
                     商品詳細を見る
                 </a>
 
@@ -343,15 +347,16 @@ if (isset($_SESSION['user_id']) && is_int((int) $_SESSION['user_id']) && (int) $
 
         <?php endforeach; ?>
 
-    </div>
+            </div>
 
-<?php else: ?>
+        <?php else: ?>
 
-    <p>現在、出品されている商品はありません。</p>
+            <p class="goods-empty">現在、出品されている商品はありません。</p>
 
-<?php endif; ?>
+        <?php endif; ?>
 
-</main>
+    </main>
+</div>
 
 <!-- ほしいものリスト用JavaScript -->
 <script src="../assets/js/favorites.js" defer></script>
