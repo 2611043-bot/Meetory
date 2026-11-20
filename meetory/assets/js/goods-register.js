@@ -5,13 +5,26 @@
 const goodsImage = document.getElementById('goods_image');
 
 if (goodsImage) {
+    let previewUrl = null;
+
     goodsImage.addEventListener('change', function() {
         const file = this.files[0];
+        const preview = document.getElementById('preview');
+
+        if (!preview) return;
+
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+            previewUrl = null;
+        }
 
         if (file) {
-            const preview = document.getElementById('preview');
-            preview.src = URL.createObjectURL(file);
+            previewUrl = URL.createObjectURL(file);
+            preview.src = previewUrl;
             preview.style.display = 'block';
+        } else {
+            preview.removeAttribute('src');
+            preview.style.display = 'none';
         }
     });
 }
@@ -26,7 +39,9 @@ if (goodsImage) {
     const auctionFields = document.querySelector('.auction-fields');
 
     function toggleFields() {
-        const checked = document.querySelector('input[name="listing_type"]:checked');
+        const checked = document.querySelector(
+            'input[name="listing_type"]:checked'
+        );
 
         if (!checked || !normalFields || !auctionFields) return;
 
@@ -34,18 +49,20 @@ if (goodsImage) {
             normalFields.classList.remove('is-hidden');
             auctionFields.classList.add('is-hidden');
 
-            // オークション必須項目を一時的に不要にする
             auctionFields.querySelectorAll('[required]').forEach(function(el) {
                 el.removeAttribute('required');
             });
 
-            normalFields.querySelector('input[name="price"]').setAttribute('required', '');
+            const price = normalFields.querySelector('input[name="price"]');
+
+            if (price) {
+                price.setAttribute('required', '');
+            }
 
         } else {
             auctionFields.classList.remove('is-hidden');
             normalFields.classList.add('is-hidden');
 
-            // 通常出品の必須項目を一時的に不要にする
             normalFields.querySelectorAll('[required]').forEach(function(el) {
                 el.removeAttribute('required');
             });
@@ -62,7 +79,6 @@ if (goodsImage) {
         radio.addEventListener('change', toggleFields);
     });
 
-    // 初期表示
     toggleFields();
 })();
 
@@ -119,21 +135,19 @@ if (goodsImage) {
     const applyTitleButton = document.getElementById('ai-apply-title');
     const applyDescriptionButton = document.getElementById('ai-apply-description');
 
-    if (
-        !chatMessages ||
-        !chatInput ||
-        !sendButton
-    ) {
+    if (!chatMessages || !chatInput || !sendButton) {
         return;
     }
 
     // AI会話ID
-    // 最初の通信ではnull、2回目以降はサーバーから受け取ったIDを使用
     let aiDataId = null;
 
     // 現在のAI提案
     let currentSuggestedTitle = null;
     let currentSuggestedDescription = null;
+
+    // 二重送信防止
+    let isSending = false;
 
 
     // -----------------------------------------
@@ -151,12 +165,10 @@ if (goodsImage) {
             messageElement.classList.add('model-message');
         }
 
-        // HTMLとして解釈させず、安全に文字列を表示する
+        // HTMLとして解釈させず、安全に文字列として表示
         messageElement.textContent = message;
 
         chatMessages.appendChild(messageElement);
-
-        // 最新メッセージまでスクロール
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
@@ -183,10 +195,75 @@ if (goodsImage) {
 
 
     // -----------------------------------------
+    // 古い提案をリセット
+    // -----------------------------------------
+
+    function clearSuggestions() {
+        currentSuggestedTitle = null;
+        currentSuggestedDescription = null;
+
+        if (titleResult) {
+            titleResult.classList.add('is-hidden');
+        }
+
+        if (descriptionResult) {
+            descriptionResult.classList.add('is-hidden');
+        }
+
+        if (suggestedTitle) {
+            suggestedTitle.textContent = '';
+        }
+
+        if (suggestedDescription) {
+            suggestedDescription.textContent = '';
+        }
+    }
+
+
+    // -----------------------------------------
+    // エラー表示用メッセージ
+    // -----------------------------------------
+
+    function getErrorMessage(data, response) {
+        if (data && typeof data.error === 'string' && data.error !== '') {
+            return data.error;
+        }
+
+        if (response.status === 429) {
+            return 'AIの利用回数または利用量の上限に達しました。しばらく時間をおいてください。';
+        }
+
+        if (response.status === 502 || response.status === 503) {
+            return 'AI側で一時的な問題が発生しています。少し時間をおいて再度お試しください。';
+        }
+
+        if (response.status === 504) {
+            return 'AIの応答に時間がかかっています。少し時間をおいて再度お試しください。';
+        }
+
+        if (response.status === 401) {
+            return 'ログイン状態を確認してください。';
+        }
+
+        if (response.status === 403) {
+            return 'ページを再読み込みしてから、もう一度お試しください。';
+        }
+
+        if (response.status >= 500) {
+            return 'サーバーでエラーが発生しました。時間をおいて再度お試しください。';
+        }
+
+        return 'AIとの通信に失敗しました。入力内容を確認してください。';
+    }
+
+
+    // -----------------------------------------
     // AIにメッセージを送信
     // -----------------------------------------
 
     async function sendAiMessage() {
+        if (isSending) return;
+
         const message = chatInput.value.trim();
 
         if (!message) {
@@ -199,11 +276,12 @@ if (goodsImage) {
         )?.value;
 
         if (!csrfToken) {
-            chatStatus.textContent = 'CSRFトークンを取得できませんでした。';
+            chatStatus.textContent = 'CSRFトークンを取得できませんでした。ページを再読み込みしてください。';
             return;
         }
 
-        // ユーザーのメッセージを表示
+        isSending = true;
+
         addChatMessage(message, 'user');
 
         chatInput.value = '';
@@ -212,29 +290,55 @@ if (goodsImage) {
         sendButton.disabled = true;
         chatInput.disabled = true;
 
+        clearSuggestions();
+
         try {
+            const formData = new FormData();
+
+            formData.append('csrf_token', csrfToken);
+            formData.append('ai_data_id', aiDataId ?? '');
+            formData.append('message', message);
+            formData.append(
+                'product_info',
+                JSON.stringify(getProductInfo())
+            );
+
+            // 選択されている画像を送信
+            // PHP側でハッシュを比較し、同じ画像の再解析を防ぐ
+            const imageFile = goodsImage?.files?.[0];
+
+            if (imageFile) {
+                formData.append('goods_image', imageFile);
+            }
+
             const response = await fetch(
                 '/Meetory/meetory/goods/ai-listing-assist.php',
                 {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        csrf_token: csrfToken,
-                        ai_data_id: aiDataId,
-                        message: message,
-                        product_info: getProductInfo()
-                    })
+                    body: formData
                 }
             );
 
-            const data = await response.json();
+            // JSON以外のレスポンスにも対応
+            let data;
+
+            try {
+                data = await response.json();
+            } catch (jsonError) {
+                throw new Error(
+                    'サーバーから正しい応答を取得できませんでした。ページを再読み込みして再度お試しください。'
+                );
+            }
 
             if (!response.ok || !data.success) {
-                throw new Error(
-                    data.error || 'AIとの通信に失敗しました。'
-                );
+                throw new Error(getErrorMessage(data, response));
+            }
+
+            if (
+                typeof data.message !== 'string' ||
+                data.message.trim() === ''
+            ) {
+                throw new Error('AIから有効な返答を取得できませんでした。');
             }
 
             // 会話IDを保存
@@ -243,8 +347,9 @@ if (goodsImage) {
             // AIの返答を表示
             addChatMessage(data.message, 'model');
 
+
             // ---------------------------------
-            // 商品名の提案があれば表示
+            // 商品名の提案
             // ---------------------------------
 
             if (
@@ -253,12 +358,15 @@ if (goodsImage) {
             ) {
                 currentSuggestedTitle = data.suggested_title;
 
-                suggestedTitle.textContent = currentSuggestedTitle;
-                titleResult.classList.remove('is-hidden');
+                if (suggestedTitle && titleResult) {
+                    suggestedTitle.textContent = currentSuggestedTitle;
+                    titleResult.classList.remove('is-hidden');
+                }
             }
 
+
             // ---------------------------------
-            // 商品説明文の提案があれば表示
+            // 商品説明文の提案
             // ---------------------------------
 
             if (
@@ -267,8 +375,12 @@ if (goodsImage) {
             ) {
                 currentSuggestedDescription = data.suggested_description;
 
-                suggestedDescription.textContent = currentSuggestedDescription;
-                descriptionResult.classList.remove('is-hidden');
+                if (suggestedDescription && descriptionResult) {
+                    suggestedDescription.textContent =
+                        currentSuggestedDescription;
+
+                    descriptionResult.classList.remove('is-hidden');
+                }
             }
 
             chatStatus.textContent = '';
@@ -276,8 +388,11 @@ if (goodsImage) {
         } catch (error) {
             console.error('AIチャットエラー:', error);
 
-            chatStatus.textContent = error.message;
+            chatStatus.textContent =
+                error.message || 'AIとの通信に失敗しました。';
+
         } finally {
+            isSending = false;
             sendButton.disabled = false;
             chatInput.disabled = false;
             chatInput.focus();
@@ -292,7 +407,7 @@ if (goodsImage) {
     sendButton.addEventListener('click', sendAiMessage);
 
 
-    // Ctrl + Enterでも送信できるようにする
+    // Ctrl + Enterでも送信
     chatInput.addEventListener('keydown', function(event) {
         if (event.key === 'Enter' && event.ctrlKey) {
             event.preventDefault();
@@ -305,29 +420,37 @@ if (goodsImage) {
     // 商品名をフォームに反映
     // -----------------------------------------
 
-    applyTitleButton.addEventListener('click', function() {
-        if (!currentSuggestedTitle) return;
+    if (applyTitleButton) {
+        applyTitleButton.addEventListener('click', function() {
+            if (!currentSuggestedTitle) return;
 
-        const goodsName = document.getElementById('goods_name');
+            const goodsName = document.getElementById('goods_name');
 
-        goodsName.value = currentSuggestedTitle;
-
-        chatStatus.textContent = 'AIの提案した商品名を反映しました。';
-    });
+            if (goodsName) {
+                goodsName.value = currentSuggestedTitle;
+                chatStatus.textContent =
+                    'AIの提案した商品名を反映しました。';
+            }
+        });
+    }
 
 
     // -----------------------------------------
     // 商品説明文をフォームに反映
     // -----------------------------------------
 
-    applyDescriptionButton.addEventListener('click', function() {
-        if (!currentSuggestedDescription) return;
+    if (applyDescriptionButton) {
+        applyDescriptionButton.addEventListener('click', function() {
+            if (!currentSuggestedDescription) return;
 
-        const description = document.getElementById('description');
+            const description = document.getElementById('description');
 
-        description.value = currentSuggestedDescription;
-
-        chatStatus.textContent = 'AIの提案した商品説明文を反映しました。';
-    });
+            if (description) {
+                description.value = currentSuggestedDescription;
+                chatStatus.textContent =
+                    'AIの提案した商品説明文を反映しました。';
+            }
+        });
+    }
 
 })();

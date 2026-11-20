@@ -24,16 +24,36 @@ $pdo = getPDO();
 
 // 出品制限の確認
 if (!canListGoods($pdo, (int) $_SESSION['user_id'])) {
-    $restriction = getActiveRestrictionByType($pdo, (int) $_SESSION['user_id'], 'listing');
-    $suspension = isAccountSuspended($pdo, (int) $_SESSION['user_id']);
+    $restriction = getActiveRestrictionByType(
+        $pdo,
+        (int) $_SESSION['user_id'],
+        'listing'
+    );
+
+    $suspension = isAccountSuspended(
+        $pdo,
+        (int) $_SESSION['user_id']
+    );
+
     if ($suspension !== null) {
         exit('アカウント停止中のため商品を出品できません。');
     }
-    $reason = $restriction !== null ? htmlspecialchars($restriction['reason'], ENT_QUOTES, 'UTF-8') : '';
+
+    $reason = $restriction !== null
+        ? htmlspecialchars($restriction['reason'], ENT_QUOTES, 'UTF-8')
+        : '';
+
     $ends = $restriction !== null && $restriction['ends_at'] !== null
         ? date('Y/m/d H:i', strtotime($restriction['ends_at']))
         : '無期限';
-    exit('出品制限が適用されているため商品を出品できません。理由：' . $reason . '（終了日時：' . $ends . '）');
+
+    exit(
+        '出品制限が適用されているため商品を出品できません。理由：'
+        . $reason
+        . '（終了日時：'
+        . $ends
+        . '）'
+    );
 }
 
 // カテゴリーを取得
@@ -64,7 +84,8 @@ $old_end_at = $old['end_at'] ?? '';
 $old_auto_extend = $old['auto_extend'] ?? '1';
 
 // ページ固有CSS
-$page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DIR__ . '/../assets/css/goods-register.css');
+$page_css = '/Meetory/meetory/assets/css/goods-register.css?v='
+    . filemtime(__DIR__ . '/../assets/css/goods-register.css');
 
 ?>
 
@@ -85,7 +106,12 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DI
             </div>
         <?php endif; ?>
 
-        <form action="goods-register-process.php" method="post" enctype="multipart/form-data" class="register-form">
+        <form
+            action="goods-register-process.php"
+            method="post"
+            enctype="multipart/form-data"
+            class="register-form"
+        >
 
             <!-- CSRF対策：トークンを送信 -->
             <input
@@ -134,6 +160,7 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DI
                     カテゴリ
                     <select id="category_id" name="category_id" required>
                         <option value="">選択してください</option>
+
                         <?php foreach ($categories as $category): ?>
                             <option
                                 value="<?= htmlspecialchars($category['category_id'], ENT_QUOTES, 'UTF-8') ?>"
@@ -145,25 +172,43 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DI
                     </select>
                 </p>
 
-               <div class="image-upload-group">
-            <span class="field-label">商品画像</span>
+                <!-- 商品画像 -->
+                <div class="image-upload-group">
+                    <span class="field-label">商品画像</span>
 
-            <!-- 元のinput（機能・プレビュー連携はそのまま維持） -->
-            <input type="file" id="goods_image" name="goods_image" accept="image/*" class="hidden-file-input">
+                    <input
+                        type="file"
+                        id="goods_image"
+                        name="goods_image"
+                        accept="image/*"
+                        class="hidden-file-input"
+                    >
 
-            <!-- カメラアイコン付きの「写真を選択する」ボタン -->
-            <label for="goods_image" class="image-upload-box">
-                <svg class="camera-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#1976d2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                    <circle cx="12" cy="13" r="4"></circle>
-                </svg>
-                <span class="upload-main-text">写真を選択する</span>
-                <span class="upload-sub-text">クリックして端末から画像を選択</span>
-            </label>
+                    <label for="goods_image" class="image-upload-box">
+                        <svg
+                            class="camera-icon"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            width="34"
+                            height="34"
+                            fill="none"
+                            stroke="#1976d2"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
 
-            <img id="preview">
-        </div>
+                        <span class="upload-main-text">写真を選択する</span>
+                        <span class="upload-sub-text">クリックして端末から画像を選択</span>
+                    </label>
+
+                    <img id="preview" alt="商品画像プレビュー">
+                </div>
             </fieldset>
+
 
             <!-- AIアシスト利用選択 -->
             <fieldset class="ai-mode-panel">
@@ -195,8 +240,12 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DI
                 </p>
             </fieldset>
 
+
             <!-- AIチャット欄 -->
-            <section id="ai-assist-panel" class="ai-assist-panel is-hidden">
+            <section
+                id="ai-assist-panel"
+                class="ai-assist-panel is-hidden"
+            >
 
                 <h2>Meetory AI出品アシスタント</h2>
 
@@ -205,15 +254,36 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DI
                     回答を確認しながら、商品名と商品説明文を一緒に作成しましょう。
                 </p>
 
+                <p class="ai-short-notice">
+                    AIの生成内容には誤りが含まれる場合があります。出品前に必ずご確認ください。
+                </p>
+
                 <div
                     id="ai-chat-messages"
                     class="ai-chat-messages"
                     aria-live="polite"
                 >
+
+                    <!-- 固定の注意事項。AI会話履歴には保存しない -->
+                    <div class="ai-chat-message model-message ai-chat-disclaimer">
+                        <strong>AIアシストを利用する前にご確認ください</strong>
+
+                        <ul>
+                            <li>AIの回答や生成内容には誤りが含まれる場合があります。出品前に必ず確認・編集してください。</li>
+                            <li>商品の状態、動作状況、付属品などは、ご自身で確認してください。</li>
+                            <li>画像だけでは真贋、性能、型番、内部状態、故障の有無などを正確に判断できません。</li>
+                            <li>住所、電話番号、メールアドレス、パスワード、クレジットカード番号、銀行口座情報などの個人情報・金融情報を入力しないでください。</li>
+                            <li>第三者の個人情報も入力しないでください。</li>
+                            <li>AIは最新の市場価格を調査していません。価格の目安は参考情報として扱ってください。</li>
+                            <li>医療・法律など、商品出品に関係しない専門相談には対応していません。</li>
+                        </ul>
+                    </div>
+
                     <div class="ai-chat-message model-message">
                         こんにちは！MeetoryのAI出品アシスタントです。
                         商品情報を確認して、出品に必要な情報を一緒に整理していきましょう！
                     </div>
+
                 </div>
 
                 <div class="ai-chat-input-area">
@@ -229,27 +299,36 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DI
                     </button>
                 </div>
 
-                <p id="ai-chat-status" class="ai-chat-status" aria-live="polite"></p>
+                <p
+                    id="ai-chat-status"
+                    class="ai-chat-status"
+                    aria-live="polite"
+                ></p>
+
 
                 <!-- AI提案の商品名 -->
                 <div id="ai-title-result" class="ai-suggestion is-hidden">
                     <h3>AIが提案した商品名</h3>
                     <p id="ai-suggested-title"></p>
+
                     <button type="button" id="ai-apply-title">
                         商品名に反映する
                     </button>
                 </div>
 
+
                 <!-- AI提案の商品説明文 -->
                 <div id="ai-description-result" class="ai-suggestion is-hidden">
                     <h3>AIが提案した商品説明文</h3>
                     <p id="ai-suggested-description"></p>
+
                     <button type="button" id="ai-apply-description">
                         商品説明文に反映する
                     </button>
                 </div>
 
             </section>
+
 
             <!-- 出品タイプ選択パネル -->
             <fieldset class="listing-type-panel">
@@ -278,6 +357,7 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DI
                 </div>
             </fieldset>
 
+
             <!-- 通常出品入力欄 -->
             <fieldset
                 class="listing-fields normal-fields<?= $old_listing_type === 'auction' ? ' is-hidden' : '' ?>"
@@ -295,8 +375,8 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DI
                         required
                     >
                 </p>
-
             </fieldset>
+
 
             <!-- オークション出品入力欄 -->
             <fieldset
@@ -343,23 +423,33 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v=' . filemtime(__DI
                         <option value="0" <?= $old_auto_extend === '0' ? 'selected' : '' ?>>OFF</option>
                     </select>
                 </p>
-
             </fieldset>
+
 
             <input type="submit" value="出品する">
 
         </form>
 
+
         <script src="/Meetory/meetory/assets/js/goods-register.js?v=<?= filemtime(__DIR__ . '/../assets/js/goods-register.js') ?>"></script>
 
-       <form action="../user/logout.php" method="post" style="margin-top: 24px; text-align: center;">
-    <input
-        type="hidden"
-        name="csrf_token"
-        value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
-    >
-    <button
-        type="submit"
-        style="display: inline-block; background-color: #ff5252; border: none; color: #ffffff; padding: 10px 28px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 8px rgba(255, 82, 82, 0.25);"
-    >ログアウト</button>
-</form>
+
+        <!-- ログアウト -->
+        <form
+            action="../user/logout.php"
+            method="post"
+            class="logout-form"
+        >
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
+            >
+
+            <button type="submit">
+                ログアウト
+            </button>
+        </form>
+
+    </div>
+</div>
