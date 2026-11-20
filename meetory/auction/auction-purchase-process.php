@@ -25,6 +25,15 @@ require_once '../../meetory-functions.php';
 
 $pdo = getPDO();
 
+// 購入制限の確認
+if (!canPurchase($pdo, (int) $_SESSION['user_id'])) {
+    $suspension = isAccountSuspended($pdo, (int) $_SESSION['user_id']);
+    if ($suspension !== null) {
+        exit('アカウント停止中のため購入できません。');
+    }
+    exit('購入制限が適用されているため購入できません。');
+}
+
 // CSRF対策
 $csrf_token = $_POST['csrf_token'] ?? '';
 

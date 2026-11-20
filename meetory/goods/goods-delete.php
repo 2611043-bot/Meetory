@@ -28,6 +28,15 @@ if ($goods_id === false || $goods_id === null || $goods_id <= 0) {
 
 $pdo = getPDO();
 
+// 出品制限の確認
+if (!canListGoods($pdo, (int) $_SESSION['user_id'])) {
+    $suspension = isAccountSuspended($pdo, (int) $_SESSION['user_id']);
+    if ($suspension !== null) {
+        exit('アカウント停止中のため商品を削除できません。');
+    }
+    exit('出品制限が適用されているため商品を削除できません。');
+}
+
 
 $is_admin = isset($_SESSION['role'])
     && $_SESSION['role'] === 'admin';

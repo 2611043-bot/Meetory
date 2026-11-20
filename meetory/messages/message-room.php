@@ -122,6 +122,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 送信する種類を取得
     $action = $_POST['action'] ?? '';
 
+    // メッセージ送信制限の確認
+    if (!canSendMessage($pdo, $my_user_id)) {
+        $suspension = isAccountSuspended($pdo, $my_user_id);
+        if ($suspension !== null) {
+            exit('アカウント停止中のためメッセージを送信できません。');
+        }
+        exit('メッセージ送信制限が適用されているためメッセージを送信できません。');
+    }
+
     if (isBlockedEitherWay($pdo, $my_user_id, $user_id)) {
         exit('ブロック中のためメッセージを送信できません。');
     }

@@ -43,6 +43,15 @@ $is_admin = isset($_SESSION['role'])
 
 $pdo = getPDO();
 
+// 出品制限の確認
+if (!canListGoods($pdo, $user_id)) {
+    $suspension = isAccountSuspended($pdo, $user_id);
+    if ($suspension !== null) {
+        exit('アカウント停止中のため商品を削除できません。');
+    }
+    exit('出品制限が適用されているため商品を削除できません。');
+}
+
 try {
     $pdo->beginTransaction();
 

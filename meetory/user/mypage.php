@@ -42,16 +42,19 @@ $stmt->execute([$user_id]);
 
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// ユーザーが見つからない場合
-if (!$user) {
-    session_unset();
-    session_destroy();
+    // ユーザーが見つからない場合
+    if (!$user) {
+        session_unset();
+        session_destroy();
 
-    header('Location: login.php');
-    exit;
-}
+        header('Location: login.php');
+        exit;
+    }
 
-// 購入履歴を取得
+    // 現在適用されている停止・制限状態を取得
+    $activeRestrictions = getActiveRestrictions($pdo, $user_id);
+
+    // 購入履歴を取得
 $sql = '
     SELECT
         b.transaction_id,
@@ -254,6 +257,46 @@ require '../../meetory-header.php';
             <a href="logout.php">ログアウト</a>
         </nav>
     </section>
+
+    <?php if (!empty($activeRestrictions)): ?>
+    <section class="mypage-panel mypage-restriction-panel">
+        <h2>停止・利用制限の状態</h2>
+        <div class="mypage-restriction-list">
+            <?php foreach ($activeRestrictions as $r): ?>
+                <?php
+                $adminName = '(不明)';
+                if (!empty($r['created_by'])) {
+                    $aStmt = $pdo->prepare('SELECT user_name FROM users WHERE user_id = ? LIMIT 1');
+                    $aStmt->execute([(int) $r['created_by']]);
+                    $aRow = $aStmt->fetch(PDO::FETCH_ASSOC);
+                    if ($aRow) {
+                        $adminName = htmlspecialchars($aRow['user_name'], ENT_QUOTES, 'UTF-8');
+                    }
+                }
+                $startsAt = date('Y/m/d H:i', strtotime($r['starts_at']));
+                $endsAt = $r['ends_at'] !== null
+                    ? date('Y/m/d H:i', strtotime($r['ends_at']))
+                    : '無期限';
+                ?>
+                <div class="mypage-restriction-card">
+                    <span class="mypage-restriction-badge mypage-restriction-<?= htmlspecialchars($r['restriction_type'], ENT_QUOTES, 'UTF-8') ?>">
+                        <?= htmlspecialchars(getRestrictionTypeLabel($r['restriction_type']), ENT_QUOTES, 'UTF-8') ?>
+                    </span>
+                    <p class="mypage-restriction-reason"><?= nl2br(htmlspecialchars($r['reason'], ENT_QUOTES, 'UTF-8')) ?></p>
+                    <p class="mypage-restriction-period">
+                        開始：<?= htmlspecialchars($startsAt, ENT_QUOTES, 'UTF-8') ?> /
+                        終了：<?= htmlspecialchars($endsAt, ENT_QUOTES, 'UTF-8') ?>
+                    </p>
+                    <p class="mypage-restriction-admin">設定管理者：<?= $adminName ?></p>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        <p class="mypage-restriction-note">
+            <a href="account-status.php">制限の詳細を確認する</a>
+            ※ 終了日時が設定されている制限は、期限を過ぎると自動的に解除されます。
+        </p>
+    </section>
+    <?php endif; ?>
 
     <section class="mypage-panel" id="purchase-history">
         <h2>購入履歴</h2>

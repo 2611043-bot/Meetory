@@ -274,4 +274,392 @@ function getReportTargetTypeLabel(string $target_type): string
     return $target_type === 'user' ? 'ユーザー' : '商品';
 }
 
+// ============================================================
+// アカウント停止・利用制限 共通関数
+// ============================================================
+
+const RESTRICTION_TYPE_SUSPEND = 'suspend';
+const RESTRICTION_TYPE_LISTING = 'listing';
+const RESTRICTION_TYPE_PURCHASE = 'purchase';
+const RESTRICTION_TYPE_MESSAGE = 'message';
+
+const RESTRICTION_TYPES = [
+    RESTRICTION_TYPE_SUSPEND,
+    RESTRICTION_TYPE_LISTING,
+    RESTRICTION_TYPE_PURCHASE,
+    RESTRICTION_TYPE_MESSAGE,
+];
+
+function isValidRestrictionType(string $type): bool
+{
+    return in_array($type, RESTRICTION_TYPES, true);
+}
+
+function getRestrictionTypeLabel(string $type): string
+{
+    $labels = [
+        RESTRICTION_TYPE_SUSPEND  => 'アカウント停止',
+        RESTRICTION_TYPE_LISTING  => '出品制限',
+        RESTRICTION_TYPE_PURCHASE => '購入制限',
+        RESTRICTION_TYPE_MESSAGE  => 'メッセージ送信制限',
+    ];
+    return $labels[$type] ?? $type;
+}
+
+/**
+ * 現在有効な制限をすべて取得する。
+ * 開始日時が現在以前かつ、終了日時が null（無期限）または未来のもののみを有効とみなす。
+ * 期限が過ぎた制限は自動的に無効（解除扱い）として扱う。
+ */
+function getActiveRestrictions(PDO $pdo, int $user_id): array
+{
+    $stmt = $pdo->prepare("
+        SELECT
+            restriction_id,
+            user_id,
+            restriction_type,
+            reason,
+            starts_at,
+            ends_at,
+            created_by,
+            created_at
+        FROM account_restrictions
+        WHERE user_id = :user_id
+          AND status = 'active'
+          AND starts_at <= NOW()
+          AND (ends_at IS NULL OR ends_at > NOW())
+        ORDER BY
+            CASE restriction_type
+                WHEN 'suspend'  THEN 1
+                WHEN 'listing'  THEN 2
+                WHEN 'purchase' THEN 3
+                WHEN 'message'  THEN 4
+                ELSE 5
+            END,
+            starts_at DESC,
+            restriction_id DESC
+    ");
+    $stmt->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * 指定した種類の現在有効な制限を1件取得する。
+ */
+function getActiveRestrictionByType(PDO $pdo, int $user_id, string $type): ?array
+{
+    if (!isValidRestrictionType($type)) {
+        return null;
+    }
+    $restrictions = getActiveRestrictions($pdo, $user_id);
+    foreach ($restrictions as $restriction) {
+        if ($restriction['restriction_type'] === $type) {
+            return $restriction;
+        }
+    }
+    return null;
+}
+
+/**
+ * アカウント停止中かどうかを返す。停止中は制限情報を、そうでなければ null を返す。
+ */
+function isAccountSuspended(PDO $pdo, int $user_id): ?array
+{
+    return getActiveRestrictionByType($pdo, $user_id, RESTRICTION_TYPE_SUSPEND);
+}
+
+/**
+ * 出品可能かどうかを返す。停止中または出品制限中は false。
+ */
+function canListGoods(PDO $pdo, int $user_id): bool
+{
+    if (isAccountSuspended($pdo, $user_id) !== null) {
+        return false;
+    }
+    return getActiveRestrictionByType($pdo, $user_id, RESTRICTION_TYPE_LISTING) === null;
+}
+
+/**
+ * 購入可能かどうかを返す。停止中または購入制限中は false。
+ */
+function canPurchase(PDO $pdo, int $user_id): bool
+{
+    if (isAccountSuspended($pdo, $user_id) !== null) {
+        return false;
+    }
+    return getActiveRestrictionByType($pdo, $user_id, RESTRICTION_TYPE_PURCHASE) === null;
+}
+
+/**
+ * メッセージ送信可能かどうかを返す。停止中またはメッセージ制限中は false。
+ * 閲覧は制限しない。
+ */
+function canSendMessage(PDO $pdo, int $user_id): bool
+{
+    if (isAccountSuspended($pdo, $user_id) !== null) {
+        return false;
+    }
+    return getActiveRestrictionByType($pdo, $user_id, RESTRICTION_TYPE_MESSAGE) === null;
+}
+
+/**
+ * ユーザーに現在適用されている制限の概要を返す。
+ */
+function getUserRestrictionSummary(PDO $pdo, int $user_id): array
+{
+    $restrictions = getActiveRestrictions($pdo, $user_id);
+    $summary = [
+        'suspended'  => false,
+        'listing'    => false,
+        'purchase'   => false,
+        'message'    => false,
+        'restrictions' => [],
+    ];
+    foreach ($restrictions as $r) {
+        $type = $r['restriction_type'];
+        $summary[$type] = true;
+        $summary['restrictions'][] = $r;
+        if ($type === RESTRICTION_TYPE_SUSPEND) {
+            $summary['suspended'] = true;
+        }
+    }
+    return $summary;
+}
+
+/**
+ * 制限を新規作成し、履歴にも記録する。
+ * 同種類の有効な制限があれば先に解除する。
+ * 作成した restriction_id を返す。
+ */
+function createRestriction(
+    PDO $pdo,
+    int $user_id,
+    string $restriction_type,
+    string $reason,
+    ?string $starts_at,
+    ?string $ends_at,
+    int $created_by
+): int {
+    if (!isValidRestrictionType($restriction_type)) {
+        throw new InvalidArgumentException('不正な制限種別です。');
+    }
+    if (trim($reason) === '') {
+        throw new InvalidArgumentException('理由は必須です。');
+    }
+    if ($created_by <= 0) {
+        throw new InvalidArgumentException('実行者は必須です。');
+    }
+
+    $now = date('Y-m-d H:i:s');
+    if ($starts_at === null || $starts_at === '') {
+        $starts_at = $now;
+    }
+
+    $pdo->beginTransaction();
+    try {
+        // 同種類の有効な制限を解除する（重複を防ぐ）
+        $stmt = $pdo->prepare("
+            UPDATE account_restrictions
+            SET status = 'revoked', revoked_at = NOW(), revoked_by = :revoked_by
+            WHERE user_id = :user_id
+              AND restriction_type = :type
+              AND status = 'active'
+        ");
+        $stmt->execute([
+            ':revoked_by' => $created_by,
+            ':user_id'    => $user_id,
+            ':type'       => $restriction_type,
+        ]);
+
+        $stmt = $pdo->prepare("
+            INSERT INTO account_restrictions
+            (user_id, restriction_type, reason, starts_at, ends_at, status, created_by, created_at)
+            VALUES
+            (:user_id, :type, :reason, :starts_at, :ends_at, 'active', :created_by, NOW())
+        ");
+        $stmt->execute([
+            ':user_id'     => $user_id,
+            ':type'        => $restriction_type,
+            ':reason'      => $reason,
+            ':starts_at'   => $starts_at,
+            ':ends_at'     => $ends_at,
+            ':created_by'  => $created_by,
+        ]);
+        $restriction_id = (int) $pdo->lastInsertId();
+
+        $stmt = $pdo->prepare("
+            INSERT INTO account_restriction_logs
+            (restriction_id, user_id, action, restriction_type, reason, admin_id, logged_at)
+            VALUES
+            (:restriction_id, :user_id, 'created', :type, :reason, :admin_id, NOW())
+        ");
+        $stmt->execute([
+            ':restriction_id' => $restriction_id,
+            ':user_id'        => $user_id,
+            ':type'           => $restriction_type,
+            ':reason'         => $reason,
+            ':admin_id'       => $created_by,
+        ]);
+
+        $pdo->commit();
+        return $restriction_id;
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
+}
+
+/**
+ * 指定した制限を解除し、履歴を記録する。
+ * 対象の制限だけを解除し、他の制限には影響しない。
+ */
+function revokeRestriction(PDO $pdo, int $restriction_id, int $revoked_by): bool
+{
+    if ($restriction_id <= 0 || $revoked_by <= 0) {
+        return false;
+    }
+
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare("
+            SELECT restriction_id, user_id, restriction_type, reason
+            FROM account_restrictions
+            WHERE restriction_id = :id AND status = 'active'
+            LIMIT 1
+        ");
+        $stmt->bindValue(':id', $restriction_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row === false) {
+            $pdo->rollBack();
+            return false;
+        }
+
+        $stmt = $pdo->prepare("
+            UPDATE account_restrictions
+            SET status = 'revoked', revoked_at = NOW(), revoked_by = :revoked_by
+            WHERE restriction_id = :id
+        ");
+        $stmt->bindValue(':id', $restriction_id, PDO::PARAM_INT);
+        $stmt->bindValue(':revoked_by', $revoked_by, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $stmt = $pdo->prepare("
+            INSERT INTO account_restriction_logs
+            (restriction_id, user_id, action, restriction_type, reason, admin_id, logged_at)
+            VALUES
+            (:restriction_id, :user_id, 'revoked', :type, :reason, :admin_id, NOW())
+        ");
+        $stmt->execute([
+            ':restriction_id' => $restriction_id,
+            ':user_id'        => (int) $row['user_id'],
+            ':type'           => $row['restriction_type'],
+            ':reason'         => $row['reason'],
+            ':admin_id'       => $revoked_by,
+        ]);
+
+        $pdo->commit();
+        return true;
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
+}
+
+/**
+ * 制限IDから制限情報を取得する。
+ */
+function getRestrictionById(PDO $pdo, int $restriction_id): ?array
+{
+    if ($restriction_id <= 0) {
+        return null;
+    }
+    $stmt = $pdo->prepare("
+        SELECT
+            restriction_id,
+            user_id,
+            restriction_type,
+            reason,
+            starts_at,
+            ends_at,
+            status,
+            created_by,
+            revoked_at,
+            revoked_by,
+            created_at
+        FROM account_restrictions
+        WHERE restriction_id = :id
+        LIMIT 1
+    ");
+    $stmt->bindValue(':id', $restriction_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row === false ? null : $row;
+}
+
+/**
+ * ユーザーの制限・解除履歴を取得する。
+ */
+function getRestrictionHistory(PDO $pdo, int $user_id): array
+{
+    $stmt = $pdo->prepare("
+        SELECT
+            log_id,
+            restriction_id,
+            action,
+            restriction_type,
+            reason,
+            admin_id,
+            logged_at
+        FROM account_restriction_logs
+        WHERE user_id = :user_id
+        ORDER BY logged_at DESC, log_id DESC
+    ");
+    $stmt->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * 制限がかかっているユーザーを検索する（管理者用）。
+ */
+function searchRestrictedUsers(PDO $pdo, string $keyword = ''): array
+{
+    $sql = "
+        SELECT
+            u.user_id,
+            u.user_name,
+            u.role,
+            u.created_at,
+            GROUP_CONCAT(
+                DISTINCT CONCAT(r.restriction_type, ':', r.status)
+                ORDER BY r.restriction_type SEPARATOR ','
+            ) AS restriction_states
+        FROM users AS u
+        LEFT JOIN account_restrictions AS r
+            ON r.user_id = u.user_id
+            AND r.status = 'active'
+            AND r.starts_at <= NOW()
+            AND (r.ends_at IS NULL OR r.ends_at > NOW())
+        WHERE 1 = 1";
+    $params = [];
+    if ($keyword !== '') {
+        $sql .= ' AND u.user_name LIKE :keyword';
+        $params[':keyword'] = '%' . $keyword . '%';
+    }
+    $sql .= ' GROUP BY u.user_id, u.user_name, u.role, u.created_at ORDER BY u.user_id DESC';
+
+    $stmt = $pdo->prepare($sql);
+    foreach ($params as $key => $val) {
+        $stmt->bindValue($key, $val, PDO::PARAM_STR);
+    }
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 ?>

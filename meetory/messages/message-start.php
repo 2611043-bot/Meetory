@@ -22,6 +22,15 @@ $pdo = getPDO();
 
 $user_id = (int) $_SESSION['user_id'];
 
+// メッセージ送信制限の確認
+if (!canSendMessage($pdo, $user_id)) {
+    $suspension = isAccountSuspended($pdo, $user_id);
+    if ($suspension !== null) {
+        exit('アカウント停止中のためメッセージを送信できません。');
+    }
+    exit('メッセージ送信制限が適用されているためメッセージを送信できません。');
+}
+
 // 商品IDを取得
 $goods_id = filter_input(
     INPUT_GET,

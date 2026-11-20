@@ -98,6 +98,15 @@ if (
 
 $pdo = getPDO();
 
+// 出品制限の確認
+if (!canListGoods($pdo, (int) $user_id)) {
+    $suspension = isAccountSuspended($pdo, (int) $user_id);
+    if ($suspension !== null) {
+        exit('アカウント停止中のため商品を編集できません。');
+    }
+    exit('出品制限が適用されているため商品を編集できません。');
+}
+
 // 商品の出品者・現在の価格・商品名・売却状態を確認
 $sql = 'SELECT seller_id, price AS old_price, goods_name, is_sold
         FROM goods

@@ -95,6 +95,50 @@ if (
         $profileAvatarUrl = getProfileAvatarUrl($avatarData);
     }
 }
+
+// ログイン中のユーザーのアカウント停止・利用制限状態を確認
+$userRestrictions = [];
+$restrictionBanner = '';
+if (
+    isset($_SESSION['user_id']) &&
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) !== false &&
+    (int) $_SESSION['user_id'] > 0 &&
+    !$is_auth_page
+) {
+    $pdoRestrict = isset($pdo) && $pdo instanceof PDO ? $pdo : getPDO();
+    $auth_user_id = (int) $_SESSION['user_id'];
+
+    // アカウント停止中の場合は次回アクセス時にログアウトする
+    $suspension = isAccountSuspended($pdoRestrict, $auth_user_id);
+    if ($suspension !== null) {
+        $_SESSION = [];
+        if (isset($_COOKIE[session_name()])) {
+            setcookie(session_name(), '', time() - 42000, '/');
+        }
+        session_destroy();
+        $return = str_replace('\\', '/', $_SERVER['REQUEST_URI'] ?? '/Meetory/meetory/index.php');
+        header('Location: /Meetory/meetory/user/login.php?error=suspended&return_url=' . urlencode($return)
+            . '&reason=' . urlencode($suspension['reason'] ?? '')
+            . '&starts=' . urlencode($suspension['starts_at'] ?? '')
+            . '&ends=' . urlencode($suspension['ends_at'] ?? ''));
+        exit;
+    }
+
+    // 利用制限がある場合はバナー用に保持する
+    $userRestrictions = getActiveRestrictions($pdoRestrict, $auth_user_id);
+    if (!empty($userRestrictions)) {
+        $parts = [];
+        foreach ($userRestrictions as $r) {
+            $label = getRestrictionTypeLabel($r['restriction_type']);
+            $ends = $r['ends_at'] !== null
+                ? date('Y/m/d', strtotime($r['ends_at']))
+                : '無期限';
+            $parts[] = htmlspecialchars($label, ENT_QUOTES, 'UTF-8') .
+                '（' . htmlspecialchars($ends, ENT_QUOTES, 'UTF-8') . 'まで）';
+        }
+        $restrictionBanner = implode('・', $parts);
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -114,6 +158,12 @@ if (
     <link
         rel="stylesheet"
         href="/Meetory/meetory/assets/css/header.css?v=<?= filemtime(__DIR__ . '/meetory/assets/css/header.css') ?>"
+    >
+
+    <!-- アカウント停止・利用制限用CSS -->
+    <link
+        rel="stylesheet"
+        href="/Meetory/meetory/assets/css/restriction.css?v=<?= filemtime(__DIR__ . '/meetory/assets/css/restriction.css') ?>"
     >
 
     <!-- サイトのアイコン -->
@@ -339,6 +389,13 @@ if (
                 <i class="fa-solid fa-flag"></i>
                 通報管理
             </a>
+            <a
+                href="/Meetory/meetory/reports/admin/users.php"
+                class="sidebar-link"
+            >
+                <i class="fa-solid fa-user-shield"></i>
+                ユーザー制限管理
+            </a>
             <?php endif; ?>
 
             <!-- その他 -->
@@ -419,5 +476,18 @@ if (
 
     <!-- CSRFトークン（全ページ共通、アカウント削除等で使用） -->
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+
+    <!-- 利用制限中のユーザーへの通知バナー -->
+    <?php if (!empty($restrictionBanner)): ?>
+    <div class="restriction-banner" role="alert">
+        <p>
+            <strong>アカウントに利用制限が適用されています：</strong>
+            <?= htmlspecialchars($restrictionBanner, ENT_QUOTES, 'UTF-8') ?>
+        </p>
+        <p>
+            <a href="/Meetory/meetory/user/account-status.php">制限の詳細を確認する</a>
+        </p>
+    </div>
+    <?php endif; ?>
 
 <main class="main-container">

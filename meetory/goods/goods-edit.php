@@ -19,6 +19,15 @@ if (!isset($_GET['goods_id']) || !ctype_digit((string)$_GET['goods_id'])) {
 
 $pdo = getPDO();
 
+// 出品制限の確認
+if (!canListGoods($pdo, (int) $_SESSION['user_id'])) {
+    $suspension = isAccountSuspended($pdo, (int) $_SESSION['user_id']);
+    if ($suspension !== null) {
+        exit('アカウント停止中のため商品を編集できません。');
+    }
+    exit('出品制限が適用されているため商品を編集できません。');
+}
+
 $is_admin = isset($_SESSION['role'])
     && $_SESSION['role'] === 'admin';
 

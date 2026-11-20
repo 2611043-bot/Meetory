@@ -1,0 +1,159 @@
+/* アカウント停止・利用制限 関連スタイル */
+.restriction-banner {
+    background: #fff3f3;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+.restriction-banner strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+.restriction-banner a {
+    color: #dc2626;
+    text-decoration: underline;
+}
+.restriction-banner a:hover {
+    text-decoration: none;
+}
+
+.restriction-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #fff;
+}
+.restriction-badge.suspend { background: #dc2626; }
+.restriction-badge.listing { background: #ca8a04; }
+.restriction-badge.purchase { background: #0ea5e9; }
+.restriction-badge.message { background: #8b5cf6; }
+
+.mypage-restriction-panel {
+    background: #fff3f3;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+.mypage-restriction-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.mypage-restriction-card {
+    background: #ffffff;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 0.75rem;
+}
+.mypage-restriction-badge {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #fff;
+}
+.mypage-restriction-badge.mypage-restriction-suspend { background: #dc2626; }
+.mypage-restriction-badge.mypage-restriction-listing { background: #ca8a04; }
+.mypage-restriction-badge.mypage-restriction-purchase { background: #0ea5e9; }
+.mypage-restriction-badge.mypage-restriction-message { background: #8b5cf6; }
+.mypage-restriction-reason {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.95rem;
+    color: #333;
+}
+.mypage-restriction-period {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.85rem;
+    color: #666;
+}
+.mypage-restriction-admin {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #666;
+}
+.mypage-restriction-note {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.85rem;
+    color: #666;
+}
+.mypage-restriction-note a {
+    color: #0ea5e9;
+    text-decoration: underline;
+}
+
+/* アカウント状態ページ */
+.account-status-page table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+.account-status-page th,
+.account-status-page td {
+    border: 1px solid #ddd;
+    padding: 0.6rem;
+    text-align: left;
+    font-size: 0.95rem;
+}
+.account-status-page th {
+    background: #f5f5f5;
+}
+.account-status-page .restriction-note {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.5rem;
+}
+
+/* 管理者 制限フォーム */
+.report-form p {
+    margin-bottom: 1rem;
+}
+.report-form label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+}
+.report-form select,
+.report-form textarea,
+.report-form input[type="datetime-local"],
+.report-form input[type="text"] {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+.report-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+.report-form button {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
+.hint {
+    font-size: 0.85rem;
+    color: #666;
+    margin-left: 0.5rem;
+}
+.restriction-note {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.5rem;
+}
+.restriction-revoke-form button {
+    font-size: 0.85rem;
+    padding: 2px 8px;
+}

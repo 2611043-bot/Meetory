@@ -42,6 +42,15 @@ require_once '../../meetory-functions.php';
 // DB接続
 $pdo = getPDO();
 
+// 出品制限の確認
+if (!canListGoods($pdo, (int) $_SESSION['user_id'])) {
+    $suspension = isAccountSuspended($pdo, (int) $_SESSION['user_id']);
+    if ($suspension !== null) {
+        exit('アカウント停止中のため商品を出品できません。');
+    }
+    exit('出品制限が適用されているため商品を出品できません。');
+}
+
 // 出品フォームから送信された情報を受け取る
 $goods_name = $_POST['goods_name'] ?? '';
 $description = $_POST['description'] ?? '';

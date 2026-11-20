@@ -22,6 +22,20 @@ require_once '../../meetory-functions.php';
 // DB接続
 $pdo = getPDO();
 
+// 出品制限の確認
+if (!canListGoods($pdo, (int) $_SESSION['user_id'])) {
+    $restriction = getActiveRestrictionByType($pdo, (int) $_SESSION['user_id'], 'listing');
+    $suspension = isAccountSuspended($pdo, (int) $_SESSION['user_id']);
+    if ($suspension !== null) {
+        exit('アカウント停止中のため商品を出品できません。');
+    }
+    $reason = $restriction !== null ? htmlspecialchars($restriction['reason'], ENT_QUOTES, 'UTF-8') : '';
+    $ends = $restriction !== null && $restriction['ends_at'] !== null
+        ? date('Y/m/d H:i', strtotime($restriction['ends_at']))
+        : '無期限';
+    exit('出品制限が適用されているため商品を出品できません。理由：' . $reason . '（終了日時：' . $ends . '）');
+}
+
 // カテゴリーを取得
 $sql = "SELECT category_id, category_name FROM categories ORDER BY category_id";
 $stmt = $pdo->query($sql);

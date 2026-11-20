@@ -36,6 +36,20 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 // ユーザーが存在し、パスワードが正しいか確認
 if ($user && password_verify($password, $user['password'])) {
 
+    // アカウント停止中はログインを許可しない
+    $suspension = isAccountSuspended($pdo, (int) $user['user_id']);
+    if ($suspension !== null) {
+        $reason = htmlspecialchars(trim($suspension['reason']), ENT_QUOTES, 'UTF-8');
+        $starts = htmlspecialchars(date('Y/m/d H:i', strtotime($suspension['starts_at'])), ENT_QUOTES, 'UTF-8');
+        $ends = $suspension['ends_at'] !== null
+            ? htmlspecialchars(date('Y/m/d H:i', strtotime($suspension['ends_at'])), ENT_QUOTES, 'UTF-8')
+            : '無期限';
+        $redirect_url = 'login.php?error=suspended&reason=' . urlencode($reason)
+            . '&starts=' . urlencode($starts) . '&ends=' . urlencode($ends);
+        header('Location: ' . $redirect_url);
+        exit;
+    }
+
     // セッションIDを新しくする
     session_regenerate_id(true);
 
