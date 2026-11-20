@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const sidebarMenu = document.getElementById('sidebarMenu');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     const sidebarClose = document.getElementById('sidebarClose');
+    const siteHeader = document.querySelector('.site-header');
 
     // 要素が存在しない場合は処理を中断
     if (!hamburgerBtn || !sidebarMenu || !sidebarOverlay || !sidebarClose) {
@@ -28,6 +29,9 @@ document.addEventListener('DOMContentLoaded', function () {
     function openSidebar() {
         sidebarMenu.classList.add('open');
         sidebarOverlay.classList.add('open');
+        if (siteHeader) {
+            siteHeader.classList.add('sidebar-open');
+        }
         // 体のスクロールを禁止
         document.body.style.overflow = 'hidden';
     }
@@ -35,6 +39,9 @@ document.addEventListener('DOMContentLoaded', function () {
     function closeSidebar() {
         sidebarMenu.classList.remove('open');
         sidebarOverlay.classList.remove('open');
+        if (siteHeader) {
+            siteHeader.classList.remove('sidebar-open');
+        }
         // 体のスクロールを再開
         document.body.style.overflow = '';
     }

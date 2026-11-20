@@ -242,6 +242,9 @@ require '../../meetory-header.php';
             >
                 自分の開催中オークションを確認する
             </a>
+            <a class="mypage-action-card" href="sales.php">
+                売上・販売実績を確認する
+            </a>
         </div>
     </section>
 
@@ -252,9 +255,6 @@ require '../../meetory-header.php';
             <a href="browsing-history.php">閲覧履歴</a>
             <a href="address-list.php">住所管理</a>
             <a href="../messages/message-center.php">メッセージ</a>
-            <a href="notification-settings.php">通知設定</a>
-            <a href="blocked-list.php">ブロック一覧</a>
-            <a href="logout.php">ログアウト</a>
         </nav>
     </section>
 

@@ -1,4 +1,3 @@
-
 <?php
 
 // セッションを開始
@@ -250,7 +249,7 @@ $rating_colors = [
 require '../../meetory-header.php';
 ?>
 
-<link rel="stylesheet" href="../assets/css/profile.css">
+<link rel="stylesheet" href="../assets/css/profile.css?v=<?= filemtime(__DIR__ . '/../assets/css/profile.css') ?>">
 
 <main class="profile-container">
 
