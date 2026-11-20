@@ -1,400 +1,100 @@
-<<<<<<< HEAD
 @charset "UTF-8";
-=======
+
 /* ==============================
-    マイページ専用スタイルシート
-    mypage.php で class="goods-image" を使用
-    他ページ（goods-list.php, cart-list.php 等）とクラス名が重複するため、
-    ここでは mypage.php のHTML構造に最小限のスタイルのみを定義
+    マイページ専用スタイルシート（フラット＆ブルーアクセント版）
+    mypage.php で使用（PHP変更なし）
    ============================== */
->>>>>>> 82bf08846794cc25a34ad368c964b7dbb6d73aae
 
-/* ==========================================================================
-   全体ベース（背景カラーはログイン画面と統一）
-   ========================================================================== */
 body {
-    background-color: #f4f8fa;
+    background-color: #f0f5fa;
     margin: 0;
-}
-
-.mypage-container {
-    max-width: 840px;
-    margin: 40px auto 90px;
-    padding: 0 20px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     color: #1e293b;
 }
 
-/* ページタイトル（立体バーアクセント） */
-.mypage-title {
-    font-size: 24px;
-    font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 28px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    letter-spacing: -0.3px;
-}
-
-.mypage-title::before {
-    content: "";
-    display: inline-block;
-    width: 6px;
-    height: 24px;
-    background: linear-gradient(180deg, #1a85ea 0%, #005bb5 100%);
-    border-radius: 4px;
-<<<<<<< HEAD
-    box-shadow: 0 2px 8px rgba(26, 133, 234, 0.4);
-}
-
-/* ==========================================================================
-   ユーザー情報カード（重厚感のある2層シャドウ＋立体インナー行）
-   ========================================================================== */
-.user-info-card {
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 32px;
-    /* 2層のグラデーションシャドウでくっきり浮き上がらせる */
-    box-shadow: 
-        0 20px 40px -15px rgba(15, 23, 42, 0.08),
-        0 4px 12px 0 rgba(26, 133, 234, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    margin-bottom: 32px;
-}
-
-.user-info-card h2 {
-    font-size: 17px;
-    font-weight: 800;
-    color: #1a85ea;
-    margin-top: 0;
-    margin-bottom: 20px;
-    padding-bottom: 14px;
-    border-bottom: 2px solid #eef6fc;
-    letter-spacing: 0.5px;
-}
-
-.info-row {
-    font-size: 15px;
-    margin: 14px 0;
-    display: flex;
-    align-items: center;
-    background: #ffffff;
-    padding: 14px 20px;
-    border-radius: 12px;
-    /* 内側に凹み感・外側に少し影を付けてカード化 */
-    border: 1px solid #e2eaf0;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-    transition: all 0.2s ease;
-}
-
-.info-row:hover {
-    border-color: #bcd9f5;
-    box-shadow: 0 4px 12px rgba(26, 133, 234, 0.08);
-    transform: translateY(-1px);
-}
-
-.info-label {
-    color: #64748b;
-    width: 140px;
-    flex-shrink: 0;
-    font-weight: 600;
-    font-size: 13.5px;
-}
-
-.info-value {
-    color: #0f172a;
-    font-weight: 700;
-}
-
-.section-divider {
-    display: none;
-}
-
-/* ==========================================================================
-   購入履歴カード（浮遊感シャドウ）
-   ========================================================================== */
-.purchase-history-card {
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 32px;
-    box-shadow: 
-        0 20px 40px -15px rgba(15, 23, 42, 0.08),
-        0 4px 12px 0 rgba(26, 133, 234, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-}
-
-.purchase-history-card h2 {
-    font-size: 17px;
-    font-weight: 800;
-    color: #0f172a;
-    margin-top: 0;
-    margin-bottom: 20px;
-    padding-bottom: 14px;
-    border-bottom: 2px solid #eef6fc;
-}
-
-/* 履歴なし表示（内側に窪んだインセットシャドウ） */
-.empty-message {
-    color: #64748b;
-    text-align: center;
-    padding: 56px 20px;
-    font-size: 14px;
-    font-weight: 600;
-    background: #f8fafc;
-    border-radius: 16px;
-    border: 1px solid #e2e8f0;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03);
-    margin: 10px 0;
-}
-
-/* ==========================================================================
-   取引カード（カード自体が立体的に持ち上がる）
-   ========================================================================== */
-.transaction-box {
-    background: #ffffff;
-    border: 1px solid #e1ebf3;
-    border-radius: 16px;
-    padding: 22px 26px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.transaction-box:hover {
-    transform: translateY(-4px);
-    border-color: #1a85ea;
-    box-shadow: 0 12px 28px rgba(26, 133, 234, 0.15);
-}
-
-.transaction-box h3 {
-    font-size: 15px;
-    color: #1a85ea;
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-weight: 800;
-}
-
-.meta-row {
-    font-size: 13px;
-    color: #64748b;
-    margin: 5px 0;
-}
-
-.status-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, #eaf4fd 0%, #d5e9fa 100%);
-    color: #1a85ea;
-    padding: 4px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-    box-shadow: 0 2px 6px rgba(26, 133, 234, 0.12);
-}
-
-.transaction-box h4 {
-    font-size: 13.5px;
-    color: #334155;
-    margin-top: 18px;
-    margin-bottom: 12px;
-    padding-top: 14px;
-    border-top: 1px dashed #e2e8f0;
-    font-weight: 700;
-}
-
-.item-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 14px 0;
-}
-
-.item-card {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    background: #f8fafc;
-    border-radius: 12px;
-    padding: 12px 16px;
-    margin-bottom: 10px;
-    border: 1px solid #edf2f7;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-}
-
-.goods-image {
-    width: 68px;
-    height: 68px;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #e2e8f0;
-    flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.goods-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.no-image-text {
-    width: 68px;
-    height: 68px;
-    background: #f1f5f9;
-    color: #94a3b8;
-    font-size: 11px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    margin: 0;
-    flex-shrink: 0;
-}
-
-.item-details {
-    flex-grow: 1;
-}
-
-.item-name {
-    font-size: 14.5px;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0 0 4px 0;
-}
-
-.item-price {
-    font-size: 13.5px;
-    color: #64748b;
-    margin: 0;
-}
-
-.item-price span {
-    font-weight: 800;
-    color: #0f172a;
-}
-
-.total-price-row {
-    text-align: right;
-    font-size: 14px;
-    color: #475569;
-    margin-top: 16px;
-    margin-bottom: 0;
-    font-weight: 600;
-}
-
-.total-price-value {
-    font-size: 20px;
-    color: #ef4444;
-    font-weight: 900;
-    margin-left: 6px;
-}
-
-.transaction-divider {
-    display: none;
-}
-
-/* ==========================================================================
-   ログアウトボタン（3D押し込みシャドウ付きボタン）
-   ========================================================================== */
-/* ==========================================================================
-   ログアウトボタン（デフォルトで存在感のある赤スタイル）
-   ========================================================================== */
-.logout-container {
-    margin-top: 40px;
-    text-align: center;
-}
-
-/* ==========================================================================
-   ログアウトボタン（洗練されたフラットカード・アイコンスタイル）
-   ========================================================================== */
-/* ==========================================================================
-   ログアウトボタン（クリーン＆洗練されたホバーリワーク）
-   ========================================================================== */
-.logout-container {
-    margin-top: 40px;
-    display: flex;
-    justify-content: center;
-}
-
-.btn-logout {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 36px;
-    background: #ffffff;
-    color: #e53e3e;
-    border: 1.5px solid #fecaca;
-    border-radius: 12px;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 12px rgba(229, 62, 62, 0.08);
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* カーソルを合わせた時のリワークエフェクト */
-.btn-logout:hover {
-    background: #e53e3e;
-    color: #ffffff;
-    border-color: #e53e3e;
-    box-shadow: 0 8px 22px rgba(229, 62, 62, 0.28);
-    transform: translateY(-2px);
-}
-
-/* クリックした時の打鍵感 */
-.btn-logout:active {
-    transform: translateY(0);
-    box-shadow: 0 3px 8px rgba(229, 62, 62, 0.2);
-}
-=======
-}
-
-/* マイページダッシュボード */
 .mypage-container {
-    width: min(100% - 32px, 1040px);
-    margin: 28px auto;
+    width: 100%;
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 32px 16px 110px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
+/* ==============================
+    ページ見出し
+   ============================== */
 .mypage-heading {
-    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #d5e3f0;
 }
 
 .mypage-heading h1 {
-    margin-bottom: 6px;
-    color: #243447;
+    margin: 0;
+    font-size: 23px;
+    font-weight: 700;
+    color: #0f2942;
 }
 
-.mypage-heading p,
-.mypage-eyebrow {
-    color: #667085;
+.mypage-heading p {
+    margin: 0;
+    font-size: 13px;
+    color: #5b7083;
 }
 
+/* ==============================
+    共通セクションボックス（シャープな枠＋淡いブルーの縁取り）
+   ============================== */
 .mypage-panel {
-    margin: 18px 0;
-    padding: 22px;
-    border: 1px solid #e1e8ed;
-    border-radius: 12px;
-    background: #fff;
+    background-color: #ffffff;
+    border: 1px solid #d5e3f0;
+    border-radius: 10px;
+    padding: 20px 24px;
+    box-sizing: border-box;
 }
 
 .mypage-panel > h2 {
-    margin: 0 0 16px;
-    color: #243447;
-    font-size: 20px;
-}
-
-.mypage-user-panel {
+    margin: 0 0 16px 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f2942;
     display: flex;
     align-items: center;
+    gap: 8px;
+}
+
+.mypage-panel > h2::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 16px;
+    background-color: #1976d2;
+    border-radius: 2px;
+}
+
+/* ==============================
+    1. アカウント情報パネル（上部に青のアクセントライン）
+   ============================== */
+.mypage-user-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
-    gap: 20px;
+    gap: 16px;
+    border-top: 4px solid #1976d2;
 }
 
 .mypage-user-identity {
     display: flex;
-    min-width: 0;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
+    min-width: 0;
 }
 
 .mypage-avatar {
@@ -403,41 +103,77 @@ body {
     height: 64px;
     overflow: hidden;
     border-radius: 50%;
+    border: 2px solid #90caf9;
+    background-color: #f4f9fd;
 }
 
-.mypage-user-panel h2 {
-    margin: 4px 0;
+.mypage-avatar img,
+.mypage-avatar svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .mypage-eyebrow {
-    margin: 0;
-    font-size: 13px;
+    display: none;
+}
+
+.mypage-user-panel h2 {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f2942;
+}
+
+.mypage-user-panel h2::before {
+    display: none;
 }
 
 .mypage-user-email {
     margin: 0;
+    font-size: 13px;
+    color: #5b7083;
     overflow-wrap: anywhere;
-    color: #667085;
 }
 
-.mypage-link-list {
+.mypage-user-panel .mypage-link-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px 18px;
+    gap: 8px;
 }
 
-.mypage-link-list a,
-.mypage-purchase-card > a {
-    color: #1769aa;
+.mypage-user-panel .mypage-link-list a {
+    display: inline-block;
+    padding: 8px 14px;
+    border: 1px solid #bfd7ed;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #1565c0;
+    font-size: 13px;
     font-weight: 600;
     text-decoration: none;
+    transition: background-color 0.15s, border-color 0.15s;
 }
 
-.mypage-link-list a:hover,
-.mypage-purchase-card > a:hover {
-    text-decoration: underline;
+.mypage-user-panel .mypage-link-list a:first-child {
+    background-color: #1976d2;
+    border-color: #1976d2;
+    color: #ffffff;
 }
 
+.mypage-user-panel .mypage-link-list a:first-child:hover {
+    background-color: #1565c0;
+}
+
+.mypage-user-panel .mypage-link-list a:not(:first-child):hover {
+    background-color: #eef6fc;
+    border-color: #64b5f6;
+}
+
+/* ==============================
+    2. 取引管理（4列ステータスカード）
+   ============================== */
 .mypage-stat-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -446,116 +182,320 @@ body {
 
 .mypage-stat-card {
     display: flex;
-    min-height: 104px;
     flex-direction: column;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 16px;
-    border: 1px solid #dfe6ee;
-    border-radius: 10px;
-    background: #f9fbfd;
-    color: #344054;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 8px;
+    border: 1px solid #d5e3f0;
+    border-radius: 8px;
+    background-color: #f7fbff;
     text-decoration: none;
+    transition: background-color 0.15s, border-color 0.15s;
 }
 
-a.mypage-stat-card:hover {
-    border-color: #83b7e5;
-    background: #f2f8fd;
+.mypage-stat-card:hover {
+    background-color: #ebf5ff;
+    border-color: #64b5f6;
+}
+
+.mypage-stat-card span {
+    font-size: 12px;
+    font-weight: 600;
+    color: #4a6075;
+    margin-bottom: 6px;
 }
 
 .mypage-stat-card strong {
-    color: #1a73e8;
-    font-size: 24px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1976d2;
 }
 
+/* ==============================
+    3. 出品管理（フラットボタン）
+   ============================== */
 .mypage-action-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
+    gap: 10px;
 }
 
 .mypage-action-card {
     display: flex;
-    min-height: 60px;
     align-items: center;
     justify-content: center;
-    padding: 14px;
-    border: 1px solid #dfe6ee;
-    border-radius: 10px;
-    color: #344054;
+    gap: 6px;
+    min-height: 44px;
+    padding: 10px 14px;
+    border: 1px solid #90caf9;
+    border-radius: 6px;
+    background-color: #f7fbff;
+    color: #1565c0;
+    font-size: 13px;
     font-weight: 600;
     text-align: center;
     text-decoration: none;
+    transition: background-color 0.15s, border-color 0.15s;
 }
 
 .mypage-action-card:hover {
-    border-color: #83b7e5;
-    background: #f2f8fd;
+    background-color: #e3f2fd;
+    border-color: #1976d2;
 }
 
 .mypage-action-primary {
-    border-color: #1a73e8;
-    background: #1a73e8;
-    color: #fff;
+    border-color: #1976d2;
+    background-color: #1976d2;
+    color: #ffffff;
 }
 
 .mypage-action-primary:hover {
-    background: #0d5fbd;
-    color: #fff;
+    background-color: #1565c0;
+    color: #ffffff;
 }
 
-.mypage-purchase-card {
-    margin-top: 14px;
-    padding: 18px;
-    border: 1px solid #e1e8ed;
-    border-radius: 10px;
-    background: #fff;
+/* ==============================
+    4. その他メニュー（実用アプリ風の縦並びリスト）
+   ============================== */
+nav.mypage-link-list {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #d5e3f0;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.mypage-purchase-card h3 {
-    margin: 0 0 10px;
+nav.mypage-link-list a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 16px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e6eff7;
+    color: #1e293b;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.15s, color 0.15s;
 }
 
-.mypage-purchase-card ul {
-    padding-left: 20px;
+nav.mypage-link-list a:last-child {
+    border-bottom: none;
 }
 
-.mypage-purchase-card li {
-    margin: 12px 0;
+nav.mypage-link-list a::after {
+    content: ">";
+    font-size: 14px;
+    font-weight: 700;
+    color: #64b5f6;
 }
 
+nav.mypage-link-list a:hover {
+    background-color: #f4f9fd;
+    color: #1976d2;
+}
+
+nav.mypage-link-list a[href="logout.php"] {
+    color: #dc2626;
+}
+
+nav.mypage-link-list a[href="logout.php"]::after {
+    color: #f87171;
+}
+
+nav.mypage-link-list a[href="logout.php"]:hover {
+    background-color: #fef2f2;
+    color: #b91c1c;
+}
+
+/* ==============================
+    5. 停止・利用制限の状態（該当時のみ表示）
+   ============================== */
+.mypage-restriction-panel {
+    border-color: #fca5a5;
+    background-color: #fef2f2;
+}
+
+.mypage-restriction-panel > h2 {
+    color: #b91c1c;
+}
+
+.mypage-restriction-panel > h2::before {
+    background-color: #dc2626;
+}
+
+.mypage-restriction-card {
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    background-color: #ffffff;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.mypage-restriction-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background-color: #dc2626;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 11px;
+    margin-bottom: 6px;
+}
+
+.mypage-restriction-note {
+    margin: 8px 0 0 0;
+    font-size: 12px;
+    color: #4b5563;
+}
+
+/* ==============================
+    6. 購入履歴セクション
+   ============================== */
 #purchase-history {
     scroll-margin-top: 24px;
 }
 
-@media (max-width: 800px) {
+#purchase-history > p {
+    color: #5b7083;
+    font-size: 13px;
+    text-align: center;
+    padding: 24px 0;
+    margin: 0;
+}
+
+.mypage-purchase-card {
+    margin-top: 14px;
+    padding: 16px 18px;
+    border: 1px solid #d5e3f0;
+    border-left: 4px solid #1976d2;
+    border-radius: 8px;
+    background-color: #f9fcff;
+}
+
+.mypage-purchase-card h3 {
+    margin: 0 0 6px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1565c0;
+}
+
+.mypage-purchase-card > p {
+    margin: 3px 0;
+    font-size: 12px;
+    color: #4a6075;
+}
+
+.mypage-purchase-card h4 {
+    margin: 12px 0 8px 0;
+    padding-top: 10px;
+    border-top: 1px solid #e1ecf5;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f2942;
+}
+
+.mypage-purchase-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 12px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mypage-purchase-card li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background-color: #ffffff;
+    border: 1px solid #d5e3f0;
+    border-radius: 6px;
+}
+
+.mypage-purchase-card .goods-image {
+    width: 56px;
+    height: 56px;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: #f7fbff;
+    border: 1px solid #e1ecf5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.mypage-purchase-card .goods-image img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+.mypage-purchase-card li > p {
+    margin: 0;
+    font-size: 13px;
+    color: #1e293b;
+}
+
+.mypage-purchase-card > a {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 7px 14px;
+    border: 1px solid #90caf9;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #1976d2;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.mypage-purchase-card > a:hover {
+    background-color: #1976d2;
+    border-color: #1976d2;
+    color: #ffffff;
+}
+
+/* ==============================
+    レスポンシブ対応
+   ============================== */
+@media (max-width: 768px) {
+    .mypage-container {
+        padding: 20px 12px 100px;
+    }
+
     .mypage-stat-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .mypage-action-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr;
     }
 }
 
-@media (max-width: 520px) {
-    .mypage-container {
-        width: min(100% - 20px, 1040px);
-        margin: 18px auto;
-    }
-
+@media (max-width: 480px) {
     .mypage-panel {
         padding: 16px;
     }
 
     .mypage-user-panel {
-        align-items: flex-start;
         flex-direction: column;
+        align-items: flex-start;
     }
 
-    .mypage-stat-grid,
-    .mypage-action-grid {
-        grid-template-columns: 1fr;
+    .mypage-user-panel .mypage-link-list {
+        width: 100%;
+    }
+
+    .mypage-user-panel .mypage-link-list a {
+        flex: 1;
+        text-align: center;
     }
 }
->>>>>>> 82bf08846794cc25a34ad368c964b7dbb6d73aae

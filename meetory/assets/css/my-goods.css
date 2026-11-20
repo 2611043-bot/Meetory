@@ -1,123 +1,319 @@
-/* =============================================
-   自分の出品商品（出品履歴）：1個目ベースの改良版
-============================================= */
+/* ==============================
+    出品履歴ページ専用スタイルシート
+    my-goods.php で使用（3列カード＋商品画像表示対応）
+   ============================== */
+
+/* ページ全体の淡いブルー背景 */
 .my-goods-page {
     min-height: calc(100vh - 120px);
-    padding: 40px 20px 100px; /* 下部ナビゲーションバーと重ならない余白 */
+    padding: 36px 20px 110px;
     background: linear-gradient(135deg, #eef8ff, #f8fbff);
     box-sizing: border-box;
 }
 
+/* 中央の最大幅コンテナ */
 .my-goods-container {
     width: 100%;
-    max-width: 760px;
+    max-width: 1140px;
     margin: 0 auto;
-    background-color: #ffffff;
-    padding: 36px 40px;
-    border-radius: 16px;
-    box-shadow: 0 8px 30px rgba(30, 136, 229, 0.12);
-    border: 1px solid #e1f0fa;
     box-sizing: border-box;
 }
 
-.my-goods-container h1 {
-    text-align: center;
-    margin: 0 0 28px 0;
-    padding-bottom: 16px;
-    font-size: 26px;
-    color: #1976d2;
-    border-bottom: 2px solid #eef8ff;
-}
-
-/* =============================================
-   各出品商品の履歴カード
-============================================= */
-.my-goods-item {
-    position: relative;
-    padding: 22px 24px 22px 28px;
+/* ==============================
+    上部の出品履歴ヘッダーバー
+   ============================== */
+.my-goods-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 24px;
+    margin-bottom: 26px;
+    background-color: #ffffff;
     border: 1px solid #d9eaf7;
-    border-left: 5px solid #2196f3; /* 履歴の1件ごとを分かりやすくする青いライン */
-    border-radius: 12px;
-    background-color: #fafdff;
-    margin-bottom: 20px;
-    transition: box-shadow 0.2s, border-color 0.2s;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(30, 136, 229, 0.07);
 }
 
-.my-goods-item:hover {
-    border-color: #90caf9;
-    box-shadow: 0 4px 14px rgba(33, 150, 243, 0.08);
+.my-goods-title-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
 }
 
-/* 商品名 */
-.my-goods-item h2 {
-    margin: 0 0 12px 0;
-    font-size: 19px;
-    color: #1e293b;
-    line-height: 1.45;
-}
-
-/* 価格と商品状態を横に並べてスッキリ表示 */
-.my-goods-price {
-    display: inline-block;
-    margin: 0 14px 14px 0;
-    font-size: 18px;
+.my-goods-header h1 {
+    margin: 0;
+    font-size: 24px;
     font-weight: bold;
     color: #1976d2;
+    letter-spacing: 0.03em;
 }
 
-.my-goods-condition {
-    display: inline-block;
-    vertical-align: middle;
-    margin: 0 0 14px 0;
+.my-goods-count {
     padding: 4px 12px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: bold;
     color: #1565c0;
     background-color: #e3f2fd;
-    border: 1px solid #bbdefb;
-    border-radius: 20px;
+    border-radius: 999px;
 }
 
-/* 商品説明文 */
-.my-goods-description {
-    margin: 0 0 18px 0;
-    padding: 14px 16px;
-    background-color: #ffffff;
-    border: 1px solid #e6f0f8;
-    border-radius: 8px;
-    font-size: 14px;
-    line-height: 1.7;
-    color: #475569;
-}
-
-/* 商品詳細を見るボタン */
-.my-goods-detail-link {
+.my-goods-register-btn {
     display: inline-block;
-    padding: 10px 22px;
+    padding: 9px 18px;
     border-radius: 8px;
     background: linear-gradient(135deg, #2196f3, #1976d2);
     color: #ffffff;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: bold;
     text-decoration: none;
     box-shadow: 0 3px 10px rgba(25, 118, 210, 0.2);
     transition: 0.2s;
 }
 
+.my-goods-register-btn:hover {
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+}
+
+/* ==============================
+    商品カード一覧（3列・サイズ完全統一）
+   ============================== */
+.my-goods-list {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 24px !important;
+    align-items: stretch !important;
+}
+
+.my-goods-list hr {
+    display: none !important;
+}
+
+/* 個別の商品カード */
+.my-goods-item {
+    position: relative;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    border: 1px solid #d9eaf7;
+    border-radius: 16px;
+    padding: 18px 20px 20px;
+    box-sizing: border-box;
+    background: #ffffff;
+    box-shadow: 0 4px 16px rgba(30, 136, 229, 0.07);
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.my-goods-item:hover {
+    transform: translateY(-2px);
+    border-color: #90caf9;
+    box-shadow: 0 8px 24px rgba(30, 136, 229, 0.14);
+}
+
+/* カード上部の履歴メタ行（出品日・出品中バッジ） */
+.my-goods-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.my-goods-date {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.my-goods-status {
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #0277bd;
+    background-color: #e1f5fe;
+    border: 1px solid #b3e5fc;
+    border-radius: 4px;
+}
+
+/* 商品画像のラッパー（2枚目と同じく高さを170pxに統一） */
+.my-goods-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 170px;
+    margin-bottom: 12px;
+    background-color: #f8fbff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.my-goods-image img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+/* 画像なし時のボックス（画像と同じ170pxに統一） */
+.my-no-image-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 170px;
+    margin: 0 0 12px 0;
+    background-color: #f3f7fb;
+    border: 1px dashed #cddfea;
+    border-radius: 10px;
+    color: #8899aa;
+    font-size: 13px;
+}
+
+/* 商品名（2行分の高さを確保して位置を揃える） */
+.my-goods-item h2 {
+    margin: 0 0 10px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #edf4fa;
+    font-size: 16px;
+    font-weight: bold;
+    color: #1e293b;
+    line-height: 1.45;
+    height: 2.9em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 価格 */
+.my-goods-price {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: bold;
+    color: #1565c0;
+    letter-spacing: 0.02em;
+}
+
+/* 商品の状態バッジ */
+.my-goods-condition {
+    align-self: flex-start;
+    margin: 0 0 12px 0;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #1976d2;
+    background-color: #eef8ff;
+    border: 1px solid #cce4f7;
+    border-radius: 20px;
+}
+
+/* 商品説明文（淡い枠の中に2行まで表示） */
+.my-goods-description {
+    margin: 0 0 16px 0 !important;
+    padding: 10px 12px !important;
+    background-color: #f8fbff;
+    border: 1px solid #e8f1f8;
+    border-radius: 10px;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+    height: 3em !important;
+    max-height: 3em !important;
+    color: #475569;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    word-break: break-all;
+}
+
+/* 商品詳細を見るボタン */
+.my-goods-detail-link {
+    margin-top: auto;
+    display: block;
+    text-align: center;
+    padding: 11px 16px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0 3px 10px rgba(25, 118, 210, 0.2);
+    transition: background 0.2s, transform 0.1s;
+}
+
 .my-goods-detail-link:hover {
     background: linear-gradient(135deg, #1976d2, #1565c0);
 }
 
-/* 元の <hr> は非表示 */
-.my-goods-container hr {
-    display: none;
-}
-
-/* =============================================
-   出品0件時のメッセージ & 下部リンク
-============================================= */
+/* 出品0件時のメッセージ */
 .my-goods-empty {
     text-align: center;
-    padding: 40px 20px;
-    color: #6b7c8f;
-    font-size:
+    padding: 48px 20px;
+    background-color: #ffffff;
+    border: 1px solid #d9eaf7;
+    border-radius: 14px;
+    color: #64748b;
+    font-size: 15px;
+    margin: 0 0 24px 0;
+}
+
+/* 下部の「すべての商品を見る」ボタン */
+.my-goods-all-link {
+    margin: 36px 0 0 0;
+    text-align: center;
+}
+
+.my-goods-all-link a {
+    display: inline-block;
+    padding: 10px 28px;
+    border: 1.5px solid #1976d2;
+    border-radius: 10px;
+    background-color: #ffffff;
+    color: #1976d2;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.my-goods-all-link a:hover {
+    background-color: #1976d2;
+    color: #ffffff;
+}
+
+/* ==============================
+    レスポンシブ対応
+   ============================== */
+@media (max-width: 900px) {
+    .my-goods-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .my-goods-page {
+        padding: 20px 12px 100px;
+    }
+
+    .my-goods-header {
+        padding: 16px;
+    }
+
+    .my-goods-register-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .my-goods-item {
+        padding: 16px;
+    }
+
+    .my-goods-list {
+        grid-template-columns: 1fr !important;
+    }
+}
