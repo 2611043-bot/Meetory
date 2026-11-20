@@ -415,6 +415,13 @@ if (
                 ユーザー制限管理
             </a>
             <a
+                href="/Meetory/meetory/admin/index.php"
+                class="sidebar-link"
+            >
+                <i class="fa-solid fa-chart-pie"></i>
+                管理者ダッシュボード
+            </a>
+            <a
                 href="/Meetory/meetory/reports/admin/inquiries.php"
                 class="sidebar-link"
             >
