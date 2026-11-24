@@ -61,6 +61,7 @@ $product_stmt = $pdo->prepare(
             )
         )
         AND g.is_sold = 0
+        AND g.is_active = 1
         AND NOT EXISTS (
             SELECT 1
             FROM auctions AS a

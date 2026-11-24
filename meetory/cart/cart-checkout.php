@@ -41,7 +41,8 @@ $sql = '
         g.goods_name,
         g.price,
         g.seller_id,
-        g.is_sold
+        g.is_sold,
+        g.is_active
     FROM cart AS c
     INNER JOIN goods AS g
         ON c.goods_id = g.goods_id
@@ -61,6 +62,7 @@ $total_price = 0;
 foreach ($cart_items as $item) {
     if (
         (int) $item['is_sold'] === 0 &&
+        (int) $item['is_active'] === 1 &&
         (int) $item['seller_id'] !== $user_id
     ) {
         $purchase_items[] = $item;

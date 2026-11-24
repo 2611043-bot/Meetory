@@ -56,7 +56,7 @@ try {
 
     // 商品情報を取得
     $stmt = $pdo->prepare(
-        'SELECT goods_id, seller_id, is_sold
+        'SELECT goods_id, seller_id, is_sold, is_active
         FROM goods
         WHERE goods_id = ?'
     );
@@ -78,6 +78,11 @@ try {
     // 売却済み商品は追加できない
     if ((int) $goods['is_sold'] !== 0) {
         exit('売却済みの商品はカートに追加できません。');
+    }
+
+    // 公開停止商品は追加できない
+    if ((int) $goods['is_active'] !== 1) {
+        exit('この商品は現在公開停止中です。');
     }
 
     // すでにカートに入っているか確認
