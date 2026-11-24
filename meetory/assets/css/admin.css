@@ -376,3 +376,95 @@
         padding-left: 0;
     }
 }
+
+/* ============================================================
+   自動更新関連UI
+   ============================================================ */
+
+/* 自動更新コントロールコンテナ */
+.auto-update-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 16px 0;
+    flex-wrap: wrap;
+}
+
+/* 更新ボタン */
+.auto-refresh-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #1a3a5c;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+}
+
+.auto-refresh-button:hover:not(:disabled) {
+    background: #16456b;
+}
+
+.auto-refresh-button:disabled {
+    background: #cbd5e1;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+/* 最終更新時刻 */
+.last-updated {
+    font-size: 13px;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+/* 更新状態表示 */
+.auto-update-status {
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.auto-update-status.normal {
+    background: #eef2ff;
+    color: #1a3a5c;
+}
+
+.auto-update-status.updating {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.auto-update-status.error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* スマートフォンでの自動更新UI調整 */
+@media (max-width: 768px) {
+    .auto-update-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .auto-refresh-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .last-updated {
+        font-size: 12px;
+    }
+
+    .auto-update-status {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+}

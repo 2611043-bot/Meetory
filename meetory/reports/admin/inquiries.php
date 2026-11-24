@@ -127,8 +127,13 @@ require '../../../meetory-header.php';
 ?>
 
 <link rel="stylesheet" href="../../assets/css/inquiries.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
-<div class="inquiry-page">
+<main class="report-page report-admin">
+    <div class="admin-layout">
+        <?php require __DIR__ . '/../../admin/includes/admin-sidebar.php'; ?>
+        <div class="admin-main-content">
+        <div class="inquiry-page">
     <h1>お問い合わせ管理</h1>
 
     <form class="inquiry-admin-filters" method="get" action="inquiries.php">
@@ -216,6 +221,9 @@ require '../../../meetory-header.php';
             </nav>
         <?php endif; ?>
     <?php endif; ?>
-</div>
+    </div>
+        </div>
+    </div>
+</main>
 
 <?php require '../../../meetory-footer.php'; ?>

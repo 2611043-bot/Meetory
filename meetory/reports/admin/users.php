@@ -39,6 +39,7 @@ require '../../../meetory-header.php';
 ?>
 
 <link rel="stylesheet" href="../../assets/css/reports.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 <style>
 .restriction-badge {
     display: inline-block;
@@ -55,6 +56,9 @@ require '../../../meetory-header.php';
 </style>
 
 <main class="report-page report-admin">
+    <div class="admin-layout">
+        <?php require __DIR__ . '/../../admin/includes/admin-sidebar.php'; ?>
+        <div class="admin-main-content">
 
     <h1>ユーザー制限管理</h1>
 
@@ -156,6 +160,8 @@ require '../../../meetory-header.php';
         <a href="../report/admin/index.php">通報管理に戻る</a>
     </p>
 
+        </div>
+    </div>
 </main>
 
 <?php require '../../../meetory-footer.php'; ?>

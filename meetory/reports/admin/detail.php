@@ -91,8 +91,12 @@ require '../../../meetory-header.php';
 ?>
 
 <link rel="stylesheet" href="../../assets/css/reports.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <main class="report-page report-admin">
+    <div class="admin-layout">
+        <?php require __DIR__ . '/../../admin/includes/admin-sidebar.php'; ?>
+        <div class="admin-main-content">
 
     <h1>通報詳細</h1>
 
@@ -163,7 +167,7 @@ require '../../../meetory-header.php';
         <dd>
             <?php $status_class = 'report-status-' . htmlspecialchars($report['status'], ENT_QUOTES, 'UTF-8'); ?>
             <span class="<?= $status_class ?>">
-                <?= htmlspecialchars(getReportStatusLabel($report['status']), ENT_QUOTES, 'UTF-8') ?>
+                <?= htmlspecialchars(getReportStatusLabel($report['status'], ENT_QUOTES, 'UTF-8')) ?>
             </span>
         </dd>
 
@@ -199,6 +203,8 @@ require '../../../meetory-header.php';
         <a href="index.php">通報一覧に戻る</a>
     </p>
 
+        </div>
+    </div>
 </main>
 
 <?php require '../../../meetory-footer.php'; ?>
