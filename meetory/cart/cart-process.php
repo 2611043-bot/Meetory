@@ -86,7 +86,8 @@ try {
             g.goods_name,
             g.seller_id,
             g.price,
-            g.is_sold
+            g.is_sold,
+            g.is_active
         FROM cart AS c
         INNER JOIN goods AS g
             ON c.goods_id = g.goods_id
@@ -122,6 +123,13 @@ try {
         if ((int) $item['is_sold'] !== 0) {
             throw new RuntimeException(
                 '売却済みの商品がカートに含まれています。カートから削除してください。'
+            );
+        }
+
+        // 公開停止商品は購入できない
+        if ((int) $item['is_active'] !== 1) {
+            throw new RuntimeException(
+                '公開停止中の商品がカートに含まれています。カートから削除してください。'
             );
         }
 
@@ -173,6 +181,7 @@ try {
         SET is_sold = 1
         WHERE goods_id = ?
             AND is_sold = 0
+            AND is_active = 1
     ';
 
     $update_goods_stmt = $pdo->prepare($update_goods_sql);

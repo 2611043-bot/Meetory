@@ -72,9 +72,23 @@ try {
     $response['stats']['completed_transactions'] = (int) $stmt->fetchColumn();
 
     // チャートデータ取得（dashboard.php から移植）
+    // 直近6か月分の年月ラベルを必ず生成（古い月から新しい月へ）
+    $monthLabels = [];
+    for ($i = 5; $i >= 0; $i--) {
+        $monthLabels[] = date('Y-m', strtotime("-$i months"));
+    }
+
     $startDate = date('Y-m-01', strtotime('-5 months'));
 
+    // データがない月も0として含めるよう、あらかじめ6か月分を0で初期化
     $userData = [];
+    foreach ($monthLabels as $month) {
+        $userData[] = [
+            'month' => $month,
+            'count' => 0
+        ];
+    }
+
     $stmt = $pdo->prepare("
         SELECT DATE_FORMAT(created_at, '%Y-%m') AS month, COUNT(*) AS cnt
         FROM users
@@ -85,15 +99,24 @@ try {
     $stmt->bindValue(':start_date', $startDate, PDO::PARAM_STR);
     $stmt->execute();
     $userResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // SQL結果を対応する月のカウントに上書き
     foreach ($userResults as $row) {
-        $userData[] = [
-            'month' => $row['month'],
-            'count' => (int) $row['cnt']
-        ];
+        $month = $row['month'];
+        $index = array_search($month, $monthLabels, true);
+        if ($index !== false) {
+            $userData[$index]['count'] = (int) $row['cnt'];
+        }
     }
     $response['charts']['user_registrations'] = $userData;
 
     $goodsData = [];
+    foreach ($monthLabels as $month) {
+        $goodsData[] = [
+            'month' => $month,
+            'count' => 0
+        ];
+    }
+
     $stmt = $pdo->prepare("
         SELECT DATE_FORMAT(listed_at, '%Y-%m') AS month, COUNT(*) AS cnt
         FROM goods
@@ -104,11 +127,13 @@ try {
     $stmt->bindValue(':start_date', $startDate, PDO::PARAM_STR);
     $stmt->execute();
     $goodsResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // SQL結果を対応する月のカウントに上書き
     foreach ($goodsResults as $row) {
-        $goodsData[] = [
-            'month' => $row['month'],
-            'count' => (int) $row['cnt']
-        ];
+        $month = $row['month'];
+        $index = array_search($month, $monthLabels, true);
+        if ($index !== false) {
+            $goodsData[$index]['count'] = (int) $row['cnt'];
+        }
     }
     $response['charts']['goods_listings'] = $goodsData;
 

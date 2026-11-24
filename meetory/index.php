@@ -25,6 +25,7 @@ $sql = "
         ) AS image_path
     FROM goods g
     WHERE g.is_sold = 0
+      AND g.is_active = 1
       AND NOT EXISTS (
           SELECT 1 FROM auctions a WHERE a.goods_id = g.goods_id
       )
@@ -56,6 +57,7 @@ $auction_sql = "
       AND a.start_at <= NOW()
       AND a.end_at > NOW()
       AND g.is_sold = 0
+      AND g.is_active = 1
     ORDER BY g.listed_at DESC, g.goods_id DESC
     LIMIT 6
 ";
