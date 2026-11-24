@@ -1,10 +1,5 @@
 @charset "UTF-8";
 
-/* ==============================
-    メッセージルーム専用スタイルシート
-    message-room.css（入力欄下部固定・独立スクロール対応）
-   ============================== */
-
 .message-room {
     display: flex;
     flex-direction: column;
@@ -17,7 +12,6 @@
     box-sizing: border-box;
 }
 
-/* message-center.php の会話パネル内で部分表示される場合 */
 .message-room.room-partial {
     flex: 1 1 auto;
     width: 100%;
@@ -27,9 +21,6 @@
     border-radius: 0;
 }
 
-/* ==============================
-    トークヘッダー（上部に固定）
-   ============================== */
 .room-header {
     display: flex;
     flex-shrink: 0;
@@ -105,9 +96,6 @@
     text-decoration: underline;
 }
 
-/* ==============================
-    メッセージ表示部分（ここだけが縦スクロールする）
-   ============================== */
 .room-messages {
     display: flex;
     flex: 1 1 auto;
@@ -120,7 +108,6 @@
     background: linear-gradient(180deg, #eef6fd 0%, #f5f9fe 100%);
 }
 
-/* スクロールバースタイル */
 .room-messages::-webkit-scrollbar {
     width: 6px;
 }
@@ -162,9 +149,6 @@
     padding: 24px 0;
 }
 
-/* ==============================
-    メッセージ行・吹き出し
-   ============================== */
 .message-row,
 .product-message-row {
     display: flex;
@@ -227,9 +211,6 @@
     text-align: right;
 }
 
-/* ==============================
-    商品カード（メッセージ内）
-   ============================== */
 .product-message-row {
     width: 75%;
 }
@@ -250,7 +231,7 @@
     flex-shrink: 0;
     width: 104px;
     height: 104px;
-   border-radius: 10px;
+    border-radius: 10px;
     background-color: #f1f5f9;
     overflow: hidden;
     cursor: zoom-in;
@@ -348,7 +329,6 @@
     font-size: 11px;
 }
 
-/* 画像プレースホルダー */
 .product-image-placeholder {
     display: flex;
     flex-direction: column;
@@ -373,9 +353,6 @@
     font-size: 11px;
 }
 
-/* ==============================
-    画像拡大モーダル
-   ============================== */
 .image-modal {
     position: fixed;
     inset: 0;
@@ -451,7 +428,6 @@
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* 商品詳細ページ用ミニチャット */
 .product-chat {
     padding-top: 15px;
 }
@@ -525,9 +501,6 @@
     transition: background-color 0.15s;
 }
 
-/* ==============================
-    商品選択エリア・通常メッセージ入力（下部に常時固定）
-   ============================== */
 .product-picker-area {
     flex-shrink: 0;
     padding: 10px 20px;
@@ -628,7 +601,6 @@
     display: none;
 }
 
-/* メッセージ入力バー（下部に常時固定） */
 .room-input-area {
     display: flex;
     flex-shrink: 0;
@@ -678,9 +650,6 @@
     background-color: #1565c0;
 }
 
-/* ==============================
-    スマートフォン対応
-   ============================== */
 @media (max-width: 700px) {
     .message-room {
         height: calc(100dvh - 185px);
@@ -770,6 +739,10 @@
 
     .room-input-area {
         padding: 10px 12px;
+    }
+
+    .room-input-area input {
+        font-size: 16px;
     }
 
     .image-modal {

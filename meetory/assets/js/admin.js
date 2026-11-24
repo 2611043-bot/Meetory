@@ -207,19 +207,18 @@
         }
     }
 
-    // 統計情報更新
+   // 統計情報更新
     function updateStats(stats) {
         const statValues = document.querySelectorAll('.admin-stat-value');
         if (!statValues || statValues.length < 4) {
             return;
         }
 
-        statValues[0].textContent = stats.total_users;
-        statValues[1].textContent = stats.total_goods;
-        statValues[2].textContent = stats.total_transactions;
-        statValues[3].textContent = stats.completed_transactions;
+        statValues[0].textContent = stats.total_users ?? 0;
+        statValues[1].textContent = stats.total_goods ?? 0;
+        statValues[2].textContent = stats.total_transactions ?? stats.total_orders ?? 0;
+        statValues[3].textContent = stats.completed_transactions ?? stats.completed_orders ?? 0;
     }
-
     // グラフ更新
     function updateCharts(charts) {
         // ユーザー登録推移グラフ
