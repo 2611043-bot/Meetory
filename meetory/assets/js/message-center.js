@@ -772,4 +772,76 @@
     if (initialConversation) {
         loadConversation(initialConversation, { keepAddress: true });
     }
+    // ========================================
+    // 右側メッセージエリアの拡大・縮小切り替え
+    // ========================================
+    function isExpanded() {
+        return layout.classList.contains('is-expanded');
+    }
+
+    function updateExpandButtons() {
+        const expanded = isExpanded();
+        messageRoomPanel.querySelectorAll('.room-expand-btn').forEach(function (btn) {
+            btn.setAttribute('aria-pressed', String(expanded));
+            btn.title = expanded ? '元のサイズに戻す' : 'メッセージ画面を拡大';
+            btn.innerHTML = expanded
+                ? '<i class="fa-solid fa-compress"></i><span>戻す</span>'
+                : '<i class="fa-solid fa-expand"></i><span>拡大</span>';
+        });
+    }
+
+    function setExpanded(expanded) {
+        if (isMobile()) {
+            return;
+        }
+        layout.classList.toggle('is-expanded', expanded);
+        document.body.classList.toggle('is-message-expanded', expanded);
+        updateExpandButtons();
+    }
+
+    function injectExpandButton() {
+        if (isMobile()) {
+            return;
+        }
+        const targetHeader =
+            messageRoomPanel.querySelector('.room-header') ||
+            messageRoomPanel.querySelector('.talk-welcome');
+
+        if (!targetHeader || targetHeader.querySelector('.room-expand-btn')) {
+            updateExpandButtons();
+            return;
+        }
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'room-expand-btn';
+        targetHeader.appendChild(btn);
+        updateExpandButtons();
+    }
+
+    // トーク一覧の各項目にホバー用タイトルを付与（縮小表示時に相手名が分かるように）
+    talkList.querySelectorAll('.talk-item').forEach(function (item) {
+        const nameEl = item.querySelector('.talk-user-name');
+        const ctxEl = item.querySelector('.talk-context');
+        if (nameEl && !item.title) {
+            item.title = nameEl.textContent.trim() + (ctxEl ? '（' + ctxEl.textContent.trim() + '）' : '');
+        }
+    });
+
+    // 右パネルの中身が切り替わるたびに拡大ボタンを自動挿入
+    const panelObserver = new MutationObserver(function () {
+        injectExpandButton();
+    });
+    panelObserver.observe(messageRoomPanel, { childList: true });
+    injectExpandButton();
+
+    // 拡大ボタンのクリック処理
+    messageRoomPanel.addEventListener('click', function (event) {
+        const expandBtn = event.target.closest('.room-expand-btn');
+        if (!expandBtn) {
+            return;
+        }
+        event.preventDefault();
+        setExpanded(!isExpanded());
+    });
 })();

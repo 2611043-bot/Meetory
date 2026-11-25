@@ -5,15 +5,15 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 
 if (
-    !isset($_SESSION['user_id']) ||
-    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false ||
+    !isset($_SESSION['user_id']) or
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false or
     (int) $_SESSION['user_id'] <= 0
 ) {
     header('Location: ../../user/login.php');
     exit;
 }
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+if (!isset($_SESSION['role']) or $_SESSION['role'] !== 'admin') {
     http_response_code(403);
     exit('このページを閲覧する権限がありません。');
 }
@@ -127,8 +127,321 @@ require '../../../meetory-header.php';
 ?>
 
 <link rel="stylesheet" href="../../assets/css/inquiries.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
+<style>
+/* ページ全体の背景（Meetory標準の淡いブルーグラデーション） */
+html:has(.report-page.report-admin),
+body:has(.report-page.report-admin) {
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
+}
 
-<div class="inquiry-page">
+.report-page.report-admin {
+    background: transparent !important;
+    padding: 24px 18px 110px;
+}
+
+.report-page.report-admin .admin-layout {
+    max-width: 1140px;
+    margin: 0 auto;
+    gap: 22px;
+    align-items: flex-start;
+    background: transparent !important;
+}
+
+/* 右側メインエリア（左の管理メニューと揃えた白のフローティングカード） */
+.report-page.report-admin .admin-main-content {
+    flex: 1;
+    min-width: 0;
+    padding: 28px 32px;
+    border: 1px solid rgba(25, 118, 210, 0.12);
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 10px 30px -8px rgba(15, 41, 66, 0.08);
+    box-sizing: border-box;
+}
+
+.report-page.report-admin .inquiry-page {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* 見出し */
+.report-page.report-admin .inquiry-page > h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 20px;
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f2942;
+    letter-spacing: -0.01em;
+}
+
+.report-page.report-admin .inquiry-page > h1::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 22px;
+    border-radius: 999px;
+    background-color: #1976d2;
+}
+
+/* 絞り込みフィルターフォーム */
+.report-page.report-admin .inquiry-admin-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px 14px;
+    margin: 0 0 20px;
+    padding: 16px 18px;
+    border: 1px solid #e2ebf5;
+    border-radius: 14px;
+    background-color: #f8fbff;
+}
+
+.report-page.report-admin .inquiry-admin-filters label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #334155;
+}
+
+.report-page.report-admin .inquiry-admin-filters select,
+.report-page.report-admin .inquiry-admin-filters input[type="search"] {
+    height: 38px;
+    padding: 0 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background-color: #ffffff;
+    font-size: 13px;
+    color: #0f172a;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.report-page.report-admin .inquiry-admin-filters select {
+    min-width: 140px;
+    cursor: pointer;
+}
+
+.report-page.report-admin .inquiry-admin-filters input[type="search"] {
+    min-width: 210px;
+}
+
+.report-page.report-admin .inquiry-admin-filters select:focus,
+.report-page.report-admin .inquiry-admin-filters input[type="search"]:focus {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.14);
+}
+
+.report-page.report-admin .inquiry-admin-filters button[type="submit"] {
+    height: 38px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 999px;
+    background-color: #1976d2;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(25, 118, 210, 0.22);
+    transition: background-color 0.15s;
+}
+
+.report-page.report-admin .inquiry-admin-filters button[type="submit"]:hover {
+    background-color: #1565c0;
+}
+
+.report-page.report-admin .inquiry-admin-filters a {
+    display: inline-flex;
+    align-items: center;
+    height: 38px;
+    padding: 0 16px;
+    border: 1px solid #dce6f2;
+    border-radius: 999px;
+    background-color: #ffffff;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    box-sizing: border-box;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.report-page.report-admin .inquiry-admin-filters a:hover {
+    background-color: #f1f5f9;
+    color: #0f2942;
+}
+
+/* エラーアラート・件数表示 */
+.report-page.report-admin .inquiry-alert {
+    margin: 0 0 16px;
+    padding: 12px 16px;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    background-color: #fef2f2;
+    color: #dc2626;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.report-page.report-admin .inquiry-page > p {
+    margin: 0 0 12px;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* テーブルデザイン */
+.report-page.report-admin .inquiry-table-wrap {
+    border: 1px solid #e2ebf5;
+    border-radius: 14px;
+    overflow-x: auto;
+    background-color: #ffffff;
+}
+
+.report-page.report-admin .inquiry-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0;
+}
+
+.report-page.report-admin .inquiry-table thead th {
+    padding: 13px 14px;
+    border: none;
+    border-bottom: 1px solid #dce6f2;
+    background-color: #f1f7fe;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.report-page.report-admin .inquiry-table tbody td {
+    padding: 14px;
+    border: none;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.report-page.report-admin .inquiry-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.report-page.report-admin .inquiry-table tbody tr:hover td {
+    background-color: #f8fbff;
+}
+
+/* 問い合わせ番号リンク */
+.report-page.report-admin .inquiry-table td:first-child {
+    white-space: nowrap;
+}
+
+.report-page.report-admin .inquiry-table td:first-child a {
+    color: #1976d2;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.report-page.report-admin .inquiry-table td:first-child a:hover {
+    text-decoration: underline;
+}
+
+/* 件名セル */
+.report-page.report-admin .inquiry-subject {
+    max-width: 240px;
+    font-weight: 600;
+    color: #0f172a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ステータス・新着バッジ */
+.report-page.report-admin .inquiry-status {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1565c0;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.report-page.report-admin .inquiry-table td:first-child .inquiry-status {
+    margin-left: 6px;
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #dc2626;
+}
+
+/* ページネーション */
+.report-page.report-admin .inquiry-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 22px;
+}
+
+.report-page.report-admin .inquiry-pagination a {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 16px;
+    border: 1px solid #dce6f2;
+    border-radius: 999px;
+    background-color: #f8fbff;
+    color: #1976d2;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.report-page.report-admin .inquiry-pagination a:hover {
+    background-color: #e8f3fe;
+    border-color: #90caf9;
+}
+
+.report-page.report-admin .inquiry-pagination span {
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+}
+
+/* スマホ・タブレット対応 */
+@media (max-width: 768px) {
+    .report-page.report-admin .admin-main-content {
+        padding: 20px 16px;
+        border-radius: 16px;
+    }
+
+    .report-page.report-admin .inquiry-admin-filters label,
+    .report-page.report-admin .inquiry-admin-filters select,
+    .report-page.report-admin .inquiry-admin-filters input[type="search"] {
+        width: 100%;
+    }
+}
+</style>
+
+<main class="report-page report-admin">
+    <div class="admin-layout">
+        <?php require __DIR__ . '/../../admin/includes/admin-sidebar.php'; ?>
+        <div class="admin-main-content">
+        <div class="inquiry-page">
     <h1>お問い合わせ管理</h1>
 
     <form class="inquiry-admin-filters" method="get" action="inquiries.php">
@@ -216,6 +529,9 @@ require '../../../meetory-header.php';
             </nav>
         <?php endif; ?>
     <?php endif; ?>
-</div>
+    </div>
+        </div>
+    </div>
+</main>
 
 <?php require '../../../meetory-footer.php'; ?>

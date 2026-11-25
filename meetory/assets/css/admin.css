@@ -290,26 +290,124 @@
 
 /* サイドバー */
 .admin-sidebar {
-    width: 250px;
+    width: 260px;
     flex-shrink: 0;
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 20px;
+    padding: 0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     height: fit-content;
+    display: flex;
+    flex-direction: column;
+}
+
+/* サイドバーブランド（ロゴ・タイトル） */
+.admin-sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-sidebar-brand-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #1a3a5c 0%, #2d5a87 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(26, 58, 92, 0.2);
+}
+
+.admin-sidebar-brand-icon i {
+    color: #ffffff;
+    font-size: 20px;
+}
+
+.admin-sidebar-brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-sidebar-brand-name {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1a3a5c;
+    letter-spacing: 0.05em;
+    line-height: 1;
+}
+
+.admin-sidebar-brand-sub {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    margin-top: 2px;
 }
 
 /* サイドバーナビゲーション */
 .admin-sidebar-nav {
     padding: 0;
+    flex: 1;
 }
 
-/* サイドバーリスト */
-.admin-sidebar-list {
+/* カテゴリコンテナ */
+.admin-sidebar-category {
+    margin: 0;
+}
+
+/* カテゴリヘッダー */
+.admin-sidebar-category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 14px 20px;
+    background: transparent;
+    text-align: left;
+    cursor: default;
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.admin-sidebar-category-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    background: #f1f5f9;
+    border-radius: 6px;
+}
+
+.admin-sidebar-category-icon i {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.admin-sidebar-category-title {
+    flex: 1;
+}
+
+/* カテゴリリスト（常時表示） */
+.admin-sidebar-category-list {
     list-style: none;
     padding: 0;
     margin: 0;
+    display: block;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* カテゴリ展開時のメニュー項目を右にずらす */
+.admin-sidebar-category-list .admin-sidebar-link {
+    padding-left: 34px;
 }
 
 /* サイドバーリンク */
@@ -317,28 +415,30 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 14px;
-    border-radius: 8px;
+    padding: 10px 20px;
+    border-radius: 0;
     color: #475569;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
-    transition: background 0.2s, color 0.2s;
+    transition: background 0.15s, color 0.15s;
+    border-left: 3px solid transparent;
 }
 
 .admin-sidebar-link i {
-    font-size: 16px;
+    font-size: 15px;
     width: 20px;
     text-align: center;
     color: #94a3b8;
+    transition: color 0.15s;
 }
 
-.admin-sidebar-link:hover {
+.admin-sidebar-link:hover:not(.disabled) {
     background: #f1f5f9;
     color: #1a3a5c;
 }
 
-.admin-sidebar-link:hover i {
+.admin-sidebar-link:hover:not(.disabled) i {
     color: #1a3a5c;
 }
 
@@ -348,11 +448,51 @@
     color: #1a3a5c;
     font-weight: 600;
     border-left: 3px solid #1a3a5c;
-    padding-left: 11px;
 }
 
 .admin-sidebar-link.active i {
     color: #1a3a5c;
+}
+
+/* 無効リンク（準備中） */
+.admin-sidebar-link.disabled {
+    color: #94a3b8;
+    cursor: not-allowed;
+    background: transparent;
+}
+
+.admin-sidebar-link.disabled:hover {
+    background: transparent;
+    color: #94a3b8;
+}
+
+.admin-sidebar-link.disabled i {
+    color: #cbd5e1;
+}
+
+.admin-sidebar-link.disabled span {
+    color: #94a3b8;
+}
+
+/* 準備中バッジ */
+.admin-sidebar-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-left: auto;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.admin-sidebar-link.disabled .admin-sidebar-badge {
+    color: #94a3b8;
+    background: #f1f5f9;
+    border-color: #e2e8f0;
 }
 
 /* メインコンテンツ */
@@ -372,7 +512,215 @@
         width: 100%;
     }
 
+    .admin-sidebar-brand {
+        padding: 16px 16px 20px;
+    }
+
     .admin-main-content {
         padding-left: 0;
+    }
+
+    .admin-sidebar-category-toggle {
+        padding: 12px 16px;
+        font-size: 12.5px;
+    }
+
+    .admin-sidebar-link {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+}
+
+/* ============================================================
+   自動更新関連UI
+   ============================================================ */
+
+/* 自動更新コントロールコンテナ */
+.auto-update-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 16px 0;
+    flex-wrap: wrap;
+}
+
+/* 更新ボタン */
+.auto-refresh-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #1a3a5c;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+}
+
+.auto-refresh-button:hover:not(:disabled) {
+    background: #16456b;
+}
+
+.auto-refresh-button:disabled {
+    background: #cbd5e1;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+/* 最終更新時刻 */
+.last-updated {
+    font-size: 13px;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+/* 更新状態表示 */
+.auto-update-status {
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.auto-update-status.normal {
+    background: #eef2ff;
+    color: #1a3a5c;
+}
+
+.auto-update-status.updating {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.auto-update-status.error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* スマートフォンでの自動更新UI調整 */
+@media (max-width: 768px) {
+    .auto-update-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .auto-refresh-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .last-updated {
+        font-size: 12px;
+    }
+
+    .auto-update-status {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+}
+
+/* ============================================================
+   管理者サイドバー情報パネル
+   ============================================================ */
+
+.admin-sidebar-info {
+    margin-top: 24px;
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.admin-sidebar-info-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-sidebar-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px;
+}
+
+.admin-sidebar-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+    color: #475569;
+}
+
+.admin-sidebar-info-item:last-child {
+    border-bottom: none;
+}
+
+.admin-sidebar-info-label {
+    color: #64748b;
+}
+
+.admin-sidebar-info-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a3a5c;
+}
+
+.admin-sidebar-recent-logs {
+    margin-top: 0;
+}
+
+.admin-sidebar-recent-logs-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 8px;
+    padding-top: 8px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.admin-sidebar-recent-logs-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-sidebar-recent-log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 12px;
+    color: #475569;
+}
+
+.admin-sidebar-recent-log-item:last-child {
+    border-bottom: none;
+}
+
+.admin-sidebar-recent-log-action {
+    color: #64748b;
+}
+
+.admin-sidebar-recent-log-time {
+    color: #94a3b8;
+    font-variant-numeric: tabular-nums;
+}
+
+/* スマートフォンでの情報パネル調整 */
+@media (max-width: 768px) {
+    .admin-sidebar-info {
+        margin-top: 16px;
+        padding: 16px;
     }
 }

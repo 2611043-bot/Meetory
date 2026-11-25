@@ -221,8 +221,17 @@ require '../../meetory-header.php';
 <link rel="stylesheet" href="../assets/css/admin.css?v=<?= filemtime(__DIR__ . '/../assets/css/admin.css') ?>">
 
 <main class="main-container admin-container">
+    <div class="admin-layout">
+        <?php require __DIR__ . '/includes/admin-sidebar.php'; ?>
+        <div class="admin-main-content">
 
     <h1 class="admin-page-title">ダッシュボード詳細</h1>
+
+    <div class="auto-update-controls">
+        <button id="autoRefreshButton" class="auto-refresh-button">今すぐ更新</button>
+        <span id="lastUpdated" class="last-updated"></span>
+        <span id="autoRefreshStatus" class="auto-update-status"></span>
+    </div>
 
     <nav class="admin-breadcrumb">
         <a href="index.php">ホーム</a>
@@ -283,6 +292,8 @@ require '../../meetory-header.php';
         </div>
     </section>
 
+        </div>
+    </div>
 </main>
 
 <?php require '../../meetory-footer.php'; ?>

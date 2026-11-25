@@ -44,6 +44,7 @@ $sql = '
         g.price,
         g.seller_id,
         g.is_sold,
+        g.is_active,
         u.user_name AS seller_name,
         (
             SELECT gi.image_path
@@ -74,7 +75,7 @@ $available_count = 0;
 
 foreach ($cart_items as $item) {
     // 売却済み商品は合計に含めない
-    if ((int) $item['is_sold'] === 0) {
+    if ((int) $item['is_sold'] === 0 && (int) $item['is_active'] === 1) {
         // 自分が出品した商品も購入対象にしない
         if ((int) $item['seller_id'] !== $user_id) {
             $total_price += (int) $item['price'];
@@ -175,6 +176,10 @@ foreach ($cart_items as $item) {
                 <?php if ((int) $item['is_sold'] === 1): ?>
 
                     <p>この商品は売却済みです。購入できません。</p>
+
+                <?php elseif ((int) $item['is_active'] !== 1): ?>
+
+                    <p>この商品は現在公開停止中です。購入できません。</p>
 
                 <?php elseif ((int) $item['seller_id'] === $user_id): ?>
 

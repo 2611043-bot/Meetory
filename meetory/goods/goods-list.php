@@ -57,6 +57,9 @@ $conditions[] = 'NOT EXISTS (SELECT 1 FROM auctions a WHERE a.goods_id = g.goods
 // 売却済み商品は除外
 $conditions[] = 'g.is_sold = 0';
 
+// 公開停止商品は除外
+$conditions[] = 'g.is_active = 1';
+
 // カテゴリーで絞り込み
 if ($category_id !== '' && ctype_digit($category_id) && (int) $category_id > 0) {
     $conditions[] = 'g.category_id = :category_id';

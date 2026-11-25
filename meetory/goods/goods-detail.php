@@ -39,6 +39,7 @@ $sql = 'SELECT
     `condition`,
     listed_at,
     is_sold,
+    is_active,
     seller.user_name AS seller_name,
     seller.profile_image_type,
     seller.profile_image
@@ -55,6 +56,26 @@ $goods = $stmt->fetch(PDO::FETCH_ASSOC);
 // 商品が見つからない場合
 if ($goods === false) {
     exit('商品が見つかりません。');
+}
+
+// 出品者・管理者判定（公開停止チェックで使用）
+$is_owner = isset($_SESSION['user_id'])
+    && (int) $_SESSION['user_id'] === (int) $goods['seller_id'];
+$is_admin = isset($_SESSION['role'])
+    && $_SESSION['role'] === 'admin';
+
+// 公開停止商品へのアクセス制御
+if ((int) $goods['is_active'] !== 1 && !$is_owner && !$is_admin) {
+    require '../../meetory-header.php';
+    ?>
+    <main>
+        <h1>商品詳細</h1>
+        <p>この商品は現在公開停止中です。</p>
+        <p><a href="goods-list.php">商品一覧に戻る</a></p>
+    </main>
+    <?php
+    require '../../meetory-footer.php';
+    exit;
 }
 
 // 閲覧履歴を保存（ログイン中の場合のみ）
@@ -122,18 +143,11 @@ if (
 
 $csrf_token = $_SESSION['csrf_token'];
 
-// ログイン中のユーザーが出品者か確認
-$is_owner = isset($_SESSION['user_id'])
-    && (int) $_SESSION['user_id'] === (int) $goods['seller_id'];
-
-// 管理者か確認
-$is_admin = isset($_SESSION['role'])
-    && $_SESSION['role'] === 'admin';
-
 // カートに入れられる条件
 $can_add_cart = isset($_SESSION['user_id'])
     && !$is_owner
-    && (int) $goods['is_sold'] === 0;
+    && (int) $goods['is_sold'] === 0
+    && (int) $goods['is_active'] === 1;
 
 // ほしいものリストに保存済みか確認
 $is_favorited = false;

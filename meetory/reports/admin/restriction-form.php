@@ -6,13 +6,13 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 require_once '../../../meetory-functions.php';
 
-if (empty($_SESSION['user_id']) || (int) $_SESSION['user_id'] <= 0) {
+if (empty($_SESSION['user_id']) or (int) $_SESSION['user_id'] <= 0) {
     $return = str_replace('\\', '/', $_SERVER['REQUEST_URI'] ?? '/Meetory/meetory/reports/admin/restriction-form.php');
     header('Location: ../../user/login.php?return_url=' . urlencode($return));
     exit;
 }
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+if (!isset($_SESSION['role']) or $_SESSION['role'] !== 'admin') {
     exit('このページを閲覧する権限がありません。');
 }
 
@@ -28,7 +28,7 @@ unset($_SESSION['restriction_flash']);
 
 // 対象ユーザー
 $target_user_id = filter_input(INPUT_GET, 'user_id', FILTER_VALIDATE_INT);
-if ($target_user_id === false || $target_user_id === null || $target_user_id <= 0) {
+if ($target_user_id === false or $target_user_id === null or $target_user_id <= 0) {
     exit('ユーザーIDが正しくありません。');
 }
 
@@ -49,6 +49,311 @@ require '../../../meetory-header.php';
 ?>
 
 <link rel="stylesheet" href="../../assets/css/reports.css">
+<style>
+/* ページ全体の背景（Meetory標準の淡いブルーグラデーション） */
+html:has(.report-page.report-admin),
+body:has(.report-page.report-admin) {
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
+}
+
+/* メインコンテナ（白のフローティングカード） */
+.report-page.report-admin {
+    max-width: 920px;
+    margin: 24px auto 110px;
+    padding: 32px 36px;
+    border: 1px solid rgba(25, 118, 210, 0.12);
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 10px 30px -8px rgba(15, 41, 66, 0.08);
+    box-sizing: border-box;
+    color: #0f172a;
+}
+
+/* ページ見出し */
+.report-page.report-admin > h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 18px;
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f2942;
+    letter-spacing: -0.01em;
+}
+
+.report-page.report-admin > h1::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 22px;
+    border-radius: 999px;
+    background-color: #1976d2;
+}
+
+/* フラッシュメッセージ */
+.report-page.report-admin .report-flash {
+    margin: 0 0 18px;
+    padding: 12px 16px;
+    border: 1px solid #bae6fd;
+    border-radius: 12px;
+    background-color: #f0f9ff;
+    color: #0369a1;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* 上部ナビゲーションリンク（ユーザー一覧に戻る | 履歴を見る） */
+.report-page.report-admin > p:has(a[href="users.php"]) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 24px;
+    color: transparent;
+    font-size: 0;
+}
+
+.report-page.report-admin > p:has(a[href="users.php"]) a {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 16px;
+    border: 1px solid #dce6f2;
+    border-radius: 999px;
+    background-color: #f8fbff;
+    color: #1976d2;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.report-page.report-admin > p:has(a[href="users.php"]) a:hover {
+    background-color: #e8f3fe;
+    border-color: #90caf9;
+}
+
+/* 各セクションカード */
+.report-page.report-admin > section {
+    margin-bottom: 24px;
+    padding: 22px 24px;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    background-color: #f8fbff;
+}
+
+.report-page.report-admin > section:last-of-type {
+    margin-bottom: 0;
+}
+
+.report-page.report-admin > section h2 {
+    margin: 0 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dce6f2;
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f2942;
+}
+
+.report-page.report-admin > section > p {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+/* 現在適用されている制限テーブル */
+.report-page.report-admin .report-list {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 12px;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+}
+
+.report-page.report-admin .report-list thead th {
+    padding: 11px 14px;
+    border: none;
+    border-bottom: 1px solid #dce6f2;
+    background-color: #f1f7fe;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.report-page.report-admin .report-list tbody td {
+    padding: 12px 14px;
+    border: none;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.report-page.report-admin .report-list tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.report-page.report-admin .report-list tbody tr:hover td {
+    background-color: #f8fbff;
+}
+
+/* 解除ボタン */
+.report-page.report-admin .report-list button[name="revoke_restriction_id"] {
+    padding: 6px 14px;
+    border: 1px solid #fecaca;
+    border-radius: 999px;
+    background-color: #fef2f2;
+    color: #dc2626;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.report-page.report-admin .report-list button[name="revoke_restriction_id"]:hover {
+    background-color: #dc2626;
+    border-color: #dc2626;
+    color: #ffffff;
+}
+
+.report-page.report-admin .restriction-note {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
+/* 新しい制限を設定するフォーム */
+.report-page.report-admin .report-form p {
+    margin: 0 0 18px;
+}
+
+.report-page.report-admin .report-form label {
+    display: inline-block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+}
+
+.report-page.report-admin .report-form select,
+.report-page.report-admin .report-form textarea,
+.report-page.report-admin .report-form input[type="datetime-local"] {
+    width: 100%;
+    max-width: 480px;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    background-color: #ffffff;
+    font-size: 14px;
+    color: #0f172a;
+    font-family: inherit;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.report-page.report-admin .report-form select {
+    height: 42px;
+    cursor: pointer;
+}
+
+.report-page.report-admin .report-form textarea {
+    max-width: 100%;
+    min-height: 100px;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+.report-page.report-admin .report-form select:focus,
+.report-page.report-admin .report-form textarea:focus,
+.report-page.report-admin .report-form input[type="datetime-local"]:focus {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.14);
+}
+
+.report-page.report-admin .report-form input[type="datetime-local"]:disabled {
+    background-color: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+/* 無期限制限チェックボックス行 */
+.report-page.report-admin .report-form label:has(#unlimited) {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0;
+    padding: 10px 14px;
+    border: 1px solid #dce6f2;
+    border-radius: 12px;
+    background-color: #ffffff;
+    cursor: pointer;
+}
+
+.report-page.report-admin .report-form input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #1976d2;
+    cursor: pointer;
+}
+
+.report-page.report-admin .report-form .hint {
+    display: block;
+    margin-top: 6px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+/* 送信ボタン（制限を設定する） */
+.report-page.report-admin .report-form button[type="submit"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 28px;
+    border: none;
+    border-radius: 999px;
+    background-color: #1976d2;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(25, 118, 210, 0.25);
+    transition: background-color 0.15s, transform 0.1s;
+}
+
+.report-page.report-admin .report-form button[type="submit"]:hover {
+    background-color: #1565c0;
+}
+
+.report-page.report-admin .report-form button[type="submit"]:active {
+    transform: translateY(1px);
+}
+
+/* スマホ・タブレット対応 */
+@media (max-width: 768px) {
+    .report-page.report-admin {
+        margin: 12px 10px 100px;
+        padding: 20px 16px;
+        border-radius: 16px;
+    }
+
+    .report-page.report-admin > section {
+        padding: 16px 14px;
+    }
+
+    .report-page.report-admin .report-list {
+        display: block;
+        overflow-x: auto;
+    }
+}
+</style>
 
 <main class="report-page report-admin">
 
