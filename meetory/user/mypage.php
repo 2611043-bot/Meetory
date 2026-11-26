@@ -211,11 +211,11 @@ require '../../meetory-header.php';
                 <span>購入履歴</span>
                 <strong><?= $purchase_count ?>件</strong>
             </a>
-            <a class="mypage-stat-card" href="../goods/my-goods.php">
+            <a class="mypage-stat-card" href="../goods/my-goods-active.php">
                 <span>出品中の商品</span>
                 <strong><?= (int) $listing_counts['active_goods_count'] ?>件</strong>
             </a>
-            <a class="mypage-stat-card" href="../goods/my-goods.php">
+            <a class="mypage-stat-card" href="../goods/my-goods-sold.php">
                 <span>売却済みの商品</span>
                 <strong><?= (int) $listing_counts['sold_goods_count'] ?>件</strong>
             </a>
