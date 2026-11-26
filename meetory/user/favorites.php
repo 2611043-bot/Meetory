@@ -1,4 +1,3 @@
-
 <?php
 
 // セッションを開始
@@ -16,7 +15,7 @@ if (!isset($_SESSION['user_id'])) {
 require_once '../../meetory-functions.php';
 
 // ログイン中のユーザーIDを取得
-$user_id = (int) $_SESSION['user_id'];
+$user_id = (int)$_SESSION['user_id'];
 
 // DB接続
 $pdo = getPDO();
@@ -51,14 +50,14 @@ $sql = '
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$user_id]);
 
-$favorites = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$favorites =$stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // 商品画像のパスを検証
 foreach ($favorites as &$favorite) {
-    $image_path = $favorite['image_path'] ?? '';
+    $image_path =$favorite['image_path'] ?? '';
 
     if (
-        !is_string($image_path) ||
+        !is_string($image_path) or
         !preg_match(
             '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
             $image_path
@@ -71,14 +70,13 @@ unset($favorite);
 
 // CSRFトークンを作成
 if (
-    !isset($_SESSION['csrf_token']) ||
-    !is_string($_SESSION['csrf_token']) ||
-    $_SESSION['csrf_token'] === ''
+    !isset($_SESSION['csrf_token']) or
+    !is_string($_SESSION['csrf_token']) or$_SESSION['csrf_token'] === ''
 ) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-$csrf_token = $_SESSION['csrf_token'];
+$csrf_token =$_SESSION['csrf_token'];
 
 // 共通ヘッダー
 require '../../meetory-header.php';
@@ -86,7 +84,7 @@ require '../../meetory-header.php';
 ?>
 
 <!-- ページ固有のスタイルシートを読み込む（ほしいものリスト専用） -->
-<link rel="stylesheet" href="../assets/css/favorites.css">
+<link rel="stylesheet" href="../assets/css/favorites.css?v=<?= time() ?>">
 
 <main>
 
@@ -109,7 +107,7 @@ require '../../meetory-header.php';
 
         <div class="favorites-list">
 
-        <?php foreach ($favorites as $favorite): ?>
+        <?php foreach ($favorites as$favorite): ?>
 
             <article class="favorite-item">
 
@@ -122,7 +120,7 @@ require '../../meetory-header.php';
 
                 <!-- 商品画像 -->
                 <?php
-                $fav_image_path = $favorite['image_path'] ?? '';
+                $fav_image_path =$favorite['image_path'] ?? '';
                 $is_valid_fav_image = is_string($fav_image_path)
                     && preg_match(
                         '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',

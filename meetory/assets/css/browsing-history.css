@@ -1,0 +1,331 @@
+/* ============================================================
+   閲覧履歴専用スタイルシート（Meetory標準デザイン）
+   ============================================================ */
+
+/* ページ全体の背景（Meetory標準の淡いブルーグラデーション） */
+html:has(main > .browsing-history-list),
+html:has(main > h1:first-child),
+body:has(main > .browsing-history-list),
+body:has(main > h1:first-child) {
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
+}
+
+main {
+    position: relative;
+    max-width: 960px;
+    margin: 28px auto 110px;
+    padding: 30px 34px;
+    border: 1px solid rgba(25, 118, 210, 0.12);
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 10px 30px -8px rgba(15, 41, 66, 0.08);
+    box-sizing: border-box;
+}
+
+/* 見出し */
+main > h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 16px;
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f2942;
+    letter-spacing: -0.01em;
+}
+
+main > h1::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 22px;
+    border-radius: 999px;
+    background-color: #1976d2;
+}
+
+/* 登録件数バッジ風（履歴がある場合） */
+main:has(.browsing-history-list) > p:first-of-type {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px;
+    margin: 0 12px 22px 0;
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+    background-color: #eff6ff;
+    color: #1976d2;
+    font-size: 13px;
+    font-weight: 800;
+    vertical-align: middle;
+}
+
+/* 全件削除フォーム（登録件数の横に並べる） */
+main > .clear-form {
+    display: inline-block;
+    margin: 0 0 22px;
+    vertical-align: middle;
+}
+
+main > .clear-btn {
+    height: 34px;
+    padding: 0 16px;
+    border: 1px solid #fecdd3;
+    border-radius: 999px;
+    background-color: #fff1f2;
+    color: #e11d48;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+main > .clear-btn:hover {
+    background-color: #e11d48;
+    border-color: #e11d48;
+    color: #ffffff;
+}
+
+/* 空状態のときの枠デザイン */
+main:not(:has(.browsing-history-list)) > p:first-of-type {
+    padding: 44px 20px 28px;
+    margin: 10px 0 20px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 16px;
+    background-color: #f8fbff;
+    text-align: center;
+    color: #64748b;
+    font-size: 14.5px;
+    font-weight: 700;
+}
+
+/* マイページに戻る ボタン風リンク */
+main > p > a[href="mypage.php"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 170px;
+    height: 40px;
+    padding: 0 22px;
+    border: 1px solid #dce6f2;
+    border-radius: 999px;
+    background-color: #f8fbff;
+    color: #334155;
+    font-size: 13.5px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+main > p > a[href="mypage.php"]:hover {
+    background-color: #e8f3fe;
+    border-color: #bfdbfe;
+    color: #1976d2;
+}
+
+main > p:last-child {
+    margin-top: 24px;
+    margin-bottom: 0;
+}
+
+/* 閲覧履歴一覧 */
+.browsing-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* 各商品カード */
+.history-item {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 22px;
+    padding: 20px 22px;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.history-item:hover {
+    transform: translateY(-2px);
+    border-color: #bfdbfe;
+    box-shadow: 0 8px 22px rgba(25, 118, 210, 0.09);
+}
+
+.history-item hr {
+    display: none;
+}
+
+/* 商品画像エリア */
+.history-image {
+    flex-shrink: 0;
+    width: 150px;
+    height: 150px;
+    border: 1px solid #e2ebf5;
+    border-radius: 14px;
+    background-color: #ffffff;
+    overflow: hidden;
+}
+
+.history-image a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-align: center;
+    background-color: #f8fbff;
+}
+
+.history-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.2s;
+}
+
+.history-item:hover .history-image img {
+    transform: scale(1.03);
+}
+
+/* 商品情報エリア */
+.history-info {
+    flex: 1;
+    min-width: 0;
+    padding-right: 76px;
+}
+
+.history-info h2 {
+    margin: 0 0 8px;
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.history-info h2 a {
+    color: #0f2942;
+    text-decoration: none;
+}
+
+.history-info h2 a:hover {
+    color: #1976d2;
+    text-decoration: underline;
+}
+
+.history-info p {
+    margin: 0 0 5px;
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.5;
+}
+
+/* 価格の強調（1番目のp要素） */
+.history-info > p:nth-of-type(1) {
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #1976d2;
+}
+
+/* 出品中 / 売却済み バッジ */
+.history-sold,
+.history-active {
+    display: inline-block;
+    margin: 6px 0 8px !important;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-size: 11.5px !important;
+    font-weight: 800;
+}
+
+.history-active {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.history-sold {
+    background-color: #f1f5f9;
+    color: #64748b;
+}
+
+/* 個別削除ボタン（カード右上配置） */
+.history-delete-form {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    margin: 0;
+    z-index: 2;
+}
+
+.history-delete-btn {
+    height: 32px;
+    padding: 0 14px;
+    border: 1px solid #fecdd3;
+    border-radius: 999px;
+    background-color: #fff1f2;
+    color: #e11d48;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.history-delete-btn:hover {
+    background-color: #e11d48;
+    border-color: #e11d48;
+    color: #ffffff;
+}
+
+/* 確認モーダル */
+.delete-account-modal-content {
+    border-radius: 20px !important;
+    border: 1px solid rgba(25, 118, 210, 0.14);
+    box-shadow: 0 20px 45px rgba(15, 41, 66, 0.2) !important;
+}
+
+.delete-account-modal-btn {
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+}
+
+/* スマホ対応 */
+@media (max-width: 768px) {
+    main {
+        margin: 14px 12px 110px;
+        padding: 20px 16px;
+        border-radius: 16px;
+    }
+
+    .history-item {
+        flex-direction: column;
+        gap: 14px;
+        padding: 16px;
+    }
+
+    .history-image {
+        width: 100%;
+        height: 190px;
+    }
+
+    .history-info {
+        width: 100%;
+        padding-right: 0;
+    }
+
+    .history-delete-form {
+        top: 14px;
+        right: 14px;
+    }
+
+    .history-delete-btn {
+        background-color: rgba(255, 241, 242, 0.95);
+        box-shadow: 0 2px 8px rgba(15, 41, 66, 0.12);
+    }
+}

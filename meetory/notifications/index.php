@@ -7,8 +7,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 // ログイン確認
 if (
-    !isset($_SESSION['user_id']) ||
-    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false ||
+    !isset($_SESSION['user_id']) or
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false or
     (int) $_SESSION['user_id'] <= 0
 ) {
     header('Location: ../user/login.php');
@@ -244,7 +244,7 @@ $filterType = $allowedTypes[$filter]; // null なら全種類
 // ========================================
 
 $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT);
-if ($page === false || $page === null || $page < 1) {
+if ($page === false or $page === null or $page < 1) {
     $page = 1;
 }
 
@@ -281,7 +281,7 @@ foreach ($typeColumnMap as $typeKey => $colName) {
 }
 
 // 通知全体がOFF、または有効なタイプがない場合は空配列
-if (!$notificationsEnabled || empty($allowedTypeKeys)) {
+if (!$notificationsEnabled or empty($allowedTypeKeys)) {
     $notifications = [];
     $totalCount = 0;
 } else {
@@ -382,7 +382,7 @@ if (!$notificationsEnabled || empty($allowedTypeKeys)) {
 $totalPages = (int) ceil($totalCount / $limit);
 
 // 未読件数（ヘッダー表示用など） - 設定でONのタイプのみカウント
-if (!$notificationsEnabled || empty($allowedTypeKeys)) {
+if (!$notificationsEnabled or empty($allowedTypeKeys)) {
     $unreadCount = 0;
 } else {
     $typePlaceholders = implode(',', array_map(fn($i) => ":type_$i", array_keys($allowedTypeKeys)));
@@ -410,6 +410,425 @@ require '../../meetory-header.php';
     rel="stylesheet"
     href="/Meetory/meetory/assets/css/notifications.css?v=<?= filemtime(__DIR__ . '/../assets/css/notifications.css') ?>"
 >
+<style>
+/* ページ全体の背景（Meetory標準の淡いブルーグラデーション） */
+html:has(body.notifications-page),
+body.notifications-page {
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
+}
+
+body.notifications-page {
+    padding-bottom: 110px !important;
+}
+
+/* フラッシュメッセージ */
+body.notifications-page .notify-flash {
+    max-width: 1080px;
+    margin: 22px auto 0;
+    padding: 13px 20px;
+    border-radius: 16px;
+    font-size: 13.5px;
+    font-weight: 700;
+    box-shadow: 0 6px 20px rgba(15, 41, 66, 0.06);
+    box-sizing: border-box;
+}
+
+/* 上部フィルター＆操作バー（白のフローティングカード） */
+body.notifications-page .notifications-filter {
+    max-width: 1080px;
+    margin: 24px auto 18px;
+    padding: 20px 24px;
+    border: 1px solid rgba(25, 118, 210, 0.12);
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 10px 30px -8px rgba(15, 41, 66, 0.08);
+    box-sizing: border-box;
+}
+
+body.notifications-page .filter-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+body.notifications-page .filter-link {
+    display: inline-flex;
+    align-items: center;
+    height: 34px;
+    padding: 0 14px;
+    border: 1px solid #dce6f2;
+    border-radius: 999px;
+    background-color: #f8fbff;
+    color: #475569;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+body.notifications-page .filter-link:hover {
+    background-color: #e8f3fe;
+    border-color: #bfdbfe;
+    color: #1976d2;
+}
+
+body.notifications-page .filter-link.filter-link-active {
+    background-color: #1976d2 !important;
+    border-color: #1976d2 !important;
+    color: #ffffff !important;
+    box-shadow: 0 3px 10px rgba(25, 118, 210, 0.24);
+}
+
+/* 一括操作・通知設定ボタンバー */
+body.notifications-page .filter-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #eef4fb;
+}
+
+body.notifications-page .filter-actions form {
+    margin: 0;
+}
+
+body.notifications-page .bulk-btn,
+body.notifications-page .settings-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+body.notifications-page .bulk-btn-read {
+    border: 1px solid #bfdbfe;
+    background-color: #eff6ff;
+    color: #1976d2;
+}
+
+body.notifications-page .bulk-btn-read:hover {
+    background-color: #1976d2;
+    border-color: #1976d2;
+    color: #ffffff;
+}
+
+body.notifications-page .bulk-btn-delete {
+    border: 1px solid #fecdd3;
+    background-color: #fff1f2;
+    color: #e11d48;
+}
+
+body.notifications-page .bulk-btn-delete:hover {
+    background-color: #e11d48;
+    border-color: #e11d48;
+    color: #ffffff;
+}
+
+body.notifications-page .settings-link {
+    margin-left: auto;
+    border: 1px solid #dce6f2;
+    background-color: #f8fbff;
+    color: #334155;
+}
+
+body.notifications-page .settings-link:hover {
+    background-color: #e8f3fe;
+    border-color: #bfdbfe;
+    color: #1976d2;
+}
+
+/* 通知一覧エリア（白のフローティングカード） */
+body.notifications-page .notifications-list {
+    max-width: 1080px;
+    margin: 0 auto 24px;
+    padding: 8px 0;
+    border: 1px solid rgba(25, 118, 210, 0.12);
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 10px 30px -8px rgba(15, 41, 66, 0.08);
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* 空状態 */
+body.notifications-page .notifications-empty {
+    padding: 56px 20px;
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+body.notifications-page .notifications-empty p {
+    margin: 0;
+}
+
+/* 通知アイテム一覧 */
+body.notifications-page .notification-items {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+body.notifications-page .notification-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 22px;
+    border-bottom: 1px solid #f1f5f9;
+    background-color: #ffffff;
+    transition: background-color 0.15s;
+}
+
+body.notifications-page .notification-item:last-child {
+    border-bottom: none;
+}
+
+body.notifications-page .notification-item:hover {
+    background-color: #f8fbff;
+}
+
+/* 未読通知のハイライト */
+body.notifications-page .notification-item.notification-item-unread {
+    background: linear-gradient(90deg, #eff6ff 0%, #f8fbff 100%) !important;
+    border-left: 4px solid #1976d2;
+    padding-left: 18px;
+}
+
+body.notifications-page .notification-item.notification-item-unread:hover {
+    background: #e8f2fe !important;
+}
+
+body.notifications-page .notification-link {
+    flex: 1;
+    min-width: 0;
+    text-decoration: none;
+    color: inherit;
+}
+
+body.notifications-page .notification-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+/* 種類バッジ */
+body.notifications-page .notification-type-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-width: 68px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background-color: #e3f2fd;
+    color: #1565c0;
+    font-size: 11.5px;
+    font-weight: 800;
+    text-align: center;
+}
+
+body.notifications-page .notification-text {
+    flex: 1;
+    min-width: 0;
+}
+
+body.notifications-page .notification-title {
+    margin: 0 0 4px;
+    font-size: 14.5px;
+    font-weight: 800;
+    color: #0f2942;
+    line-height: 1.45;
+}
+
+body.notifications-page .notification-message {
+    margin: 0;
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+body.notifications-page .notification-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+body.notifications-page .notification-date {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+body.notifications-page .notification-unread-mark {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background-color: #1976d2;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+/* 個別「既読にする」「削除」ボタン */
+body.notifications-page .notification-item-form {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+body.notifications-page .action-btn {
+    height: 32px;
+    padding: 0 13px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+body.notifications-page .action-btn-read {
+    border: 1px solid #bfdbfe;
+    background-color: #eff6ff;
+    color: #1976d2;
+}
+
+body.notifications-page .action-btn-read:hover {
+    background-color: #1976d2;
+    border-color: #1976d2;
+    color: #ffffff;
+}
+
+body.notifications-page .action-btn-delete {
+    border: 1px solid #fecdd3;
+    background-color: #fff1f2;
+    color: #e11d48;
+}
+
+body.notifications-page .action-btn-delete:hover {
+    background-color: #e11d48;
+    border-color: #e11d48;
+    color: #ffffff;
+}
+
+/* ページネーション */
+body.notifications-page .notifications-pagination {
+    padding: 18px 20px;
+    border-top: 1px solid #eef4fb;
+    background-color: #f8fbff;
+}
+
+body.notifications-page .pagination-list {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+body.notifications-page .pagination-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 16px;
+    border: 1px solid #dce6f2;
+    border-radius: 999px;
+    background-color: #ffffff;
+    color: #1976d2;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+body.notifications-page .pagination-link:hover {
+    background-color: #e8f3fe;
+    border-color: #bfdbfe;
+}
+
+body.notifications-page .pagination-current {
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+}
+
+/* 確認モーダル */
+body.notifications-page .delete-account-modal-content {
+    border-radius: 20px !important;
+    border: 1px solid rgba(25, 118, 210, 0.14);
+    box-shadow: 0 20px 45px rgba(15, 41, 66, 0.2) !important;
+}
+
+body.notifications-page .delete-account-modal-btn {
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+}
+
+/* スマホ対応 */
+@media (max-width: 768px) {
+    body.notifications-page .notifications-filter,
+    body.notifications-page .notifications-list,
+    body.notifications-page .notify-flash {
+        margin-left: 12px;
+        margin-right: 12px;
+        border-radius: 16px;
+    }
+
+    body.notifications-page .notifications-filter {
+        padding: 16px 14px;
+    }
+
+    body.notifications-page .settings-link {
+        margin-left: 0;
+    }
+
+    body.notifications-page .notification-item {
+        flex-wrap: wrap;
+        padding: 14px 16px;
+    }
+
+    body.notifications-page .notification-item.notification-item-unread {
+        padding-left: 12px;
+    }
+
+    body.notifications-page .notification-link {
+        width: 100%;
+        flex-basis: 100%;
+    }
+
+    body.notifications-page .notification-content {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    body.notifications-page .notification-meta {
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+</style>
 
 <!-- フラッシュメッセージ -->
 <?php if ($flash_message !== ''): ?>

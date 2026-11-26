@@ -1,4 +1,3 @@
-
 <?php
 
 // セッションを開始
@@ -8,8 +7,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 // ログインしているか確認
 if (
-    !isset($_SESSION['user_id']) ||
-    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false ||
+    !isset($_SESSION['user_id']) or
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false or
     (int) $_SESSION['user_id'] <= 0
 ) {
     header('Location: login.php');
@@ -27,8 +26,8 @@ $pdo = getPDO();
 
 // CSRFトークンを作成
 if (
-    !isset($_SESSION['csrf_token']) ||
-    !is_string($_SESSION['csrf_token']) ||
+    !isset($_SESSION['csrf_token']) or
+    !is_string($_SESSION['csrf_token']) or
     $_SESSION['csrf_token'] === ''
 ) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -70,7 +69,7 @@ foreach ($browsing_history as &$item) {
     $image_path = $item['image_path'] ?? '';
 
     if (
-        !is_string($image_path) ||
+        !is_string($image_path) or
         !preg_match(
             '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
             $image_path
@@ -87,8 +86,7 @@ require '../../meetory-header.php';
 ?>
 
 <!-- ページ固有のスタイルシートを読み込む（閲覧履歴専用） -->
-<link rel="stylesheet" href="../assets/css/favorites.css">
-
+<link rel="stylesheet" href="/Meetory/meetory/assets/css/browsing-history.css?v=<?= time() ?>">
 <main>
 
     <h1>閲覧履歴</h1>

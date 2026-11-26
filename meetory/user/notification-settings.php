@@ -7,7 +7,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 require_once '../../meetory-functions.php';
 
 $user_id = filter_var($_SESSION['user_id'] ?? null, FILTER_VALIDATE_INT);
-if ($user_id === false || $user_id === null || $user_id <= 0) {
+if ($user_id === false or $user_id === null or $user_id <= 0) {
     header('Location: login.php');
     exit;
 }
@@ -124,6 +124,242 @@ require '../../meetory-header.php';
     rel="stylesheet"
     href="../assets/css/notification-settings.css?v=<?= filemtime(__DIR__ . '/../assets/css/notification-settings.css') ?>"
 >
+<style>
+/* ページ全体の背景（Meetory標準の淡いブルーグラデーション） */
+html:has(.notification-settings-page),
+body:has(.notification-settings-page) {
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
+}
+
+.notification-settings-page {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 28px 18px 120px;
+    background: transparent !important;
+    box-sizing: border-box;
+}
+
+/* ページ見出しエリア */
+.notification-settings-page .notification-settings-heading {
+    margin: 0 0 22px;
+    padding: 22px 26px;
+    border: 1px solid rgba(25, 118, 210, 0.12);
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 10px 30px -8px rgba(15, 41, 66, 0.08);
+}
+
+.notification-settings-page .notification-settings-heading h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f2942;
+    letter-spacing: -0.01em;
+}
+
+.notification-settings-page .notification-settings-heading h1::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 22px;
+    border-radius: 999px;
+    background-color: #1976d2;
+}
+
+.notification-settings-page .notification-settings-heading p {
+    margin: 0;
+    padding-left: 15px;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+/* フラッシュメッセージ */
+.notification-settings-page .flash-message {
+    margin: 0 0 18px;
+    padding: 13px 18px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* 全体設定OFF時の案内バナー */
+.notification-settings-page .global-off-message {
+    margin: 0 0 18px;
+    padding: 13px 18px;
+    border: 1px solid #fde68a;
+    border-radius: 14px;
+    background-color: #fffbeb;
+    color: #92400e;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.notification-settings-page .global-off-message p {
+    margin: 0;
+}
+
+/* 各設定セクション（白のフローティングカード） */
+.notification-settings-page .settings-section {
+    margin: 0 0 20px;
+    padding: 24px 28px;
+    border: 1px solid rgba(25, 118, 210, 0.12);
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 10px 30px -8px rgba(15, 41, 66, 0.08);
+    box-sizing: border-box;
+    transition: opacity 0.2s;
+}
+
+.notification-settings-page .settings-section.settings-section-disabled {
+    opacity: 0.62;
+}
+
+.notification-settings-page .settings-section > h2,
+.notification-settings-page .settings-section-header h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f2942;
+}
+
+.notification-settings-page .settings-section > h2 {
+    margin-bottom: 12px;
+}
+
+.notification-settings-page .settings-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.notification-settings-page .settings-section-desc {
+    margin: 0 0 14px;
+    font-size: 12.5px;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+/* 「すべてON」カプセルボタン */
+.notification-settings-page #selectAllBtn {
+    height: 34px;
+    padding: 0 16px;
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+    background-color: #f0f7ff;
+    color: #1976d2;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.notification-settings-page #selectAllBtn:hover:not(:disabled) {
+    background-color: #1976d2;
+    border-color: #1976d2;
+    color: #ffffff;
+}
+
+.notification-settings-page #selectAllBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 各通知項目の行 */
+.notification-settings-page .setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 15px 6px;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.15s;
+}
+
+.notification-settings-page .setting-item:last-child {
+    border-bottom: none;
+    padding-bottom: 4px;
+}
+
+.notification-settings-page .setting-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-settings-page .setting-info h3 {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.notification-settings-page .setting-info p {
+    margin: 0;
+    font-size: 12.5px;
+    color: #64748b;
+    line-height: 1.55;
+}
+
+/* トグルスイッチの色味をMeetoryブルーに統一 */
+.notification-settings-page .toggle-switch input:checked + .toggle-slider {
+    background-color: #1976d2 !important;
+}
+
+/* 下部「設定を閉じる」ボタン */
+.notification-settings-page .settings-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 26px;
+}
+
+.notification-settings-page .settings-actions .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 180px;
+    height: 44px;
+    padding: 0 28px;
+    border: 1px solid #dce6f2;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.96);
+    color: #334155;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.06);
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.notification-settings-page .settings-actions .btn-secondary:hover {
+    background-color: #e8f3fe;
+    border-color: #bfdbfe;
+    color: #1976d2;
+}
+
+/* スマホ対応 */
+@media (max-width: 768px) {
+    .notification-settings-page {
+        padding: 16px 12px 110px;
+    }
+
+    .notification-settings-page .notification-settings-heading,
+    .notification-settings-page .settings-section {
+        padding: 20px 16px;
+        border-radius: 16px;
+    }
+
+    .notification-settings-page .setting-item {
+        gap: 12px;
+        padding: 14px 2px;
+    }
+}
+</style>
 
 <main class="notification-settings-page">
     <header class="notification-settings-heading">
