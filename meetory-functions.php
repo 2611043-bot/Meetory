@@ -741,14 +741,22 @@ function searchRestrictedUsers(PDO $pdo, string $keyword = ''): array
         WHERE 1 = 1";
     $params = [];
     if ($keyword !== '') {
-        $sql .= ' AND u.user_name LIKE :keyword';
-        $params[':keyword'] = '%' . $keyword . '%';
+        if (ctype_digit($keyword)) {
+            // 数字のみのキーワードはユーザーIDでの完全一致も検索対象とする
+            $sql .= ' AND (u.user_id = :keyword_id OR u.user_name LIKE :keyword_name)';
+            $params[':keyword_id'] = (int) $keyword;
+            $params[':keyword_name'] = '%' . $keyword . '%';
+        } else {
+            $sql .= ' AND u.user_name LIKE :keyword';
+            $params[':keyword'] = '%' . $keyword . '%';
+        }
     }
     $sql .= ' GROUP BY u.user_id, u.user_name, u.role, u.created_at ORDER BY u.user_id DESC';
 
     $stmt = $pdo->prepare($sql);
     foreach ($params as $key => $val) {
-        $stmt->bindValue($key, $val, PDO::PARAM_STR);
+        $type = ($key === ':keyword_id') ? PDO::PARAM_INT : PDO::PARAM_STR;
+        $stmt->bindValue($key, $val, $type);
     }
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);

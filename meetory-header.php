@@ -401,32 +401,11 @@ if (
             <?php if (isset($_SESSION['user_id']) && isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
             <h2 class="sidebar-section-title">管理</h2>
             <a
-                href="/Meetory/meetory/reports/admin/index.php"
-                class="sidebar-link"
-            >
-                <i class="fa-solid fa-flag"></i>
-                通報管理
-            </a>
-            <a
-                href="/Meetory/meetory/reports/admin/users.php"
-                class="sidebar-link"
-            >
-                <i class="fa-solid fa-user-shield"></i>
-                ユーザー制限管理
-            </a>
-            <a
                 href="/Meetory/meetory/admin/index.php"
                 class="sidebar-link"
             >
                 <i class="fa-solid fa-chart-pie"></i>
                 管理者ダッシュボード
-            </a>
-            <a
-                href="/Meetory/meetory/reports/admin/inquiries.php"
-                class="sidebar-link"
-            >
-                <i class="fa-solid fa-envelope"></i>
-                お問い合わせ管理
             </a>
             <?php endif; ?>
 

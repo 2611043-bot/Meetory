@@ -99,10 +99,12 @@ try {
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="admin-sidebar-link disabled">
+                    <a
+                        href="/Meetory/meetory/admin/goods-list.php"
+                        class="admin-sidebar-link<?= (strpos($currentUri, '/admin/goods-list.php') !== false || strpos($currentUri, '/admin/goods-detail.php') !== false) ? ' active' : '' ?>"
+                    >
                         <i class="fa-solid fa-box"></i>
                         <span>商品管理</span>
-                        <span class="admin-sidebar-badge">準備中</span>
                     </a>
                 </li>
                 <li>

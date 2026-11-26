@@ -29,6 +29,7 @@ $sql = '
         g.`condition`,
         g.listed_at,
         g.is_sold,
+        g.is_active,
         a.auction_id,
         a.start_price,
         a.current_price,
@@ -149,13 +150,14 @@ $end_at = new DateTimeImmutable($auction['end_at'], $tz);
 $is_started = $now >= $start_at;
 $is_ended = $now >= $end_at;
 
-// 入札可能か判定（開始前・終了後・売却済みは不可）
-$can_bid = isset($_SESSION['user_id'])
-    && !$is_owner
-    && $auction['status'] === 'active'
-    && (int) $auction['is_sold'] === 0
-    && $is_started
-    && !$is_ended;
+    // 入札可能か判定（開始前・終了後・売却済み・非公開は不可）
+    $can_bid = isset($_SESSION['user_id'])
+        && !$is_owner
+        && $auction['status'] === 'active'
+        && (int) $auction['is_sold'] === 0
+        && (int) $auction['is_active'] === 1
+        && $is_started
+        && !$is_ended;
 
 ?>
 
@@ -284,7 +286,11 @@ $can_bid = isset($_SESSION['user_id'])
 
             <p>入札がなかったため、落札者はいません。</p>
 
-        <?php elseif ((int) $auction['is_sold'] === 1 || $auction['status'] !== 'active'): ?>
+    <?php elseif ((int) $auction['is_active'] !== 1): ?>
+
+        <p>この商品は現在公開されていません。</p>
+
+    <?php elseif ((int) $auction['is_sold'] === 1 || $auction['status'] !== 'active'): ?>
 
             <p>このオークションは終了しています。</p>
 
@@ -330,6 +336,10 @@ $can_bid = isset($_SESSION['user_id'])
     <?php elseif ($is_owner): ?>
 
         <p>出品者は入札できません。</p>
+
+    <?php elseif ((int) $auction['is_active'] !== 1): ?>
+
+        <p>この商品は現在公開されていません。</p>
 
     <?php elseif ((int) $auction['is_sold'] === 1 || $auction['status'] !== 'active'): ?>
 
