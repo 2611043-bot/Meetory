@@ -159,6 +159,33 @@ try {
                     </a>
                 </li>
                 <li>
+                    <a
+                        href="/Meetory/meetory/admin/operation-logs.php"
+                        class="admin-sidebar-link<?= strpos($currentUri, '/admin/operation-logs.php') !== false ? ' active' : '' ?>"
+                    >
+                        <i class="fa-solid fa-clipboard-list"></i>
+                        <span>操作ログ一覧</span>
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="/Meetory/meetory/admin/operation-log-summary.php"
+                        class="admin-sidebar-link<?= strpos($currentUri, '/admin/operation-log-summary.php') !== false ? ' active' : '' ?>"
+                    >
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>操作ログ集計</span>
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="/Meetory/meetory/admin/operation-log-detail.php"
+                        class="admin-sidebar-link<?= strpos($currentUri, '/admin/operation-log-detail.php') !== false ? ' active' : '' ?>"
+                    >
+                        <i class="fa-solid fa-file-circle-info"></i>
+                        <span>操作ログ詳細</span>
+                    </a>
+                </li>
+                <li>
                     <a href="#" class="admin-sidebar-link disabled">
                         <i class="fa-solid fa-bullhorn"></i>
                         <span>お知らせ管理</span>

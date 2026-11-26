@@ -95,6 +95,64 @@ try {
     error_log('admin dashboard chart error: ' . $e->getMessage());
 }
 
+// 未対応件数の取得（サイドバーと同じ条件）
+$pendingReports = 0;
+$pendingInquiries = 0;
+
+try {
+    // 未対応の違反報告件数（status = 'pending'）
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM reports WHERE status = :status');
+    $stmt->bindValue(':status', 'pending', PDO::PARAM_STR);
+    $stmt->execute();
+    $pendingReports = (int) $stmt->fetchColumn();
+
+    // 未対応のお問い合わせ件数（status = '未対応'）
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM inquiries WHERE status = :status');
+    $stmt->bindValue(':status', '未対応', PDO::PARAM_STR);
+    $stmt->execute();
+    $pendingInquiries = (int) $stmt->fetchColumn();
+} catch (Throwable $e) {
+    error_log('admin dashboard pending count error: ' . $e->getMessage());
+}
+
+// 最近の対応待ち案件一覧（違反報告とお問い合わせを統合、最大5件）
+$pendingItems = [];
+
+try {
+    $stmt = $pdo->prepare("
+        SELECT
+            'report' AS item_type,
+            '違反報告' AS item_label,
+            r.report_id AS item_id,
+            r.reason AS item_title,
+            r.status AS item_status,
+            r.created_at AS item_created_at
+        FROM reports AS r
+        WHERE r.status = :report_status
+
+        UNION ALL
+
+        SELECT
+            'inquiry' AS item_type,
+            'お問い合わせ' AS item_label,
+            i.inquiry_id AS item_id,
+            i.subject AS item_title,
+            i.status AS item_status,
+            i.created_at AS item_created_at
+        FROM inquiries AS i
+        WHERE i.status = :inquiry_status
+
+        ORDER BY item_created_at DESC
+        LIMIT 5
+    ");
+    $stmt->bindValue(':report_status', 'pending', PDO::PARAM_STR);
+    $stmt->bindValue(':inquiry_status', '未対応', PDO::PARAM_STR);
+    $stmt->execute();
+    $pendingItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Throwable $e) {
+    error_log('admin dashboard pending items error: ' . $e->getMessage());
+}
+
 require '../../meetory-header.php';
 ?>
 
@@ -331,6 +389,159 @@ body:has(.admin-container) {
     }
 }
 
+/* 対応が必要な案件セクション */
+.main-container.admin-container .admin-notices {
+    margin: 0 0 28px;
+}
+
+.main-container.admin-container .admin-notice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin: 0 0 16px;
+}
+
+.main-container.admin-container .admin-notice-card {
+    padding: 16px 18px;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.main-container.admin-container .admin-notice-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.main-container.admin-container .admin-notice-icon.report {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+.main-container.admin-container .admin-notice-icon.inquiry {
+    background-color: #fef2f2;
+    color: #b45309;
+}
+
+.main-container.admin-container .admin-notice-info {
+    flex: 1;
+}
+
+.main-container.admin-container .admin-notice-label {
+    margin: 0 0 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.main-container.admin-container .admin-notice-value {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f2942;
+}
+
+/* 対応待ち案件一覧 */
+.main-container.admin-container .admin-notice-list {
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.main-container.admin-container .admin-notice-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.main-container.admin-container .admin-notice-list th {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    background-color: #f8fafc;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    text-align: left;
+}
+
+.main-container.admin-container .admin-notice-list td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+    color: #334155;
+    vertical-align: middle;
+}
+
+.main-container.admin-container .admin-notice-list tr:last-child td {
+    border-bottom: none;
+}
+
+.main-container.admin-container .admin-notice-list tr:hover {
+    background-color: #f8fafc;
+}
+
+.main-container.admin-container .admin-notice-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.main-container.admin-container .admin-notice-badge-report {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+.main-container.admin-container .admin-notice-badge-inquiry {
+    background-color: #fff7ed;
+    color: #b45309;
+}
+
+.main-container.admin-container .admin-notice-link {
+    color: #1976d2;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.main-container.admin-container .admin-notice-link:hover {
+    text-decoration: underline;
+}
+
+.main-container.admin-container .admin-notice-empty {
+    padding: 24px 16px;
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+    .main-container.admin-container .admin-main-content {
+        padding: 20px 16px;
+        border-radius: 16px;
+    }
+
+    .main-container.admin-container .admin-notice-grid {
+        grid-template-columns: 1fr;
+    }
+    .main-container.admin-container .admin-shortcut-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 768px) {
     .main-container.admin-container {
         padding: 14px 10px 100px;
@@ -399,6 +610,86 @@ body:has(.admin-container) {
                 <span>通報管理</span>
             </a>
         </div>
+    </section>
+
+    <!-- 対応が必要な案件 -->
+    <section class="admin-notices">
+        <h2 class="admin-section-title">対応が必要な案件</h2>
+        <div class="admin-notice-grid">
+            <div class="admin-notice-card">
+                <div class="admin-notice-icon report">
+                    <i class="fa-solid fa-flag"></i>
+                </div>
+                <div class="admin-notice-info">
+                    <p class="admin-notice-label">未対応の違反報告</p>
+                    <p class="admin-notice-value"><?= (int) $pendingReports ?>件</p>
+                </div>
+            </div>
+            <div class="admin-notice-card">
+                <div class="admin-notice-icon inquiry">
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
+                <div class="admin-notice-info">
+                    <p class="admin-notice-label">未対応のお問い合わせ</p>
+                    <p class="admin-notice-value"><?= (int) $pendingInquiries ?>件</p>
+                </div>
+            </div>
+        </div>
+
+        <?php if (!empty($pendingItems)): ?>
+            <div class="admin-notice-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>種類</th>
+                            <th>件名・内容</th>
+                            <th>受付日時</th>
+                            <th>対応状況</th>
+                            <th>詳細</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($pendingItems as $item): ?>
+                            <?php
+                            $isReport = $item['item_type'] === 'report';
+                            $badgeClass = $isReport ? 'admin-notice-badge-report' : 'admin-notice-badge-inquiry';
+                            $label = htmlspecialchars($item['item_label'], ENT_QUOTES, 'UTF-8');
+                            $title = $item['item_title'] !== null && $item['item_title'] !== ''
+                                ? htmlspecialchars($item['item_title'], ENT_QUOTES, 'UTF-8')
+                                : '(内容なし)';
+                            if ($isReport) {
+                                // 違反報告のステータスは日本語ラベルに変換（既存関数を再利用）
+                                $statusLabel = getReportStatusLabel($item['item_status']);
+                                $status = htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8');
+                            } else {
+                                // お問い合わせのステータスは既に日本語のためそのまま表示
+                                $status = htmlspecialchars($item['item_status'], ENT_QUOTES, 'UTF-8');
+                            }
+                            $createdAt = htmlspecialchars(date('Y/m/d H:i', strtotime($item['item_created_at'])), ENT_QUOTES, 'UTF-8');
+                            if ($isReport) {
+                                $link = '/Meetory/meetory/reports/admin/detail.php?report_id=' . (int) $item['item_id'];
+                            } else {
+                                $link = '/Meetory/meetory/reports/admin/inquiry-detail.php?inquiry_id=' . (int) $item['item_id'];
+                            }
+                            ?>
+                            <tr>
+                                <td>
+                                    <span class="admin-notice-badge <?= $badgeClass ?>"><?= $label ?></span>
+                                </td>
+                                <td><?= $title ?></td>
+                                <td><?= $createdAt ?></td>
+                                <td><?= $status ?></td>
+                                <td>
+                                    <a href="<?= htmlspecialchars($link, ENT_QUOTES, 'UTF-8') ?>" class="admin-notice-link">詳細</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <p class="admin-notice-empty">現在、対応が必要な案件はありません。</p>
+        <?php endif; ?>
     </section>
 
     <!-- ユーザー登録推移（折れ線グラフ） -->
