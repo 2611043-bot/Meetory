@@ -61,7 +61,8 @@ try {
             a.winning_price,
             a.ended_at,
             g.seller_id,
-            g.is_sold
+            g.is_sold,
+            g.is_active
         FROM auctions AS a
         INNER JOIN goods AS g
             ON a.goods_id = g.goods_id
@@ -82,8 +83,8 @@ try {
         exit;
     }
 
-    // 売却済みまたは終了済みは入札禁止
-    if ((int) $auction['is_sold'] === 1 || $auction['status'] !== 'active') {
+    // 売却済み・非公開または終了済みは入札禁止
+    if ((int) $auction['is_sold'] === 1 || (int) $auction['is_active'] !== 1 || $auction['status'] !== 'active') {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }

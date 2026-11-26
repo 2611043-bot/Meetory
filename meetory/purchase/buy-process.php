@@ -172,7 +172,7 @@ try {
 
     // 商品情報を取得してロック
     $stmt = $pdo->prepare(
-        'SELECT goods_id, seller_id, goods_name, price, is_sold
+        'SELECT goods_id, seller_id, goods_name, price, is_sold, is_active
         FROM goods
         WHERE goods_id = :goods_id
         FOR UPDATE'
@@ -197,6 +197,11 @@ try {
     // 売却済みの商品は購入できない
     if ((int) $goods['is_sold'] === 1) {
         throw new RuntimeException('この商品はすでに売却されています。');
+    }
+
+    // 公開停止の商品は購入できない
+    if ((int) $goods['is_active'] !== 1) {
+        throw new RuntimeException('この商品は現在購入できません。');
     }
 
     // 商品価格

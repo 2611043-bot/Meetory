@@ -724,3 +724,259 @@
         padding: 16px;
     }
 }
+
+/* ============================================================
+   管理者商品詳細画面専用スタイル
+   ============================================================ */
+
+.admin-goods-detail {
+    max-width: 100%;
+}
+
+.admin-goods-detail .admin-detail-section {
+    margin: 0 0 24px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.admin-goods-detail .admin-detail-section h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.admin-goods-detail .admin-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.admin-goods-detail .admin-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.admin-goods-detail .admin-detail-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.admin-goods-detail .admin-detail-value {
+    font-size: 14px;
+    color: #334155;
+    word-break: break-word;
+}
+
+.admin-goods-detail .admin-detail-value.price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #15803d;
+}
+
+.admin-goods-detail .admin-detail-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin-goods-detail .badge-sold {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.admin-goods-detail .badge-active {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.admin-goods-detail .badge-inactive {
+    background: #fecaca;
+    color: #991b1b;
+}
+
+/* フラッシュメッセージ */
+.admin-goods-detail .admin-flash {
+    margin: 0 0 16px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.admin-goods-detail .admin-flash-success {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+}
+
+.admin-goods-detail .admin-flash-error {
+    background: #fecaca;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.admin-goods-detail .admin-flash-info {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fcd34d;
+}
+
+/* 画像ギャラリー */
+.admin-goods-detail .admin-image-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.admin-goods-detail .admin-image-item {
+    position: relative;
+    padding-top: 100%;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    overflow: hidden;
+}
+
+.admin-goods-detail .admin-image-item img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.admin-goods-detail .admin-image-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* プロフィール画像 */
+.admin-goods-detail .admin-profile-image {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #e2e8f0;
+}
+
+/* テーブル */
+.admin-goods-detail .admin-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.admin-goods-detail .admin-detail-table th {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    text-align: left;
+}
+
+.admin-goods-detail .admin-detail-table td {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #334155;
+}
+
+.admin-goods-detail .admin-detail-table tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-goods-detail .admin-detail-table tr:hover {
+    background: #f8fafc;
+}
+
+/* トグルボタン */
+.admin-goods-detail .admin-toggle-form {
+    display: inline-flex;
+    gap: 8px;
+    margin: 12px 0 0;
+}
+
+.admin-goods-detail .admin-toggle-btn {
+    height: 38px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    color: #ffffff;
+    transition: opacity 0.15s;
+}
+
+.admin-goods-detail .admin-toggle-btn:hover {
+    opacity: 0.9;
+}
+
+.admin-goods-detail .admin-toggle-btn-stop {
+    background-color: #dc2626;
+}
+
+.admin-goods-detail .admin-toggle-btn-resume {
+    background-color: #1976d2;
+}
+
+/* アクションリンク */
+.admin-goods-detail .admin-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 24px;
+    padding: 10px 16px;
+    border: 1px solid #dce6f2;
+    border-radius: 999px;
+    background-color: #ffffff;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.admin-goods-detail .admin-back-link:hover {
+    background-color: #f1f5f9;
+    color: #0f2942;
+    border-color: #bfdbfe;
+}
+
+@media (max-width: 768px) {
+    .admin-main-content {
+        padding: 20px 16px;
+    }
+    .admin-goods-detail .admin-detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.admin-goods-detail .admin-toggle-btn-delete {
+    background-color: #dc2626;
+}

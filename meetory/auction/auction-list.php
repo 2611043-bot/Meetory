@@ -16,6 +16,7 @@ $sql = '
     SELECT
         g.goods_id,
         g.goods_name,
+        g.is_active,
         a.current_price,
         (
             SELECT gi.image_path
@@ -32,6 +33,7 @@ $sql = '
         AND a.start_at <= NOW()
         AND a.end_at > NOW()
         AND g.is_sold = 0
+        AND g.is_active = 1
     ORDER BY g.listed_at DESC, g.goods_id DESC
 ';
 

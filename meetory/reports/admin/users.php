@@ -35,6 +35,99 @@ $keyword = trim($keyword);
 
 $users = searchRestrictedUsers($pdo, $keyword);
 
+// Ajax レスポンス：検索結果フラグメントのみ出力（フォーカス維持のためページ全体再読み込みを回避）
+if ($_GET['ajax'] ?? '' === '1') {
+    header('Content-Type: text/html; charset=utf-8');
+    $escape = static function ($value): string {
+        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+    };
+    $flash = $_SESSION['restriction_flash'] ?? null;
+    unset($_SESSION['restriction_flash']);
+    ?>
+    <?php if ($flash !== null): ?>
+        <p class="report-flash" role="status"><?= $escape($flash) ?></p>
+    <?php endif; ?>
+    <?php if (empty($users)): ?>
+        <p>該当するユーザーはありません。</p>
+    <?php else: ?>
+        <table class="report-list">
+            <thead>
+                <tr>
+                    <th>ユーザーID</th>
+                    <th>ユーザー名</th>
+                    <th>役割</th>
+                    <th>登録日時</th>
+                    <th>現在の制限</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($users as $u): ?>
+                    <?php
+                    $states = [];
+                    $raw = $u['restriction_states'] ?? '';
+                    if ($raw !== '' and $raw !== null) {
+                        foreach (explode(',', $raw) as $pair) {
+                            $pair = trim($pair);
+                            if ($pair === '') {
+                                continue;
+                            }
+                            list($type, $status) = explode(':', $pair, 2);
+                            $states[] = $type;
+                        }
+                    }
+                    $suspended = in_array('suspend', $states, true);
+                    ?>
+                    <tr>
+                        <td><?= (int) $u['user_id'] ?></td>
+                        <td>
+                            <a href="restriction-form.php?user_id=<?= (int) $u['user_id'] ?>">
+                                <?= $escape($u['user_name']) ?>
+                            </a>
+                        </td>
+                        <td><?= $escape($u['role']) ?></td>
+                        <td><?= $escape(date('Y/m/d H:i', strtotime($u['created_at']))) ?></td>
+                        <td>
+                            <?php if (empty($states)): ?>
+                                <span class="restriction-none">なし</span>
+                            <?php else: ?>
+                                <?php foreach ($states as $type): ?>
+                                    <span
+                                        class="restriction-badge <?= $escape($type) ?>"
+                                        title="<?= $escape(getRestrictionTypeLabel($type)) ?>"
+                                    >
+                                        <?= $escape(getRestrictionTypeLabel($type)) ?>
+                                    </span>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <a
+                                href="restriction-form.php?user_id=<?= (int) $u['user_id'] ?>"
+                                class="sidebar-link"
+                            >
+                                制限管理
+                            </a>
+                            <br>
+                            <a
+                                href="restriction-history.php?user_id=<?= (int) $u['user_id'] ?>"
+                            >
+                                履歴
+                            </a>
+                            <?php if ($suspended): ?>
+                                <br>
+                                <span style="color:#dc2626;font-size:0.8rem;">停止中</span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+    <?php
+    exit;
+}
+
 require '../../../meetory-header.php';
 ?>
 
@@ -161,6 +254,28 @@ body:has(.report-page.report-admin) {
 
 .report-page.report-admin .report-filter button[type="submit"]:hover {
     background-color: #1565c0;
+}
+
+/* 検索リセットボタン */
+.report-page.report-admin .user-filter-reset-btn {
+    height: 38px;
+    padding: 0 16px;
+    border: 1px solid #dce6f2;
+    border-radius: 999px;
+    background-color: #ffffff;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    margin-left: 8px;
+}
+
+.report-page.report-admin .user-filter-reset-btn:hover {
+    background-color: #f1f5f9;
+    color: #0f2942;
+    border-color: #bfdbfe;
 }
 
 /* テーブルデザイン */
@@ -318,11 +433,7 @@ body:has(.report-page.report-admin) {
 
     <h1>ユーザー制限管理</h1>
 
-    <?php if ($flash !== null): ?>
-        <p class="report-flash" role="status"><?= htmlspecialchars($flash, ENT_QUOTES, 'UTF-8') ?></p>
-    <?php endif; ?>
-
-    <form action="users.php" method="get" class="report-filter" style="margin-bottom: 1rem;">
+    <form id="user-filter-form" action="users.php" method="get" class="report-filter" style="margin-bottom: 1rem;">
         <label for="keyword">ユーザー名で検索</label>
         <input
             type="text"
@@ -331,8 +442,13 @@ body:has(.report-page.report-admin) {
             value="<?= htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8') ?>"
             placeholder="ユーザー名を入力"
         >
-        <button type="submit">検索</button>
+        <button type="button" id="user-filter-reset" class="user-filter-reset-btn">検索リセット</button>
     </form>
+
+    <div id="user-results">
+    <?php if ($flash !== null): ?>
+        <p class="report-flash" role="status"><?= htmlspecialchars($flash, ENT_QUOTES, 'UTF-8') ?></p>
+    <?php endif; ?>
 
     <?php if (empty($users)): ?>
         <p>該当するユーザーはありません。</p>
@@ -411,6 +527,7 @@ body:has(.report-page.report-admin) {
             </tbody>
         </table>
     <?php endif; ?>
+    </div>
 
     <p>
         <a href="index.php">通報管理に戻る</a>
@@ -419,5 +536,103 @@ body:has(.report-page.report-admin) {
         </div>
     </div>
 </main>
+
+<script>
+(function () {
+    'use strict';
+
+    var form = document.getElementById('user-filter-form');
+    var keywordInput = document.getElementById('keyword');
+    var resetBtn = document.getElementById('user-filter-reset');
+    var resultsContainer = document.getElementById('user-results');
+    var timer = null;
+    var controller = null;
+
+    if (!form || !keywordInput || !resultsContainer) {
+        return;
+    }
+
+    function buildQueryString() {
+        var params = new URLSearchParams();
+        if (keywordInput.value !== '') {
+            params.append('keyword', keywordInput.value);
+        }
+        params.append('ajax', '1');
+        return params.toString();
+    }
+
+    function fetchResults() {
+        if (controller) {
+            controller.abort();
+        }
+        controller = new AbortController();
+
+        var url = form.action + '?' + buildQueryString();
+
+        fetch(url, {
+            method: 'GET',
+            signal: controller.signal,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('ネットワークエラーが発生しました。');
+            }
+            return response.text();
+        })
+        .then(function(html) {
+            resultsContainer.innerHTML = html;
+        })
+        .catch(function(err) {
+            if (err.name !== 'AbortError') {
+                console.error(err);
+                resultsContainer.innerHTML = '<p>検索結果の取得に失敗しました。</p>';
+            }
+        });
+    }
+
+    function debounceFetch() {
+        if (timer !== null) {
+            clearTimeout(timer);
+        }
+        timer = setTimeout(function() {
+            timer = null;
+            fetchResults();
+        }, 400);
+    }
+
+    keywordInput.addEventListener('input', function () {
+        debounceFetch();
+    });
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        if (timer !== null) {
+            clearTimeout(timer);
+            timer = null;
+        }
+        if (controller) {
+            controller.abort();
+            controller = null;
+        }
+        fetchResults();
+    });
+
+    resetBtn.addEventListener('click', function() {
+        if (timer !== null) {
+            clearTimeout(timer);
+            timer = null;
+        }
+        if (controller) {
+            controller.abort();
+            controller = null;
+        }
+        keywordInput.value = '';
+        fetchResults();
+    });
+})();
+</script>
 
 <?php require '../../../meetory-footer.php'; ?>
