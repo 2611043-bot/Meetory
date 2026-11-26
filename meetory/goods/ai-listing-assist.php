@@ -3,6 +3,7 @@
 // =============================================
 // Meetory AI出品アシスト
 // ファイル：meetory/goods/ai-listing-assist.php
+// 複数商品画像（最大3枚）対応
 // =============================================
 
 // Geminiの応答時間を考慮してPHPの実行時間を延長
@@ -228,18 +229,133 @@ if (!$is_new_conversation) {
 
 
 // =============================================
-// 商品画像の確認
+// 商品画像の確認（最大3枚）
 // =============================================
 
-$image_file = null;
-$image_hash = null;
-$image_mime = null;
-$image_base64 = null;
+$uploaded_images = [];
+$image_hashes = [];
+$image_mimes = [];
+$image_base64_list = [];
 
-if (isset($_FILES['goods_image'])) {
+$max_images = 3;
+$max_image_size = 5 * 1024 * 1024;
+
+$allowed_mime_types = [
+    'image/jpeg',
+    'image/png',
+    'image/webp'
+];
+
+// 画像選択が送信されたか確認
+$image_selection_present = (
+    isset($_POST['image_selection_present']) &&
+    $_POST['image_selection_present'] === '1'
+);
+
+// ---------------------------------------------
+// 複数画像形式 goods_images[]
+// ---------------------------------------------
+
+if (isset($_FILES['goods_images'])) {
+
+    $files = $_FILES['goods_images'];
+
+    if (
+        !isset($files['name']) ||
+        !is_array($files['name'])
+    ) {
+        sendJson(false, [
+            'error' => '商品画像の形式が正しくありません。',
+            'error_code' => 'INVALID_IMAGE'
+        ], 400);
+    }
+
+    $file_count = count($files['name']);
+
+    if ($file_count > $max_images) {
+        sendJson(false, [
+            'error' => '商品画像は最大3枚まで選択できます。',
+            'error_code' => 'TOO_MANY_IMAGES'
+        ], 400);
+    }
+
+    for ($i = 0; $i < $file_count; $i++) {
+
+        $upload_error = $files['error'][$i] ?? UPLOAD_ERR_NO_FILE;
+
+        // 未選択ファイルはスキップ
+        if ($upload_error === UPLOAD_ERR_NO_FILE) {
+            continue;
+        }
+
+        if ($upload_error !== UPLOAD_ERR_OK) {
+            sendJson(false, [
+                'error' => '商品画像のアップロードに失敗しました。',
+                'error_code' => 'IMAGE_UPLOAD_ERROR'
+            ], 400);
+        }
+
+        $tmp_name = $files['tmp_name'][$i] ?? '';
+        $file_size = (int) ($files['size'][$i] ?? 0);
+
+        if (
+            !is_uploaded_file($tmp_name) ||
+            $file_size <= 0 ||
+            $file_size > $max_image_size
+        ) {
+            sendJson(false, [
+                'error' => '商品画像は1枚あたり5MB以内のファイルを選択してください。',
+                'error_code' => 'INVALID_IMAGE'
+            ], 400);
+        }
+
+        // MIMEタイプを実ファイルから確認
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $image_mime = $finfo->file($tmp_name);
+
+        if (!in_array($image_mime, $allowed_mime_types, true)) {
+            sendJson(false, [
+                'error' => 'AI画像解析ではJPEG・PNG・WebP形式に対応しています。',
+                'error_code' => 'INVALID_IMAGE'
+            ], 400);
+        }
+
+        // 画像として読み込めるか確認
+        $image_info = @getimagesize($tmp_name);
+
+        if ($image_info === false) {
+            sendJson(false, [
+                'error' => '正しい画像ファイルを選択してください。',
+                'error_code' => 'INVALID_IMAGE'
+            ], 400);
+        }
+
+        // ファイルのハッシュを取得
+        $image_hash = hash_file('sha256', $tmp_name);
+
+        if ($image_hash === false) {
+            sendJson(false, [
+                'error' => '商品画像を確認できませんでした。',
+                'error_code' => 'INVALID_IMAGE'
+            ], 400);
+        }
+
+        $uploaded_images[] = $tmp_name;
+        $image_hashes[] = $image_hash;
+        $image_mimes[] = $image_mime;
+    }
+}
+
+// ---------------------------------------------
+// 旧形式 goods_image にも対応
+// ---------------------------------------------
+
+elseif (isset($_FILES['goods_image'])) {
+
     $uploaded_image = $_FILES['goods_image'];
 
     if ($uploaded_image['error'] !== UPLOAD_ERR_NO_FILE) {
+
         if ($uploaded_image['error'] !== UPLOAD_ERR_OK) {
             sendJson(false, [
                 'error' => '商品画像のアップロードに失敗しました。',
@@ -250,7 +366,7 @@ if (isset($_FILES['goods_image'])) {
         if (
             !is_uploaded_file($uploaded_image['tmp_name']) ||
             $uploaded_image['size'] <= 0 ||
-            $uploaded_image['size'] > 5 * 1024 * 1024
+            $uploaded_image['size'] > $max_image_size
         ) {
             sendJson(false, [
                 'error' => '商品画像は5MB以内のファイルを選択してください。',
@@ -261,15 +377,18 @@ if (isset($_FILES['goods_image'])) {
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $image_mime = $finfo->file($uploaded_image['tmp_name']);
 
-        $allowed_mime_types = [
-            'image/jpeg',
-            'image/png',
-            'image/webp'
-        ];
-
         if (!in_array($image_mime, $allowed_mime_types, true)) {
             sendJson(false, [
                 'error' => 'AI画像解析ではJPEG・PNG・WebP形式に対応しています。',
+                'error_code' => 'INVALID_IMAGE'
+            ], 400);
+        }
+
+        $image_info = @getimagesize($uploaded_image['tmp_name']);
+
+        if ($image_info === false) {
+            sendJson(false, [
+                'error' => '正しい画像ファイルを選択してください。',
                 'error_code' => 'INVALID_IMAGE'
             ], 400);
         }
@@ -286,8 +405,43 @@ if (isset($_FILES['goods_image'])) {
             ], 400);
         }
 
-        $image_file = $uploaded_image['tmp_name'];
+        $uploaded_images[] = $uploaded_image['tmp_name'];
+        $image_hashes[] = $image_hash;
+        $image_mimes[] = $image_mime;
     }
+}
+
+
+// =============================================
+// 画像枚数の最終確認
+// =============================================
+
+if (count($uploaded_images) > $max_images) {
+    sendJson(false, [
+        'error' => '商品画像は最大3枚まで選択できます。',
+        'error_code' => 'TOO_MANY_IMAGES'
+    ], 400);
+}
+
+
+// =============================================
+// 画像セットのハッシュを作成
+// =============================================
+
+$new_image_hash = null;
+
+if (count($image_hashes) === 1) {
+
+    // 1枚の場合は従来と同じハッシュを使用
+    $new_image_hash = $image_hashes[0];
+
+} elseif (count($image_hashes) >= 2) {
+
+    // 複数枚の場合は画像の順番も含めてハッシュ化
+    $new_image_hash = hash(
+        'sha256',
+        implode('|', $image_hashes)
+    );
 }
 
 
@@ -305,6 +459,7 @@ try {
     $saved_image_hash = null;
 
     if (!$is_new_conversation) {
+
         $sql = "
             SELECT ai_data_id, image_analysis, image_hash
             FROM ai_data
@@ -356,26 +511,32 @@ try {
     // 画像が新しいか確認
     // =============================================
 
-    $image_changed = (
-        $image_file !== null &&
-        $image_hash !== $saved_image_hash
-    );
+    $image_changed = false;
+    $image_selection_cleared = false;
+
+    // 画像が送信された場合
+    if (count($uploaded_images) > 0) {
+
+        $image_changed = (
+            $new_image_hash !== $saved_image_hash
+        );
+
+    }
+    // 画像選択が明示的に送信され、全画像が解除された場合
+    elseif (
+        $image_selection_present &&
+        $saved_image_hash !== null
+    ) {
+
+        $image_changed = true;
+        $image_selection_cleared = true;
+    }
 
     $image_analysis = $saved_image_analysis;
 
+    // 画像が変更された場合は解析情報をリセット
     if ($image_changed) {
         $image_analysis = null;
-
-        $image_bytes = file_get_contents($image_file);
-
-        if ($image_bytes === false) {
-            sendJson(false, [
-                'error' => '商品画像を読み込めませんでした。',
-                'error_code' => 'IMAGE_READ_ERROR'
-            ], 400);
-        }
-
-        $image_base64 = base64_encode($image_bytes);
     }
 
 
@@ -403,16 +564,59 @@ try {
         ];
     }
 
+
+    // =============================================
+    // 今回のメッセージと画像を設定
+    // =============================================
+
     $current_parts = [
         ['text' => $message]
     ];
 
-    if ($image_changed) {
+    // ---------------------------------------------
+    // 画像が変更された場合、すべての画像を読み込む
+    // ---------------------------------------------
+
+    if ($image_changed && !$image_selection_cleared) {
+
+        foreach ($uploaded_images as $index => $image_file) {
+
+            $image_bytes = file_get_contents($image_file);
+
+            if ($image_bytes === false) {
+                sendJson(false, [
+                    'error' => '商品画像を読み込めませんでした。',
+                    'error_code' => 'IMAGE_READ_ERROR'
+                ], 400);
+            }
+
+            $image_base64 = base64_encode($image_bytes);
+
+            // 画像ごとに番号を付けてAIに送信
+            $current_parts[] = [
+                'text' => '出品者が選択した商品画像'
+                    . ($index + 1)
+                    . '枚目（全'
+                    . count($uploaded_images)
+                    . '枚中）'
+            ];
+
+            $current_parts[] = [
+                'inline_data' => [
+                    'mime_type' => $image_mimes[$index],
+                    'data' => $image_base64
+                ]
+            ];
+        }
+    }
+
+    // ---------------------------------------------
+    // 画像選択が解除された場合
+    // ---------------------------------------------
+
+    if ($image_selection_cleared) {
         $current_parts[] = [
-            'inline_data' => [
-                'mime_type' => $image_mime,
-                'data' => $image_base64
-            ]
+            'text' => '出品者は今回、商品画像をすべて選択解除しました。以前の画像解析結果は使用しないでください。'
         ];
     }
 
@@ -448,12 +652,17 @@ try {
 ・質問を一度に大量に行わず、重要なものを優先してください。
 
 【画像の扱い】
+・複数画像が送信された場合、すべての画像を確認してください。
+・各画像を1枚ずつ確認し、同じ商品を異なる角度から撮影した画像として扱ってください。
+・画像1枚目、2枚目、3枚目で確認できる外観を整理し、画像ごとの違いや追加で確認できる情報を参考にしてください。
 ・画像から確認できる色、形、外観、目視できる文字だけを参考にしてください。
 ・画像からメーカー、型番、性能、動作状況、付属品を断定しないでください。
 ・画像だけで商品の真贋、故障、内部状態を判断しないでください。
 ・傷や汚れは明確に確認できる場合のみ指摘してください。
 ・画像で分からないことは出品者に質問してください。
 ・画像に写っているものが商品本体とは限らないため、決めつけないでください。
+・複数の画像に写っているものが同一商品か判断できない場合は、無理に同一商品と断定しないでください。
+・画像の枚数が増えても、画像だけで確認できない商品情報を推測して補わないでください。
 
 【価格相談】
 ・画像だけを根拠に価格を決めないでください。
@@ -527,11 +736,27 @@ PROMPT;
         "\n\n【出品者が入力した商品情報・参考データ】\n"
         . $product_info_json;
 
+    if ($image_changed && !$image_selection_cleared) {
+        $system_instruction .=
+            "\n\n【今回送信された商品画像】\n"
+            . count($uploaded_images)
+            . "枚の画像が送信されています。"
+            . "すべての画像を確認し、画像ごとの特徴を踏まえて商品全体の外観を分析してください。"
+            . "各画像で確認できたことと、画像全体から共通して確認できることを整理してください。";
+    }
+
     if (!$image_changed && !empty($saved_image_analysis)) {
         $system_instruction .=
             "\n\n【以前解析した商品画像の参考情報】\n"
             . $saved_image_analysis
             . "\nこの情報は以前の画像解析結果です。新しい画像は送信されていません。";
+    }
+
+    if ($image_selection_cleared) {
+        $system_instruction .=
+            "\n\n【商品画像の状態】\n"
+            . "出品者は商品画像をすべて選択解除しました。"
+            . "以前の画像解析情報は使用せず、画像がない状態で回答してください。";
     }
 
 
@@ -676,7 +901,7 @@ PROMPT;
 
         if (in_array($http_code, [500, 502, 503, 504], true)) {
             sendJson(false, [
-                'error' => 'AI側で一時的な問題が発生しています。少し時間をおいて再度お試しください。',
+                'error' => 'AI側で一時的な問題が発生しています。少し時間をおいてから再度お試しください。',
                 'error_code' => 'AI_SERVICE_BUSY'
             ], 503);
         }
@@ -824,7 +1049,7 @@ PROMPT;
 
     $new_image_analysis = $ai_data['image_analysis'] ?? null;
 
-    if ($image_changed) {
+    if ($image_changed && !$image_selection_cleared) {
         if (
             !is_string($new_image_analysis) ||
             trim($new_image_analysis) === '' ||
@@ -837,6 +1062,11 @@ PROMPT;
         }
 
         $image_analysis = trim($new_image_analysis);
+    }
+
+    // 画像をすべて解除した場合は解析情報も消去
+    if ($image_selection_cleared) {
+        $image_analysis = null;
     }
 
 
@@ -896,7 +1126,9 @@ PROMPT;
                 ':user_id' => $user_id,
                 ':input_data' => $product_info_json,
                 ':image_analysis' => $image_analysis,
-                ':image_hash' => $image_changed ? $image_hash : null
+                ':image_hash' => $image_changed
+                    ? $new_image_hash
+                    : null
             ]);
 
             $ai_data_id = (int) $pdo->lastInsertId();
@@ -908,7 +1140,8 @@ PROMPT;
                 (ai_data_id, role, message, created_at)
             VALUES
                 (:user_ai_data_id, 'user', :message, NOW()),
-                (:model_ai_data_id, 'model', :ai_message, NOW())
+                (:model_ai_data_id, 'model', :ai_message, NOW()
+                )
         ";
 
         $stmt = $pdo->prepare($sql);
@@ -940,7 +1173,7 @@ PROMPT;
             ':ai_result' => $stored_ai_message,
             ':image_analysis' => $image_analysis,
             ':image_hash' => $image_changed
-                ? $image_hash
+                ? $new_image_hash
                 : $saved_image_hash,
             ':ai_data_id' => $ai_data_id,
             ':user_id' => $user_id

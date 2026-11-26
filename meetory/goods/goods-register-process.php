@@ -14,7 +14,6 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// POST送信確認
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit('不正なアクセスです。');
 }
@@ -80,14 +79,13 @@ $auto_extend = $_POST['auto_extend'] ?? '1';
 
 $errors = [];
 
-// 商品名・商品説明の型を確認
+// 商品名・商品説明
 if (!is_string($goods_name) || !is_string($description)) {
     $errors[] = '商品名と商品説明を正しく入力してください。';
 } else {
     $goods_name = trim($goods_name);
     $description = trim($description);
 
-    // 商品名
     if ($goods_name === '') {
         $errors[] = '商品名を入力してください。';
     } elseif (mb_strlen($goods_name, 'UTF-8') < 2) {
@@ -96,7 +94,6 @@ if (!is_string($goods_name) || !is_string($description)) {
         $errors[] = '商品名は100文字以内で入力してください。';
     }
 
-    // 商品説明
     if ($description === '') {
         $errors[] = '商品説明を入力してください。';
     } elseif (mb_strlen($description, 'UTF-8') > 5000) {
@@ -145,7 +142,7 @@ if (
     $errors[] = '正しい出品方法を選択してください。';
 }
 
-// AIアシストの選択状態
+// AIアシスト
 if (
     !is_string($listing_assist_mode) ||
     !in_array($listing_assist_mode, ['normal', 'ai'], true)
@@ -164,7 +161,6 @@ if (!is_string($confirm) || !in_array($confirm, ['', '1'], true)) {
 
 if ($listing_type === 'auction') {
 
-    // 開始価格
     if (
         (!is_string($start_price) && !is_int($start_price)) ||
         !ctype_digit((string) $start_price) ||
@@ -173,7 +169,6 @@ if ($listing_type === 'auction') {
         $errors[] = '開始価格は1円以上の整数で入力してください。';
     }
 
-    // 即決価格
     if ($buyout_price !== '' && $buyout_price !== null) {
         if (
             (!is_string($buyout_price) && !is_int($buyout_price)) ||
@@ -190,13 +185,11 @@ if ($listing_type === 'auction') {
         }
     }
 
-    // 終了日時
     if (!is_string($end_at) || $end_at === '') {
         $errors[] = '終了日時を入力してください。';
     } else {
         $tz = new DateTimeZone('Asia/Tokyo');
 
-        // datetime-local の形式を厳密に確認
         $input_end_at = DateTimeImmutable::createFromFormat(
             '!Y-m-d\TH:i',
             $end_at,
@@ -229,7 +222,6 @@ if ($listing_type === 'auction') {
         }
     }
 
-    // 自動延長
     if (
         !is_string($auto_extend) ||
         !in_array($auto_extend, ['0', '1'], true)
@@ -239,7 +231,6 @@ if ($listing_type === 'auction') {
 
 } elseif ($listing_type === 'normal') {
 
-    // 通常出品の販売価格
     if (
         (!is_string($price) && !is_int($price)) ||
         !ctype_digit((string) $price) ||
@@ -276,148 +267,200 @@ if (!empty($errors)) {
 }
 
 // =============================================
-// 画像のチェック・一時保存
+// 画像管理用設定
 // =============================================
 
-// 画像が送信されたか確認
-$image_uploaded = isset($_FILES['goods_image'])
-    && is_array($_FILES['goods_image'])
-    && isset($_FILES['goods_image']['error'])
-    && $_FILES['goods_image']['error'] !== UPLOAD_ERR_NO_FILE;
+$temp_dir = __DIR__ . '/../../uploads/temp/';
+$goods_dir = __DIR__ . '/../../uploads/goods/';
 
-// 新しい出品フォームから送信された場合
-// 前回の一時画像を削除する
+$allowed_extensions = [
+    'image/jpeg' => 'jpg',
+    'image/png' => 'png',
+    'image/gif' => 'gif',
+    'image/webp' => 'webp'
+];
+
+$max_images = 3;
+$max_size = 5 * 1024 * 1024;
+
+// セッション画像を削除する関数
+function deleteGoodsTempImages($images, $temp_dir)
+{
+    if (!is_array($images)) {
+        return;
+    }
+
+    foreach ($images as $image) {
+        $file_name = $image['file_name'] ?? '';
+
+        if (
+            is_string($file_name) &&
+            preg_match('/\A[a-f0-9]{32}\.(jpg|png|gif|webp)\z/i', $file_name)
+        ) {
+            $path = $temp_dir . $file_name;
+
+            if (is_file($path)) {
+                unlink($path);
+            }
+        }
+    }
+}
+
+// =============================================
+// 新規出品時：前回の一時画像を削除
+// =============================================
+
+if ($confirm !== '1') {
+    deleteGoodsTempImages(
+        $_SESSION['goods_images'] ?? [],
+        $temp_dir
+    );
+
+    unset($_SESSION['goods_images']);
+}
+
+// =============================================
+// アップロードされた画像を配列に整理
+// =============================================
+
+$uploaded_images = [];
+
+if (isset($_FILES['goods_images'])) {
+    $files = $_FILES['goods_images'];
+
+    if (
+        !isset($files['name']) ||
+        !is_array($files['name'])
+    ) {
+        exit('画像の送信形式が正しくありません。');
+    }
+
+    foreach ($files['name'] as $index => $name) {
+        $error = $files['error'][$index] ?? UPLOAD_ERR_NO_FILE;
+
+        if ($error === UPLOAD_ERR_NO_FILE) {
+            continue;
+        }
+
+        $uploaded_images[] = [
+            'name' => $name,
+            'type' => $files['type'][$index] ?? '',
+            'tmp_name' => $files['tmp_name'][$index] ?? '',
+            'error' => $error,
+            'size' => $files['size'][$index] ?? 0
+        ];
+    }
+}
+
+if (count($uploaded_images) > $max_images) {
+    exit('商品画像は最大3枚まで選択できます。');
+}
+
+// =============================================
+// 新規出品時：画像を検証して一時保存
+// =============================================
+
 if ($confirm !== '1') {
 
-    if (
-        isset($_SESSION['goods_image']['file_name']) &&
-        is_string($_SESSION['goods_image']['file_name']) &&
-        preg_match('/\A[a-f0-9]{32}\.(jpg|png|gif|webp)\z/i', $_SESSION['goods_image']['file_name'])
-    ) {
-        $old_temp_path = __DIR__ . '/../../uploads/temp/' .
-            $_SESSION['goods_image']['file_name'];
+    if (!empty($uploaded_images)) {
 
-        if (is_file($old_temp_path)) {
-            unlink($old_temp_path);
+        if (!is_dir($temp_dir)) {
+            if (!mkdir($temp_dir, 0755, true) && !is_dir($temp_dir)) {
+                exit('画像保存フォルダを作成できません。');
+            }
         }
-    }
 
-    unset($_SESSION['goods_image']);
-}
-
-if ($image_uploaded) {
-
-    // アップロードエラー
-    if ($_FILES['goods_image']['error'] !== UPLOAD_ERR_OK) {
-        exit('画像のアップロードに失敗しました。');
-    }
-
-    // ファイルサイズ
-    $max_size = 5 * 1024 * 1024;
-    $file_size = $_FILES['goods_image']['size'] ?? 0;
-
-    if (
-        !is_int($file_size) ||
-        $file_size <= 0 ||
-        $file_size > $max_size
-    ) {
-        exit('画像は1バイト以上、5MB以下にしてください。');
-    }
-
-    // 一時ファイル
-    $tmp_name = $_FILES['goods_image']['tmp_name'] ?? '';
-
-    if (
-        !is_string($tmp_name) ||
-        $tmp_name === '' ||
-        !is_uploaded_file($tmp_name)
-    ) {
-        exit('正しい画像ファイルをアップロードしてください。');
-    }
-
-    // MIMEタイプ確認
-    if (!class_exists('finfo')) {
-        exit('画像の確認機能が利用できません。管理者に連絡してください。');
-    }
-
-    $finfo = new finfo(FILEINFO_MIME_TYPE);
-    $mime_type = $finfo->file($tmp_name);
-
-    if (!is_string($mime_type)) {
-        exit('画像ファイルの種類を確認できませんでした。');
-    }
-
-    $allowed_mime_types = [
-        'image/jpeg' => 'jpg',
-        'image/png'  => 'png',
-        'image/gif'  => 'gif',
-        'image/webp' => 'webp'
-    ];
-
-    if (!isset($allowed_mime_types[$mime_type])) {
-        exit('JPG、PNG、GIF、WebPの画像を使用してください。');
-    }
-
-    // 拡張子
-    $extension = $allowed_mime_types[$mime_type];
-
-    // ランダムなファイル名
-    $file_name = bin2hex(random_bytes(16)) . '.' . $extension;
-
-    // 一時保存先
-    $upload_dir = __DIR__ . '/../../uploads/temp/';
-
-    if (!is_dir($upload_dir)) {
-        if (!mkdir($upload_dir, 0755, true) && !is_dir($upload_dir)) {
-            exit('画像保存フォルダを作成できません。');
+        if (!class_exists('finfo')) {
+            exit('画像の確認機能が利用できません。');
         }
+
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $saved_images = [];
+
+        foreach ($uploaded_images as $image) {
+
+            if ($image['error'] !== UPLOAD_ERR_OK) {
+                deleteGoodsTempImages($saved_images, $temp_dir);
+                exit('画像のアップロードに失敗しました。');
+            }
+
+            if (
+                !is_string($image['tmp_name']) ||
+                $image['tmp_name'] === '' ||
+                !is_uploaded_file($image['tmp_name'])
+            ) {
+                deleteGoodsTempImages($saved_images, $temp_dir);
+                exit('正しい画像ファイルをアップロードしてください。');
+            }
+
+            if (
+                !is_int($image['size']) ||
+                $image['size'] <= 0 ||
+                $image['size'] > $max_size
+            ) {
+                deleteGoodsTempImages($saved_images, $temp_dir);
+                exit('画像は1バイト以上、5MB以下にしてください。');
+            }
+
+            $mime_type = $finfo->file($image['tmp_name']);
+
+            if (!is_string($mime_type) || !isset($allowed_extensions[$mime_type])) {
+                deleteGoodsTempImages($saved_images, $temp_dir);
+                exit('JPG、PNG、GIF、WebPの画像を使用してください。');
+            }
+
+            $extension = $allowed_extensions[$mime_type];
+            $file_name = bin2hex(random_bytes(16)) . '.' . $extension;
+            $upload_path = $temp_dir . $file_name;
+
+            if (!move_uploaded_file($image['tmp_name'], $upload_path)) {
+                deleteGoodsTempImages($saved_images, $temp_dir);
+                exit('画像の保存に失敗しました。');
+            }
+
+            $saved_images[] = [
+                'file_name' => $file_name,
+                'image_path' => 'uploads/temp/' . $file_name
+            ];
+        }
+
+        $_SESSION['goods_images'] = $saved_images;
     }
-
-    $upload_path = $upload_dir . $file_name;
-
-    // 画像を保存
-    if (!move_uploaded_file($tmp_name, $upload_path)) {
-        exit('画像の保存に失敗しました。');
-    }
-
-    // セッションに画像情報を保存
-    $image_path = 'uploads/temp/' . $file_name;
-
-    $_SESSION['goods_image'] = [
-        'file_name' => $file_name,
-        'image_path' => $image_path
-    ];
 }
 
 // =============================================
-// 確認画面からの2回目の送信
+// 確認画面からの2回目の送信：画像を確認
 // =============================================
 
-if ($confirm === '1' && isset($_SESSION['goods_image'])) {
+$images = $_SESSION['goods_images'] ?? [];
 
-    $file_name = $_SESSION['goods_image']['file_name'] ?? '';
+if ($confirm === '1') {
 
-    if (
-        !is_string($file_name) ||
-        !preg_match('/\A[a-f0-9]{32}\.(jpg|png|gif|webp)\z/i', $file_name)
-    ) {
+    if (!is_array($images)) {
         exit('画像情報が正しくありません。もう一度出品してください。');
     }
 
-    $image_path = $_SESSION['goods_image']['image_path'] ?? '';
+    foreach ($images as $image) {
 
-    if (!is_string($image_path) || $image_path !== 'uploads/temp/' . $file_name) {
-        exit('画像情報が正しくありません。もう一度出品してください。');
+        $file_name = $image['file_name'] ?? '';
+
+        if (
+            !is_string($file_name) ||
+            !preg_match('/\A[a-f0-9]{32}\.(jpg|png|gif|webp)\z/i', $file_name)
+        ) {
+            exit('画像情報が正しくありません。もう一度出品してください。');
+        }
+
+        $expected_path = 'uploads/temp/' . $file_name;
+
+        if (($image['image_path'] ?? '') !== $expected_path) {
+            exit('画像情報が正しくありません。もう一度出品してください。');
+        }
+
+        if (!is_file($temp_dir . $file_name)) {
+            exit('一時保存した画像が見つかりません。もう一度出品してください。');
+        }
     }
-
-    $upload_dir = __DIR__ . '/../../uploads/temp/';
-    $upload_path = $upload_dir . $file_name;
-
-    if (!is_file($upload_path)) {
-        exit('一時保存した画像が見つかりません。もう一度出品してください。');
-    }
-
-    $image_uploaded = true;
 }
 
 // =============================================
@@ -426,7 +469,6 @@ if ($confirm === '1' && isset($_SESSION['goods_image'])) {
 
 if ($confirm !== '1') {
 
-    // XSS対策
     $display_goods_name = htmlspecialchars($goods_name, ENT_QUOTES, 'UTF-8');
     $display_description = htmlspecialchars($description, ENT_QUOTES, 'UTF-8');
     $display_goods_condition = htmlspecialchars($goods_condition, ENT_QUOTES, 'UTF-8');
@@ -448,14 +490,11 @@ if ($confirm !== '1') {
         'UTF-8'
     );
 
-    // 出品タイプ
     $display_listing_type = $listing_type === 'auction'
         ? 'オークション出品'
         : '通常出品';
 
-    // 価格
     if ($listing_type === 'auction') {
-
         $display_price_label = '開始価格';
         $display_price = htmlspecialchars((string) $start_price, ENT_QUOTES, 'UTF-8') . '円';
 
@@ -465,26 +504,29 @@ if ($confirm !== '1') {
 
         $display_end_at = htmlspecialchars($end_at, ENT_QUOTES, 'UTF-8');
         $display_auto_extend = $auto_extend === '1' ? 'ON' : 'OFF';
-
     } else {
-
         $display_price_label = '販売価格';
         $display_price = htmlspecialchars((string) $price, ENT_QUOTES, 'UTF-8') . '円';
     }
 
-    // 画像表示
-    $display_image = '';
+    // 画像を複数表示
+    $display_images = '';
 
-    if (isset($_SESSION['goods_image'])) {
+    if (!empty($images)) {
+        $display_images .= '<p>商品画像：</p>';
 
-        $display_image_path = htmlspecialchars(
-            $_SESSION['goods_image']['image_path'],
-            ENT_QUOTES,
-            'UTF-8'
-        );
+        foreach ($images as $index => $image) {
+            $safe_path = htmlspecialchars(
+                $image['image_path'],
+                ENT_QUOTES,
+                'UTF-8'
+            );
 
-        $display_image = '<p>商品画像：</p>';
-        $display_image .= '<img src="../../' . $display_image_path . '" width="200">';
+            $display_images .= '<div style="display:inline-block;margin:8px;text-align:center;">';
+            $display_images .= '<p>画像' . ($index + 1) . '</p>';
+            $display_images .= '<img src="../../' . $safe_path . '" width="200" style="max-width:100%;height:auto;">';
+            $display_images .= '</div>';
+        }
     }
 
     // 確認画面へ引き継ぐ値
@@ -507,77 +549,41 @@ if ($confirm !== '1') {
     );
 
     echo <<<HTML
-
 <h2>商品情報の確認</h2>
 
 <p>商品名：{$display_goods_name}</p>
-
 <p>商品説明：{$display_description}</p>
-
 <p>出品方法：{$display_listing_type}</p>
-
 <p>{$display_price_label}：{$display_price}</p>
-
 HTML;
 
     if ($listing_type === 'auction') {
         echo <<<HTML
-
 <p>即決価格：{$display_buyout_price}</p>
-
 <p>終了日時：{$display_end_at}</p>
-
 <p>自動延長：{$display_auto_extend}</p>
-
 HTML;
     }
 
     echo <<<HTML
-
 <p>商品状態：{$display_goods_condition}</p>
-
 <p>カテゴリ：{$display_category_name}</p>
-
-{$display_image}
+{$display_images}
 
 <form action="goods-register-process.php" method="post">
 
-    <input type="hidden" name="csrf_token"
-        value="{$form_csrf_token}">
-
-    <input type="hidden" name="goods_name"
-        value="{$form_goods_name}">
-
-    <input type="hidden" name="description"
-        value="{$form_description}">
-
-    <input type="hidden" name="price"
-        value="{$form_price}">
-
-    <input type="hidden" name="goods_condition"
-        value="{$form_goods_condition}">
-
-    <input type="hidden" name="category_id"
-        value="{$form_category_id}">
-
-    <input type="hidden" name="listing_type"
-        value="{$form_listing_type}">
-
-    <input type="hidden" name="listing_assist_mode"
-        value="{$form_listing_assist_mode}">
-
-    <input type="hidden" name="start_price"
-        value="{$form_start_price}">
-
-    <input type="hidden" name="buyout_price"
-        value="{$form_buyout_price}">
-
-    <input type="hidden" name="end_at"
-        value="{$form_end_at}">
-
-    <input type="hidden" name="auto_extend"
-        value="{$form_auto_extend}">
-
+    <input type="hidden" name="csrf_token" value="{$form_csrf_token}">
+    <input type="hidden" name="goods_name" value="{$form_goods_name}">
+    <input type="hidden" name="description" value="{$form_description}">
+    <input type="hidden" name="price" value="{$form_price}">
+    <input type="hidden" name="goods_condition" value="{$form_goods_condition}">
+    <input type="hidden" name="category_id" value="{$form_category_id}">
+    <input type="hidden" name="listing_type" value="{$form_listing_type}">
+    <input type="hidden" name="listing_assist_mode" value="{$form_listing_assist_mode}">
+    <input type="hidden" name="start_price" value="{$form_start_price}">
+    <input type="hidden" name="buyout_price" value="{$form_buyout_price}">
+    <input type="hidden" name="end_at" value="{$form_end_at}">
+    <input type="hidden" name="auto_extend" value="{$form_auto_extend}">
     <input type="hidden" name="confirm" value="1">
 
     <input type="submit" value="この内容で登録する">
@@ -585,7 +591,6 @@ HTML;
 </form>
 
 <a href="goods-register.php">修正する</a>
-
 HTML;
 
     exit;
@@ -595,19 +600,17 @@ HTML;
 // DB登録
 // =============================================
 
-$image_moved = false;
+$moved_images = [];
 
 try {
 
-    // トランザクション開始
     $pdo->beginTransaction();
 
-    // オークションの場合、priceには開始価格を保存
     $register_price = $listing_type === 'auction'
         ? $start_price
         : $price;
 
-    // 商品情報を登録
+    // 商品情報
     $sql = <<<SQL
     INSERT INTO goods
     (seller_id, goods_name, description, price, `condition`, category_id, listed_at)
@@ -626,13 +629,9 @@ try {
         ':category_id' => $category_id
     ]);
 
-    // 商品ID
     $goods_id = $pdo->lastInsertId();
 
-    // =============================================
-    // オークション情報の登録
-    // =============================================
-
+    // オークション情報
     if ($listing_type === 'auction') {
 
         $sql_auction = <<<SQL
@@ -659,13 +658,10 @@ try {
     }
 
     // =============================================
-    // 商品画像の登録
+    // 複数商品画像の登録
     // =============================================
 
-    if ($image_uploaded) {
-
-        // 本保存先
-        $goods_dir = __DIR__ . '/../../uploads/goods/';
+    if (!empty($images)) {
 
         if (!is_dir($goods_dir)) {
             if (!mkdir($goods_dir, 0755, true) && !is_dir($goods_dir)) {
@@ -673,67 +669,63 @@ try {
             }
         }
 
-        // 移動先
-        $goods_path = $goods_dir . $file_name;
-
-        if (!rename($upload_path, $goods_path)) {
-            throw new Exception('画像の移動に失敗しました。');
-        }
-
-        $image_moved = true;
-
-        // DB保存用パス
-        $image_path = 'uploads/goods/' . $file_name;
-
-        $sql = <<<SQL
+        $sql_image = <<<SQL
         INSERT INTO goods_images
         (goods_id, image_path, display_order)
         VALUES
         (:goods_id, :image_path, :display_order)
         SQL;
 
-        $stmt = $pdo->prepare($sql);
+        $stmt_image = $pdo->prepare($sql_image);
 
-        $stmt->execute([
-            ':goods_id' => $goods_id,
-            ':image_path' => $image_path,
-            ':display_order' => 1
-        ]);
+        foreach ($images as $index => $image) {
+
+            $file_name = $image['file_name'];
+            $temp_path = $temp_dir . $file_name;
+            $destination_path = $goods_dir . $file_name;
+
+            if (!rename($temp_path, $destination_path)) {
+                throw new Exception('商品画像の移動に失敗しました。');
+            }
+
+            // 移動した画像を記録（エラー時の削除用）
+            $moved_images[] = $destination_path;
+
+            $image_path = 'uploads/goods/' . $file_name;
+
+            $stmt_image->execute([
+                ':goods_id' => $goods_id,
+                ':image_path' => $image_path,
+                ':display_order' => $index + 1
+            ]);
+        }
     }
 
-    // DB登録確定
     $pdo->commit();
 
 } catch (Throwable $e) {
 
-    // エラーログ
     error_log(
         '商品登録エラー: ' . $e->getMessage() .
         ' in ' . $e->getFile() . ':' . $e->getLine() .
         ' [' . get_class($e) . ']'
     );
 
-    // DBロールバック
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
 
-    // 移動済み画像を削除
-    if (
-        $image_moved &&
-        isset($goods_path) &&
-        is_file($goods_path)
-    ) {
-        unlink($goods_path);
+    // 移動済み画像をすべて削除
+    foreach ($moved_images as $path) {
+        if (is_file($path)) {
+            unlink($path);
+        }
     }
 
-    // 一時画像を削除
-    if (
-        isset($upload_path) &&
-        is_file($upload_path)
-    ) {
-        unlink($upload_path);
-    }
+    // 残っている一時画像も削除
+    deleteGoodsTempImages($images, $temp_dir);
+
+    unset($_SESSION['goods_images']);
 
     exit('商品登録に失敗しました。');
 }
@@ -742,17 +734,15 @@ try {
 // 登録完了
 // =============================================
 
-// セッションの画像情報を削除
-unset($_SESSION['goods_image']);
+deleteGoodsTempImages($images, $temp_dir);
+unset($_SESSION['goods_images']);
 
 echo '商品情報を登録しました！';
 
 echo <<<HTML
-
 <p>
     <a href="goods-list.php">商品一覧を見る</a>
 </p>
-
 HTML;
 
 ?>

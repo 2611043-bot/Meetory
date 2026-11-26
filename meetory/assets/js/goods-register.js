@@ -1,31 +1,54 @@
-// =============================================
-// 商品画像プレビュー
-// =============================================
+
+/* =============================================
+   商品画像プレビュー（最大3枚）
+============================================= */
 
 const goodsImage = document.getElementById('goods_image');
+const previewGallery = document.getElementById('preview-gallery');
 
-if (goodsImage) {
-    let previewUrl = null;
+if (goodsImage && previewGallery) {
+    let previewUrls = [];
 
     goodsImage.addEventListener('change', function() {
-        const file = this.files[0];
-        const preview = document.getElementById('preview');
 
-        if (!preview) return;
+        // 前のプレビューURLを破棄
+        previewUrls.forEach(function(url) {
+            URL.revokeObjectURL(url);
+        });
 
-        if (previewUrl) {
-            URL.revokeObjectURL(previewUrl);
-            previewUrl = null;
+        previewUrls = [];
+        previewGallery.innerHTML = '';
+
+        const files = Array.from(this.files || []);
+
+        if (files.length > 3) {
+            alert('商品画像は最大3枚まで選択できます。');
+            this.value = '';
+            return;
         }
 
-        if (file) {
-            previewUrl = URL.createObjectURL(file);
-            preview.src = previewUrl;
-            preview.style.display = 'block';
-        } else {
-            preview.removeAttribute('src');
-            preview.style.display = 'none';
-        }
+        files.forEach(function(file, index) {
+
+            const previewUrl = URL.createObjectURL(file);
+            previewUrls.push(previewUrl);
+
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('preview-image-item');
+
+            const image = document.createElement('img');
+            image.src = previewUrl;
+            image.alt = '商品画像' + (index + 1);
+            image.classList.add('preview-image');
+
+            const caption = document.createElement('span');
+            caption.textContent = index === 0
+                ? 'メイン画像'
+                : '補足画像 ' + index;
+
+            wrapper.appendChild(image);
+            wrapper.appendChild(caption);
+            previewGallery.appendChild(wrapper);
+        });
     });
 }
 
@@ -139,14 +162,11 @@ if (goodsImage) {
         return;
     }
 
-    // AI会話ID
     let aiDataId = null;
 
-    // 現在のAI提案
     let currentSuggestedTitle = null;
     let currentSuggestedDescription = null;
 
-    // 二重送信防止
     let isSending = false;
 
 
@@ -165,7 +185,6 @@ if (goodsImage) {
             messageElement.classList.add('model-message');
         }
 
-        // HTMLとして解釈させず、安全に文字列として表示
         messageElement.textContent = message;
 
         chatMessages.appendChild(messageElement);
@@ -303,13 +322,15 @@ if (goodsImage) {
                 JSON.stringify(getProductInfo())
             );
 
-            // 選択されている画像を送信
-            // PHP側でハッシュを比較し、同じ画像の再解析を防ぐ
-            const imageFile = goodsImage?.files?.[0];
+            // 画像選択状態をAI側に伝える
+            formData.append('image_selection_present', '1');
 
-            if (imageFile) {
-                formData.append('goods_image', imageFile);
-            }
+            // 選択された画像をすべて送信
+            const imageFiles = Array.from(goodsImage?.files || []);
+
+            imageFiles.forEach(function(file) {
+                formData.append('goods_images[]', file);
+            });
 
             const response = await fetch(
                 '/Meetory/meetory/goods/ai-listing-assist.php',
@@ -319,7 +340,6 @@ if (goodsImage) {
                 }
             );
 
-            // JSON以外のレスポンスにも対応
             let data;
 
             try {
@@ -341,17 +361,11 @@ if (goodsImage) {
                 throw new Error('AIから有効な返答を取得できませんでした。');
             }
 
-            // 会話IDを保存
             aiDataId = data.ai_data_id;
 
-            // AIの返答を表示
             addChatMessage(data.message, 'model');
 
-
-            // ---------------------------------
             // 商品名の提案
-            // ---------------------------------
-
             if (
                 typeof data.suggested_title === 'string' &&
                 data.suggested_title.trim() !== ''
@@ -364,11 +378,7 @@ if (goodsImage) {
                 }
             }
 
-
-            // ---------------------------------
             // 商品説明文の提案
-            // ---------------------------------
-
             if (
                 typeof data.suggested_description === 'string' &&
                 data.suggested_description.trim() !== ''
@@ -406,8 +416,6 @@ if (goodsImage) {
 
     sendButton.addEventListener('click', sendAiMessage);
 
-
-    // Ctrl + Enterでも送信
     chatInput.addEventListener('keydown', function(event) {
         if (event.key === 'Enter' && event.ctrlKey) {
             event.preventDefault();

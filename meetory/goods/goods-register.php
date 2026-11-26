@@ -173,16 +173,17 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v='
                     </select>
                 </p>
 
-                <!-- 商品画像 -->
+                <!-- 商品画像（最大3枚） -->
                 <div class="image-upload-group">
-                    <span class="field-label">商品画像</span>
+                    <span class="field-label">商品画像（最大3枚）</span>
 
                     <input
                         type="file"
                         id="goods_image"
-                        name="goods_image"
-                        accept="image/*"
+                        name="goods_images[]"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
                         class="hidden-file-input"
+                        multiple
                     >
 
                     <label for="goods_image" class="image-upload-box">
@@ -203,10 +204,10 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v='
                         </svg>
 
                         <span class="upload-main-text">写真を選択する</span>
-                        <span class="upload-sub-text">クリックして端末から画像を選択</span>
+                        <span class="upload-sub-text">最大3枚まで選択できます（1枚でも出品可能）</span>
                     </label>
 
-                    <img id="preview" alt="商品画像プレビュー">
+                    <div id="preview-gallery" class="preview-gallery"></div>
                 </div>
             </fieldset>
 
@@ -265,7 +266,6 @@ $page_css = '/Meetory/meetory/assets/css/goods-register.css?v='
                     aria-live="polite"
                 >
 
-                    <!-- 固定の注意事項。AI会話履歴には保存しない -->
                     <div class="ai-chat-message model-message ai-chat-disclaimer">
                         <strong>AIアシストを利用する前にご確認ください</strong>
 
