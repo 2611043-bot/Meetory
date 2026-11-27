@@ -1,12 +1,14 @@
 @charset "UTF-8";
 
 /* ==============================
-    マイページ専用スタイルシート（フラット＆ブルーアクセント版）
-    mypage.php で使用（PHP変更なし）
+    マイページ専用スタイルシート
+    mypage.php で使用（home.css 完全準拠）
    ============================== */
 
+html,
 body {
-    background-color: #f0f5fa;
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
     margin: 0;
     color: #1e293b;
 }
@@ -15,15 +17,15 @@ body {
     width: 100%;
     max-width: 920px;
     margin: 0 auto;
-    padding: 32px 16px 110px;
+    padding: 32px 20px 110px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 22px;
 }
 
 /* ==============================
-    ページ見出し
+    ページ見出し（home.css の見出し基準）
    ============================== */
 .mypage-heading {
     display: flex;
@@ -32,38 +34,39 @@ body {
     justify-content: space-between;
     gap: 8px;
     padding-bottom: 12px;
-    border-bottom: 2px solid #d5e3f0;
+    border-bottom: 1px solid #e2ebf5;
 }
 
 .mypage-heading h1 {
     margin: 0;
-    font-size: 23px;
+    font-size: 22px;
     font-weight: 700;
-    color: #0f2942;
+    color: #1976d2;
 }
 
 .mypage-heading p {
     margin: 0;
     font-size: 13px;
-    color: #5b7083;
+    color: #64748b;
 }
 
 /* ==============================
-    共通セクションボックス（シャープな枠＋淡いブルーの縁取り）
+    共通セクションボックス（home.css のカード枠線・角丸・影に統一）
    ============================== */
 .mypage-panel {
     background-color: #ffffff;
-    border: 1px solid #d5e3f0;
-    border-radius: 10px;
-    padding: 20px 24px;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    padding: 24px 28px;
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
     box-sizing: border-box;
 }
 
 .mypage-panel > h2 {
     margin: 0 0 16px 0;
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 700;
-    color: #0f2942;
+    color: #1976d2;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -79,7 +82,7 @@ body {
 }
 
 /* ==============================
-    1. アカウント情報パネル（上部に青のアクセントライン）
+1. アカウント情報パネル
    ============================== */
 .mypage-user-panel {
     display: flex;
@@ -87,7 +90,6 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    border-top: 4px solid #1976d2;
 }
 
 .mypage-user-identity {
@@ -104,7 +106,7 @@ body {
     overflow: hidden;
     border-radius: 50%;
     border: 2px solid #90caf9;
-    background-color: #f4f9fd;
+    background-color: #f8fbff;
 }
 
 .mypage-avatar img,
@@ -123,7 +125,7 @@ body {
     margin: 0 0 4px 0;
     font-size: 18px;
     font-weight: 700;
-    color: #0f2942;
+    color: #1e293b;
 }
 
 .mypage-user-panel h2::before {
@@ -133,29 +135,34 @@ body {
 .mypage-user-email {
     margin: 0;
     font-size: 13px;
-    color: #5b7083;
+    color: #64748b;
     overflow-wrap: anywhere;
 }
 
 .mypage-user-panel .mypage-link-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
 }
 
+/* サブボタン（home.css の .more-goods a と完全一致） */
 .mypage-user-panel .mypage-link-list a {
-    display: inline-block;
-    padding: 8px 14px;
-    border: 1px solid #bfd7ed;
-    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    padding: 0 16px;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
     background-color: #ffffff;
-    color: #1565c0;
+    color: #1976d2;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
-    transition: background-color 0.15s, border-color 0.15s;
+    transition: background-color 0.15s;
 }
 
+/* メインボタン（home.css の .home-intro a と完全一致） */
 .mypage-user-panel .mypage-link-list a:first-child {
     background-color: #1976d2;
     border-color: #1976d2;
@@ -167,17 +174,16 @@ body {
 }
 
 .mypage-user-panel .mypage-link-list a:not(:first-child):hover {
-    background-color: #eef6fc;
-    border-color: #64b5f6;
+    background-color: #eef6fd;
 }
 
 /* ==============================
-    2. 取引管理（4列ステータスカード）
+2. 取引管理（4列ステータスカード）
    ============================== */
 .mypage-stat-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
+    gap: 14px;
 }
 
 .mypage-stat-card {
@@ -185,23 +191,25 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 16px 8px;
-    border: 1px solid #d5e3f0;
-    border-radius: 8px;
-    background-color: #f7fbff;
+    padding: 18px 10px;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    background-color: #f8fbff;
     text-decoration: none;
-    transition: background-color 0.15s, border-color 0.15s;
+    transition: background-color 0.15s, border-color 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 
 .mypage-stat-card:hover {
-    background-color: #ebf5ff;
-    border-color: #64b5f6;
+    background-color: #eef6fd;
+    border-color: #90caf9;
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
+    transform: translateY(-2px);
 }
 
 .mypage-stat-card span {
     font-size: 12px;
-    font-weight: 600;
-    color: #4a6075;
+    font-weight: 700;
+    color: #64748b;
     margin-bottom: 6px;
 }
 
@@ -212,12 +220,12 @@ body {
 }
 
 /* ==============================
-    3. 出品管理（フラットボタン）
+3. 出品管理（home.css のボタン基準）
    ============================== */
 .mypage-action-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
+    gap: 12px;
 }
 
 .mypage-action-card {
@@ -226,21 +234,20 @@ body {
     justify-content: center;
     gap: 6px;
     min-height: 44px;
-    padding: 10px 14px;
-    border: 1px solid #90caf9;
-    border-radius: 6px;
-    background-color: #f7fbff;
-    color: #1565c0;
+    padding: 0 16px;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #1976d2;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     text-align: center;
     text-decoration: none;
     transition: background-color 0.15s, border-color 0.15s;
 }
 
 .mypage-action-card:hover {
-    background-color: #e3f2fd;
-    border-color: #1976d2;
+    background-color: #eef6fd;
 }
 
 .mypage-action-primary {
@@ -255,13 +262,13 @@ body {
 }
 
 /* ==============================
-    4. その他メニュー（実用アプリ風の縦並びリスト）
+4. その他メニュー（縦並びリスト）
    ============================== */
 nav.mypage-link-list {
     display: flex;
     flex-direction: column;
-    border: 1px solid #d5e3f0;
-    border-radius: 8px;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
     overflow: hidden;
 }
 
@@ -269,12 +276,12 @@ nav.mypage-link-list a {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 13px 16px;
+    padding: 14px 16px;
     background-color: #ffffff;
-    border-bottom: 1px solid #e6eff7;
+    border-bottom: 1px solid #f1f5f9;
     color: #1e293b;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     text-decoration: none;
     transition: background-color 0.15s, color 0.15s;
 }
@@ -287,11 +294,11 @@ nav.mypage-link-list a::after {
     content: ">";
     font-size: 14px;
     font-weight: 700;
-    color: #64b5f6;
+    color: #90caf9;
 }
 
 nav.mypage-link-list a:hover {
-    background-color: #f4f9fd;
+    background-color: #f8fbff;
     color: #1976d2;
 }
 
@@ -309,7 +316,7 @@ nav.mypage-link-list a[href="logout.php"]:hover {
 }
 
 /* ==============================
-    5. 停止・利用制限の状態（該当時のみ表示）
+5. 停止・利用制限の状態（該当時のみ表示）
    ============================== */
 .mypage-restriction-panel {
     border-color: #fca5a5;
@@ -325,18 +332,18 @@ nav.mypage-link-list a[href="logout.php"]:hover {
 }
 
 .mypage-restriction-card {
-    padding: 12px 14px;
+    padding: 14px 16px;
     margin-bottom: 10px;
     background-color: #ffffff;
     border: 1px solid #fecaca;
-    border-radius: 6px;
+    border-radius: 12px;
     font-size: 13px;
 }
 
 .mypage-restriction-badge {
     display: inline-block;
     padding: 2px 8px;
-    border-radius: 4px;
+    border-radius: 6px;
     background-color: #dc2626;
     color: #ffffff;
     font-weight: 700;
@@ -347,53 +354,53 @@ nav.mypage-link-list a[href="logout.php"]:hover {
 .mypage-restriction-note {
     margin: 8px 0 0 0;
     font-size: 12px;
-    color: #4b5563;
+    color: #64748b;
 }
 
 /* ==============================
-    6. 購入履歴セクション
+6. 購入履歴セクション
    ============================== */
 #purchase-history {
     scroll-margin-top: 24px;
 }
 
 #purchase-history > p {
-    color: #5b7083;
-    font-size: 13px;
+    color: #64748b;
+    font-size: 14px;
     text-align: center;
-    padding: 24px 0;
+    padding: 28px 0;
     margin: 0;
 }
 
 .mypage-purchase-card {
     margin-top: 14px;
-    padding: 16px 18px;
-    border: 1px solid #d5e3f0;
+    padding: 18px 20px;
+    border: 1px solid #e2ebf5;
     border-left: 4px solid #1976d2;
-    border-radius: 8px;
-    background-color: #f9fcff;
+    border-radius: 12px;
+    background-color: #f8fbff;
 }
 
 .mypage-purchase-card h3 {
     margin: 0 0 6px 0;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
-    color: #1565c0;
+    color: #1976d2;
 }
 
 .mypage-purchase-card > p {
     margin: 3px 0;
     font-size: 12px;
-    color: #4a6075;
+    color: #64748b;
 }
 
 .mypage-purchase-card h4 {
     margin: 12px 0 8px 0;
     padding-top: 10px;
-    border-top: 1px solid #e1ecf5;
+    border-top: 1px solid #e2ebf5;
     font-size: 13px;
     font-weight: 700;
-    color: #0f2942;
+    color: #1e293b;
 }
 
 .mypage-purchase-card ul {
@@ -412,17 +419,17 @@ nav.mypage-link-list a[href="logout.php"]:hover {
     gap: 12px;
     padding: 10px 12px;
     background-color: #ffffff;
-    border: 1px solid #d5e3f0;
-    border-radius: 6px;
+    border: 1px solid #e2ebf5;
+    border-radius: 10px;
 }
 
 .mypage-purchase-card .goods-image {
     width: 56px;
     height: 56px;
-    border-radius: 4px;
+    border-radius: 8px;
     overflow: hidden;
-    background-color: #f7fbff;
-    border: 1px solid #e1ecf5;
+    background-color: #f8fafc;
+    border: 1px solid #f1f5f9;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -443,24 +450,26 @@ nav.mypage-link-list a[href="logout.php"]:hover {
     color: #1e293b;
 }
 
+/* 詳細ボタン（home.css のサブボタン基準） */
 .mypage-purchase-card > a {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
     margin-top: 8px;
-    padding: 7px 14px;
-    border: 1px solid #90caf9;
-    border-radius: 6px;
+    padding: 0 16px;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
     background-color: #ffffff;
     color: #1976d2;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
-    transition: background-color 0.15s, color 0.15s;
+    transition: background-color 0.15s;
 }
 
 .mypage-purchase-card > a:hover {
-    background-color: #1976d2;
-    border-color: #1976d2;
-    color: #ffffff;
+    background-color: #eef6fd;
 }
 
 /* ==============================
@@ -482,7 +491,7 @@ nav.mypage-link-list a[href="logout.php"]:hover {
 
 @media (max-width: 480px) {
     .mypage-panel {
-        padding: 16px;
+        padding: 18px 16px;
     }
 
     .mypage-user-panel {

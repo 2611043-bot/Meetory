@@ -2,7 +2,7 @@
 
 /* ==============================
     メッセージセンター専用スタイルシート
-    message-center.css（画面固定・独立2カード・拡大モード対応）
+    message-center.css（home.css 完全準拠・画面固定・独立2カード・拡大モード対応）
    ============================== */
 
 html:has(body.message-page),
@@ -10,18 +10,18 @@ body.message-page {
     height: 100dvh;
     overflow: hidden;
     overscroll-behavior: none;
-    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%);
-    background-attachment: fixed;
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
     margin: 0;
-    color: #0f172a;
+    color: #1e293b;
 }
 
-/* メッセージページ用：メインコンテナ（画面内に固定） */
+/* メッセージページ用：メインコンテナ（home.css と同じ最大幅 1120px） */
 .message-page .main-container {
-    max-width: 1140px;
+    max-width: 1120px;
     height: calc(100dvh - 160px);
     margin: 16px auto 0;
-    padding: 0 18px;
+    padding: 0 20px;
     box-sizing: border-box;
     overflow: hidden;
 }
@@ -30,7 +30,7 @@ body.message-page {
 .message-center {
     width: 100%;
     height: 100%;
-    color: #0f172a;
+    color: #1e293b;
 }
 
 /* 2カラムレイアウト（左右が独立した2枚のフローティングカード） */
@@ -47,7 +47,7 @@ body.message-page {
 }
 
 /* ==============================
-    左側：トーク一覧サイドバー（独立カード）
+    左側：トーク一覧サイドバー（home.css のカード枠線・角丸・影に統一）
    ============================== */
 .talk-sidebar {
     display: flex;
@@ -55,10 +55,10 @@ body.message-page {
     min-width: 0;
     height: 100%;
     min-height: 0;
-    border: 1px solid rgba(25, 118, 210, 0.12);
-    border-radius: 20px;
-    background-color: rgba(255, 255, 255, 0.96);
-    box-shadow: 0 10px 30px -8px rgba(15, 41, 66, 0.08);
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
     overflow: hidden;
 }
 
@@ -66,28 +66,17 @@ body.message-page {
     display: flex;
     flex-shrink: 0;
     align-items: center;
-    gap: 10px;
-    padding: 22px 22px 10px;
-}
-
-.talk-sidebar-header::before {
-    content: "";
-    display: inline-block;
-    width: 5px;
-    height: 20px;
-    border-radius: 999px;
-    background-color: #1976d2;
+    padding: 20px 22px 10px;
 }
 
 .talk-sidebar-header h2 {
     margin: 0;
-    font-size: 18px;
-    font-weight: 800;
-    color: #0f2942;
-    letter-spacing: -0.01em;
+    font-size: 19px;
+    font-weight: 700;
+    color: #1976d2;
 }
 
-/* 検索欄（丸みのあるカプセル型） */
+/* 検索欄（home.css 基準の角丸 8px・枠線 #e2ebf5） */
 .talk-search {
     flex-shrink: 0;
     padding: 8px 18px 14px;
@@ -96,15 +85,16 @@ body.message-page {
 .talk-search input {
     width: 100%;
     height: 40px;
-    padding: 0 16px;
-    border: 1px solid #dce6f2;
-    border-radius: 999px;
-    background-color: #f4f8fc;
+    padding: 0 14px;
+    border: 1px solid #e2ebf5;
+    border-radius: 8px;
+    background-color: #f8fbff;
     font-size: 13px;
-    color: #0f172a;
+    font-family: inherit;
+    color: #1e293b;
     outline: none;
     box-sizing: border-box;
-    transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+    transition: border-color 0.15s, background-color 0.15s;
 }
 
 .talk-search input::placeholder {
@@ -114,7 +104,6 @@ body.message-page {
 .talk-search input:focus {
     border-color: #1976d2;
     background-color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.14);
 }
 
 /* トーク一覧リスト */
@@ -149,24 +138,24 @@ body.message-page {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 13px 14px;
+    padding: 12px 14px;
     margin-bottom: 6px;
-    border-radius: 14px;
+    border-radius: 12px;
     border: 1px solid transparent;
     color: #1e293b;
     text-decoration: none;
-    transition: background-color 0.15s, border-color 0.15s, transform 0.15s;
+    transition: background-color 0.15s, border-color 0.15s;
 }
 
 .talk-item:hover {
-    background-color: #f3f8fe;
-    border-color: #dbeafe;
+    background-color: #f8fbff;
+    border-color: #e2ebf5;
 }
 
 .talk-item.active {
-    background-color: #eaf3fe;
-    border-color: #93c5fd;
-    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.08);
+    background-color: #eef6fd;
+    border-color: #90caf9;
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
 }
 
 /* プロフィール画像・アイコン */
@@ -175,12 +164,13 @@ body.message-page {
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-    color: #1565c0;
-    font-size: 17px;
+    background-color: #eef6fd;
+    border: 1px solid #e2ebf5;
+    color: #1976d2;
+    font-size: 16px;
     font-weight: 700;
     overflow: hidden;
 }
@@ -215,7 +205,7 @@ body.message-page {
     overflow: hidden;
     font-size: 14px;
     font-weight: 700;
-    color: #0f172a;
+    color: #1e293b;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
@@ -233,12 +223,13 @@ body.message-page {
     max-width: 100%;
     overflow: hidden;
     margin: 0 0 5px;
-    padding: 2px 9px;
-    border-radius: 999px;
-    background-color: #f1f5f9;
-    color: #475569;
+    padding: 2px 8px;
+    border: 1px solid #e2ebf5;
+    border-radius: 6px;
+    background-color: #f8fafc;
+    color: #64748b;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     white-space: nowrap;
     text-overflow: ellipsis;
     box-sizing: border-box;
@@ -246,7 +237,8 @@ body.message-page {
 
 .talk-item.active .talk-context {
     background-color: #ffffff;
-    color: #1565c0;
+    border-color: #90caf9;
+    color: #1976d2;
 }
 
 .talk-last-message {
@@ -278,7 +270,8 @@ body.message-page {
 .talk-empty {
     margin: 16px 4px;
     padding: 32px 14px;
-    border-radius: 14px;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
     background-color: #f8fafc;
     color: #64748b;
     font-size: 13px;
@@ -286,7 +279,7 @@ body.message-page {
 }
 
 /* ==============================
-    右側：会話表示エリア（独立カード）
+    右側：会話表示エリア（home.css のカード枠線・角丸・影に統一）
    ============================== */
 #messageRoomPanel {
     display: flex;
@@ -294,10 +287,10 @@ body.message-page {
     min-width: 0;
     height: 100%;
     min-height: 0;
-    border: 1px solid rgba(25, 118, 210, 0.12);
-    border-radius: 20px;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
     background-color: #ffffff;
-    box-shadow: 0 10px 30px -8px rgba(15, 41, 66, 0.08);
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
     overflow: hidden;
 }
 
@@ -314,7 +307,7 @@ body.message-page {
     text-align: center;
 }
 
-/* 右側：未選択時の表示（背景に直接溶け込むスマート案内） */
+/* 右側：未選択時の表示 */
 .talk-welcome {
     position: relative;
     display: flex;
@@ -323,7 +316,7 @@ body.message-page {
     align-items: center;
     justify-content: center;
     padding: 40px 32px;
-    background: radial-gradient(circle at center, #f4f9fe 0%, #ffffff 72%);
+    background-color: #ffffff;
     text-align: center;
 }
 
@@ -331,21 +324,21 @@ body.message-page {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 80px;
-    height: 80px;
-    margin-bottom: 20px;
-    border-radius: 24px;
-    background: linear-gradient(135deg, #e3f2fd 0%, #d0e8fc 100%);
+    width: 72px;
+    height: 72px;
+    margin-bottom: 18px;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    background-color: #eef6fd;
     color: #1976d2;
-    font-size: 32px;
-    box-shadow: 0 8px 20px rgba(25, 118, 210, 0.12);
+    font-size: 30px;
 }
 
 .talk-welcome h2 {
-    margin: 0 0 10px 0;
-    font-size: 20px;
-    font-weight: 800;
-    color: #0f2942;
+    margin: 0 0 8px 0;
+    font-size: 19px;
+    font-weight: 700;
+    color: #1976d2;
 }
 
 .talk-welcome p {
@@ -353,7 +346,7 @@ body.message-page {
     max-width: 320px;
     color: #64748b;
     font-size: 13px;
-    line-height: 1.8;
+    line-height: 1.7;
 }
 
 #messageSwipeDebug {
@@ -375,7 +368,7 @@ body.message-page {
 }
 
 /* ==============================
-    拡大モード・拡大ボタン（Google Chat風の1行コンパクト左ペイン）
+    拡大モード・拡大ボタン（1行コンパクト左ペイン）
    ============================== */
 @media (min-width: 701px) {
     body.message-page.is-message-expanded .main-container {
@@ -407,14 +400,10 @@ body.message-page {
         padding: 12px 10px 8px;
     }
 
-    #messageLayout.is-expanded .talk-sidebar-header::before {
-        display: none;
-    }
-
     #messageLayout.is-expanded .talk-sidebar-header h2 {
         font-size: 12px;
         font-weight: 700;
-        color: #475569;
+        color: #64748b;
     }
 
     /* 検索欄もコンパクトにスリム化 */
@@ -425,28 +414,29 @@ body.message-page {
     #messageLayout.is-expanded .talk-search input {
         height: 34px;
         padding: 0 12px;
-        border-color: rgba(25, 118, 210, 0.16);
-        background-color: rgba(255, 255, 255, 0.85);
+        border-color: #e2ebf5;
+        border-radius: 8px;
+        background-color: #ffffff;
         font-size: 12px;
     }
 
     #messageLayout.is-expanded .talk-search input:focus {
-        background-color: #ffffff;
+        border-color: #1976d2;
     }
 
     #messageLayout.is-expanded .talk-list {
         padding: 2px 4px 12px;
     }
 
-    /* 1行ピル型リストアイテム（ミニアイコン＋相手名＋未読バッジ） */
+    /* 1行コンパクトアイテム */
     #messageLayout.is-expanded .talk-item {
         display: flex;
         align-items: center;
         gap: 10px;
         padding: 7px 12px;
         margin-bottom: 2px;
-        border: none;
-        border-radius: 999px;
+        border: 1px solid transparent;
+        border-radius: 8px;
         background-color: transparent;
         box-shadow: none;
     }
@@ -456,7 +446,8 @@ body.message-page {
     }
 
     #messageLayout.is-expanded .talk-item.active {
-        background-color: #d6e7fb;
+        background-color: #eef6fd;
+        border-color: #90caf9;
         box-shadow: none;
     }
 
@@ -488,7 +479,7 @@ body.message-page {
 
     #messageLayout.is-expanded .talk-item.active .talk-user-name {
         font-weight: 700;
-        color: #0f2942;
+        color: #1976d2;
     }
 
     /* 日時・ラベル・本文プレビューは隠して1行に集約 */
@@ -510,7 +501,7 @@ body.message-page {
     }
 }
 
-/* 拡大・縮小切り替えボタン（ヘッダー右端に配置） */
+/* 拡大・縮小切り替えボタン（home.css のサブボタン基準） */
 #messageRoomPanel .room-header {
     display: flex;
     align-items: center;
@@ -527,9 +518,9 @@ body.message-page {
     gap: 6px;
     margin-left: auto;
     padding: 7px 14px;
-    border: 1px solid #dce6f2;
-    border-radius: 999px;
-    background-color: #f8fbff;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
+    background-color: #ffffff;
     color: #1976d2;
     font-size: 12px;
     font-weight: 700;
@@ -537,13 +528,11 @@ body.message-page {
     cursor: pointer;
     white-space: nowrap;
     flex-shrink: 0;
-    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+    transition: background-color 0.15s;
 }
 
 #messageRoomPanel .room-expand-btn:hover {
-    background-color: #e8f3fe;
-    border-color: #90caf9;
-    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.12);
+    background-color: #eef6fd;
 }
 
 #messageRoomPanel .talk-welcome .room-expand-btn {
@@ -588,7 +577,7 @@ body.message-page {
     }
 
     .talk-item {
-        padding: 13px 12px;
+        padding: 12px;
     }
 
     .talk-avatar {
