@@ -61,11 +61,13 @@ body {
     align-items: center;
     margin: 0 10px;
     position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .search-input-group {
-    max-width: 300px;
     width: 100%;
+    max-width: 100%;
     display: flex;
     align-items: center;
     border: 1px solid #d0d7de;
@@ -763,7 +765,60 @@ body {
 .delete-account-modal-confirm:hover {
     background-color: #0d47a1;
 }
-/* Shared user profile image */
+/* お届け先住所 */
+.header-address {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-decoration: none;
+    color: #444;
+    padding: 4px 8px;
+    border-radius: 8px;
+    white-space: nowrap;
+    max-width: 160px;
+    overflow: hidden;
+}
+.header-address:hover {
+    background-color: #f0f4f9;
+    color: #1a73e8;
+}
+.header-address-label {
+    font-size: 11px;
+    color: #777;
+    line-height: 1;
+}
+.header-address-value {
+    font-size: 13px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* カートバッジ */
+.cart-btn {
+    position: relative;
+}
+.cart-badge {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    background: #d32f2f;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    border: 2px solid #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    z-index: 2;
+}
 .user-avatar-image {
     display: block;
     width: 100%;

@@ -96,6 +96,52 @@ if (
     }
 }
 
+// ログイン中のユーザーのデフォルト住所を取得
+$defaultAddressLabel = '住所を登録';
+if (
+    isset($_SESSION['user_id']) &&
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) !== false &&
+    (int) $_SESSION['user_id'] > 0
+) {
+    $pdoAddr = isset($pdo) && $pdo instanceof PDO ? $pdo : getPDO();
+    $addr_user_id = (int) $_SESSION['user_id'];
+    $stmtAddr = $pdoAddr->prepare(
+        'SELECT prefecture, city FROM user_addresses WHERE user_id = :user_id AND is_default = 1 LIMIT 1'
+    );
+    $stmtAddr->bindValue(':user_id', $addr_user_id, PDO::PARAM_INT);
+    $stmtAddr->execute();
+    $addrRow = $stmtAddr->fetch(PDO::FETCH_ASSOC);
+    if (!$addrRow) {
+        $stmtAddr2 = $pdoAddr->prepare(
+            'SELECT prefecture, city FROM user_addresses WHERE user_id = :user_id ORDER BY address_id DESC LIMIT 1'
+        );
+        $stmtAddr2->bindValue(':user_id', $addr_user_id, PDO::PARAM_INT);
+        $stmtAddr2->execute();
+        $addrRow = $stmtAddr2->fetch(PDO::FETCH_ASSOC);
+    }
+    if ($addrRow && isset($addrRow['prefecture'], $addrRow['city'])) {
+        $defaultAddressLabel = trim($addrRow['prefecture'] . $addrRow['city']);
+        if ($defaultAddressLabel === '') {
+            $defaultAddressLabel = '住所を登録';
+        }
+    }
+}
+
+// ログイン中のユーザーのカート商品数を取得
+$cartCount = 0;
+if (
+    isset($_SESSION['user_id']) &&
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) !== false &&
+    (int) $_SESSION['user_id'] > 0
+) {
+    $pdoCart = isset($pdo) && $pdo instanceof PDO ? $pdo : getPDO();
+    $cart_user_id = (int) $_SESSION['user_id'];
+    $stmtCart = $pdoCart->prepare('SELECT COUNT(*) FROM cart WHERE user_id = :user_id');
+    $stmtCart->bindValue(':user_id', $cart_user_id, PDO::PARAM_INT);
+    $stmtCart->execute();
+    $cartCount = (int) $stmtCart->fetchColumn();
+}
+
 // ログイン中のユーザーのアカウント停止・利用制限状態を確認
 $userRestrictions = [];
 $restrictionBanner = '';
@@ -226,6 +272,30 @@ if (
             <div class="header-actions">
 
                 <?php if (isset($_SESSION['user_id'])): ?>
+
+                    <!-- お届け先住所 -->
+                    <a
+                        href="/Meetory/meetory/user/address-list.php"
+                        class="header-address"
+                        aria-label="お届け先住所"
+                    >
+                        <span class="header-address-label">📍 お届け先</span>
+                        <span class="header-address-value"><?= htmlspecialchars($defaultAddressLabel, ENT_QUOTES, 'UTF-8') ?></span>
+                    </a>
+
+                    <!-- カート -->
+                    <a
+                        href="/Meetory/meetory/cart/cart-list.php"
+                        class="icon-btn cart-btn"
+                        aria-label="カート"
+                    >
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <?php if ($cartCount > 0): ?>
+                            <span class="cart-badge">
+                                <?= $cartCount >= 100 ? '99+' : $cartCount ?>
+                            </span>
+                        <?php endif; ?>
+                    </a>
 
                     <!-- ユーザー名表示（マイページへリンク） -->
                     <?php if (isset($_SESSION['user_name'])): ?>
