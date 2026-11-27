@@ -46,6 +46,9 @@ require '../../meetory-header.php';
   });
 })();
 </script>
+<script>
+(function(){
+  var btn=document.getElementById('zipSearchBtn');
   if(!btn) return;
   btn.addEventListener('click',function(){
     var pc=document.getElementById('postal_code').value.replace(/[^0-9]/g,'');
