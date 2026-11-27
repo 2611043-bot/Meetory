@@ -232,8 +232,20 @@ if (
 
         <?php if (!$is_auth_page): ?>
 
-            <!-- 検索バー -->
-            <form
+        <!-- お届け先住所 -->
+        <?php if (isset($_SESSION['user_id'])): ?>
+        <a
+            href="/Meetory/meetory/user/address-list.php"
+            class="header-address"
+            aria-label="お届け先住所"
+        >
+            <span class="header-address-label">📍 お届け先</span>
+            <span class="header-address-value"><?= htmlspecialchars($defaultAddressLabel, ENT_QUOTES, 'UTF-8') ?></span>
+        </a>
+        <?php endif; ?>
+
+        <!-- 検索バー -->
+        <form
                 action="/Meetory/meetory/goods/goods-list.php"
                 method="GET"
                 class="header-search-form"
@@ -272,16 +284,6 @@ if (
             <div class="header-actions">
 
                 <?php if (isset($_SESSION['user_id'])): ?>
-
-                    <!-- お届け先住所 -->
-                    <a
-                        href="/Meetory/meetory/user/address-list.php"
-                        class="header-address"
-                        aria-label="お届け先住所"
-                    >
-                        <span class="header-address-label">📍 お届け先</span>
-                        <span class="header-address-value"><?= htmlspecialchars($defaultAddressLabel, ENT_QUOTES, 'UTF-8') ?></span>
-                    </a>
 
                     <!-- カート -->
                     <a

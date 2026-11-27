@@ -543,33 +543,6 @@
 
 
 /* =============================================
-   ログアウトボタン
-============================================= */
-
-.logout-form {
-    margin-top: 24px;
-    text-align: center;
-}
-
-.logout-form button {
-    background: none;
-    border: 1px solid #cddfea;
-    color: #6b7c8f;
-    padding: 8px 20px;
-    border-radius: 8px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.logout-form button:hover {
-    border-color: #99b4cc;
-    color: #34495e;
-    background: #f5faff;
-}
-
-
-/* =============================================
    レスポンシブ対応
 ============================================= */
 
