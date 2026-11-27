@@ -1,3 +1,72 @@
+﻿html,
+body {
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
+    margin: 0;
+    color: #1e293b;
+}
+
+.transaction-detail-page {
+    min-height: calc(100vh - 120px);
+    padding: 36px 20px 110px;
+    background: transparent !important;
+    box-sizing: border-box;
+}
+
+.transaction-detail-container {
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.transaction-detail-container h1 {
+    margin: 0 0 22px 0;
+    font-size: 26px;
+    font-weight: 700;
+    color: #1976d2;
+    border-left: 4px solid #1976d2;
+    padding-left: 12px;
+}
+
+.transaction-detail-container h2 {
+    margin: 24px 0 12px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1976d2;
+    border-left: 4px solid #1976d2;
+    padding-left: 12px;
+}
+
+.transaction-detail-container h3 {
+    margin: 12px 0 8px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.transaction-detail-container section {
+    background-color: #ffffff;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
+    box-sizing: border-box;
+}
+
+.transaction-detail-container p {
+    color: #1e293b;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.transaction-detail-container hr {
+    border: none;
+    border-top: 1px solid #f1f5f9;
+    margin: 12px 0;
+}
+
 .transaction-user {
     display: inline-flex;
     align-items: center;
@@ -13,41 +82,41 @@
     border-radius: 50%;
 }
 
-/* 取引完了トリガーボタン */
 .complete-btn {
     display: inline-block;
     padding: 10px 24px;
     font-size: 14px;
-    font-weight: bold;
-    background: #1a73e8;
+    font-weight: 700;
+    background: #1976d2;
     color: #ffffff;
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    transition: background-color 0.15s;
 }
 
 .complete-btn:hover {
-    background: #0d47a1;
+    background: #1565c0;
 }
-
 
 .cancel-btn {
     display: inline-block;
     padding: 10px 24px;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 700;
     background: #d93025;
     color: #fff;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     margin: 8px 0;
+    transition: background-color 0.15s;
 }
 .cancel-btn:hover { background: #b3261e; }
 .cancel-btn-danger {
     padding: 10px 24px;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 700;
     background: #d93025;
     color: #fff;
     border: none;
@@ -57,14 +126,61 @@
 .cancel-btn-secondary {
     display: inline-block;
     margin-top: 12px;
-    color: #1a73e8;
+    color: #1976d2;
+    font-weight: 700;
 }
 .cancel-confirm-box, .cancel-complete-box {
     max-width: 520px;
     padding: 16px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
     background: #fff;
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
 }
 .cancel-warning { color: #b3261e; margin: 12px 0; }
 .cancel-action-form { margin: 8px 0; }
+
+.form-group { margin-bottom: 12px; }
+.form-group label { font-size: 13px; font-weight: 700; color: #1e293b; }
+.form-group input[type="text"],
+.form-group select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid #e2ebf5;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1e293b;
+    background-color: #f8fbff;
+    outline: none;
+}
+.form-group input[type="text"]:focus,
+.form-group select:focus {
+    border-color: #1976d2;
+    background-color: #ffffff;
+}
+.form-actions .btn-ship {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 8px;
+    background-color: #1976d2;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.form-actions .btn-ship:hover { background-color: #1565c0; }
+
+.transaction-detail-container a {
+    color: #1976d2;
+    font-weight: 700;
+    text-decoration: none;
+}
+.transaction-detail-container a:hover { text-decoration: underline; }
+
+@media (max-width: 600px) {
+    .transaction-detail-page {
+        padding: 20px 12px 100px;
+    }
+}

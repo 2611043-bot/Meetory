@@ -135,9 +135,11 @@ require_once '../../meetory-header.php';
 
 ?>
 
-<link rel="stylesheet" href="../assets/css/transaction-detail.css">
+<link rel="stylesheet" href="../assets/css/transaction-detail.css?v=<?= filemtime(__DIR__ . '/../assets/css/transaction-detail.css') ?>">
 
-<h1>取引詳細</h1>
+<div class="transaction-detail-page">
+    <main class="transaction-detail-container">
+        <h1>取引詳細</h1>
 
 <p>
     取引ID：
@@ -596,5 +598,8 @@ require_once '../../meetory-header.php';
 <p>
     <a href="../user/mypage.php">マイページへ戻る</a>
 </p>
+
+    </main>
+</div>
 
 <?php require_once '../../meetory-footer.php'; ?>
