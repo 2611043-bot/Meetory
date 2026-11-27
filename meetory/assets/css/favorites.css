@@ -1,122 +1,130 @@
+@charset "UTF-8";
+
 /* ============================================================
-   ほしいものリスト専用スタイルシート（Meetory標準デザイン）
+   ほしいものリスト専用スタイルシート
+   favorites.php で使用（home.css 完全準拠）
    ============================================================ */
 
-/* ページ全体の背景（Meetory標準の淡いブルーグラデーション） */
+/* ページ全体の背景（home.css と完全統一） */
 html:has(main > .favorites-list),
 html:has(main > h1:first-child),
 body:has(main > .favorites-list),
 body:has(main > h1:first-child) {
     background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
     background-attachment: fixed !important;
+    margin: 0;
+    color: #1e293b;
 }
 
-main {
+/* メインパネル（home.css の .home-intro と同じ白カード・枠線・角丸・影） */
+main:has(> .favorites-list),
+main:has(> h1:first-child) {
     max-width: 960px;
-    margin: 28px auto 110px;
-    padding: 30px 34px;
-    border: 1px solid rgba(25, 118, 210, 0.12);
-    border-radius: 20px;
-    background-color: rgba(255, 255, 255, 0.96) !important;
-    box-shadow: 0 10px 30px -8px rgba(15, 41, 66, 0.08);
+    margin: 32px auto 110px;
+    padding: 32px 36px;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    background-color: #ffffff !important;
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
     box-sizing: border-box;
 }
 
-/* 見出し */
-main > h1 {
+/* 見出し（home.css と同じサイズ・カラー） */
+main:has(> .favorites-list) > h1,
+main:has(> h1:first-child) > h1 {
     display: flex;
     align-items: center;
     gap: 10px;
     margin: 0 0 16px;
     font-size: 22px;
-    font-weight: 800;
-    color: #0f2942;
-    letter-spacing: -0.01em;
+    font-weight: 700;
+    color: #1976d2;
 }
 
-main > h1::before {
+main:has(> .favorites-list) > h1::before,
+main:has(> h1:first-child) > h1::before {
     content: "";
     display: inline-block;
-    width: 5px;
-    height: 22px;
-    border-radius: 999px;
+    width: 4px;
+    height: 18px;
+    border-radius: 2px;
     background-color: #1976d2;
 }
 
 /* 登録件数・空状態テキスト */
-main > p {
+main:has(> .favorites-list) > p,
+main:has(> h1:first-child) > p {
     margin: 0 0 16px;
     font-size: 14px;
-    color: #475569;
+    color: #64748b;
     line-height: 1.6;
 }
 
-/* 登録件数バッジ風（商品がある場合） */
+/* 登録件数バッジ（商品がある場合） */
 main:has(.favorites-list) > p:first-of-type {
     display: inline-flex;
     align-items: center;
-    padding: 6px 16px;
+    padding: 5px 14px;
     margin-bottom: 22px;
-    border: 1px solid #bfdbfe;
-    border-radius: 999px;
-    background-color: #eff6ff;
+    border: 1px solid #e2ebf5;
+    border-radius: 8px;
+    background-color: #eef6fd;
     color: #1976d2;
     font-size: 13px;
-    font-weight: 800;
-}
-
-/* 空状態のときの枠デザイン */
-main:not(:has(.favorites-list)) > p:first-of-type {
-    padding: 44px 20px 28px;
-    margin: 10px 0 20px;
-    border: 1px dashed #cbd5e1;
-    border-radius: 16px;
-    background-color: #f8fbff;
-    text-align: center;
-    color: #64748b;
-    font-size: 14.5px;
     font-weight: 700;
 }
 
-/* ホームに戻る / マイページに戻る ボタン風リンク */
+/* 空状態のときの枠デザイン（home.css の .new-goods > p 基準） */
+main:has(> h1:first-child):not(:has(.favorites-list)) > p:first-of-type {
+    padding: 40px 20px;
+    margin: 10px 0 20px;
+    border: 1px solid #e2ebf5;
+    border-radius: 14px;
+    background-color: #f8fbff;
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* ホームに戻る / マイページに戻る ボタン風リンク（home.css のボタン基準・角丸 8px） */
 main > p > a[href="../index.php"],
 main > p > a[href="mypage.php"] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 170px;
-    height: 40px;
-    padding: 0 22px;
-    border-radius: 999px;
-    font-size: 13.5px;
+    min-width: 180px;
+    height: 42px;
+    padding: 0 24px;
+    border-radius: 8px;
+    font-size: 13px;
     font-weight: 700;
     text-decoration: none;
-    transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+    transition: background-color 0.15s, border-color 0.15s;
 }
 
 main > p > a[href="../index.php"] {
     background-color: #1976d2;
+    border: 1px solid #1976d2;
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.24);
 }
 
 main > p > a[href="../index.php"]:hover {
     background-color: #1565c0;
+    border-color: #1565c0;
 }
 
 main > p > a[href="mypage.php"] {
-    border: 1px solid #dce6f2;
-    background-color: #f8fbff;
-    color: #334155;
-}
-
-main > p > a[href="mypage.php"]:hover {
-    background-color: #e8f3fe;
-    border-color: #bfdbfe;
+    border: 1px solid #1976d2;
+    background-color: #ffffff;
     color: #1976d2;
 }
 
-main > p:last-child {
+main > p > a[href="mypage.php"]:hover {
+    background-color: #eef6fd;
+}
+
+main:has(> .favorites-list) > p:last-child,
+main:has(> h1:first-child) > p:last-child {
     margin-top: 24px;
     margin-bottom: 0;
 }
@@ -128,31 +136,31 @@ main > p:last-child {
     gap: 16px;
 }
 
-/* 各商品カード */
+/* 各商品カード（home.css の .goods-card と同じ枠線・角丸 12px・影） */
 .favorite-item {
     position: relative;
     display: flex;
     align-items: flex-start;
-    gap: 22px;
-    padding: 20px 22px;
+    gap: 20px;
+    padding: 18px 20px;
     border: 1px solid #e2ebf5;
-    border-radius: 16px;
-    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border-radius: 12px;
+    background-color: #ffffff;
     box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
     transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
 }
 
 .favorite-item:hover {
     transform: translateY(-2px);
-    border-color: #bfdbfe;
-    box-shadow: 0 8px 22px rgba(25, 118, 210, 0.09);
+    border-color: #90caf9;
+    box-shadow: 0 8px 20px rgba(25, 118, 210, 0.1);
 }
 
 .favorite-item hr {
     display: none;
 }
 
-/* 削除ボタン（右上配置） */
+/* 削除ボタン（右上配置・角丸 8px） */
 .favorite-delete-form {
     position: absolute;
     top: 18px;
@@ -165,9 +173,9 @@ main > p:last-child {
     height: 32px;
     padding: 0 14px;
     border: 1px solid #fecdd3;
-    border-radius: 999px;
+    border-radius: 8px;
     background-color: #fff1f2;
-    color: #e11d48;
+    color: #dc2626;
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
@@ -175,8 +183,8 @@ main > p:last-child {
 }
 
 .favorite-delete-btn:hover {
-    background-color: #e11d48;
-    border-color: #e11d48;
+    background-color: #dc2626;
+    border-color: #dc2626;
     color: #ffffff;
 }
 
@@ -185,8 +193,8 @@ main > p:last-child {
     flex-shrink: 0;
     width: 150px;
     height: 150px;
-    border: 1px solid #e2ebf5;
-    border-radius: 14px;
+    border: 1px solid #f1f5f9;
+    border-radius: 10px;
     background-color: #ffffff;
     overflow: hidden;
 }
@@ -213,13 +221,12 @@ main > p:last-child {
 }
 
 .favorite-image.no-image {
-    background-color: #f1f5f9;
+    background-color: #f8fafc;
 }
 
 .favorite-image.no-image a {
     padding: 10px;
     font-size: 12px;
-    font-weight: 700;
     color: #94a3b8;
     text-align: center;
 }
@@ -233,33 +240,32 @@ main > p:last-child {
 
 .favorite-info h2 {
     margin: 0 0 8px;
-    font-size: 17px;
-    font-weight: 800;
-    line-height: 1.4;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.45;
 }
 
 .favorite-info h2 a {
-    color: #0f2942;
+    color: #1e293b;
     text-decoration: none;
 }
 
 .favorite-info h2 a:hover {
     color: #1976d2;
-    text-decoration: underline;
 }
 
 .favorite-info p {
     margin: 0 0 5px;
     font-size: 13px;
-    color: #475569;
+    color: #64748b;
     line-height: 1.5;
 }
 
-/* 価格の強調（1番目のp要素） */
+/* 価格の強調（home.css と同じ #1976d2） */
 .favorite-info > p:nth-of-type(1) {
     margin-bottom: 8px;
     font-size: 16px;
-    font-weight: 800;
+    font-weight: 700;
     color: #1976d2;
 }
 
@@ -268,23 +274,25 @@ main > p:last-child {
 .favorite-active {
     display: inline-block;
     margin: 6px 0 12px !important;
-    padding: 3px 12px;
-    border-radius: 999px;
-    font-size: 11.5px !important;
-    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px !important;
+    font-weight: 700;
 }
 
 .favorite-active {
-    background-color: #dcfce7;
-    color: #15803d;
+    background-color: #eef6fd;
+    border: 1px solid #e2ebf5;
+    color: #1976d2;
 }
 
 .favorite-sold {
-    background-color: #f1f5f9;
+    background-color: #f8fafc;
+    border: 1px solid #e2ebf5;
     color: #64748b;
 }
 
-/* 「商品詳細を見る」ボタン */
+/* 「商品詳細を見る」ボタン（home.css の .more-goods a と完全一致） */
 .favorite-info > p:last-child {
     margin-top: 6px;
     margin-bottom: 0;
@@ -293,30 +301,30 @@ main > p:last-child {
 .favorite-info > p:last-child a {
     display: inline-flex;
     align-items: center;
-    height: 34px;
-    padding: 0 16px;
-    border: 1px solid #bfdbfe;
-    border-radius: 999px;
-    background-color: #eff6ff;
+    justify-content: center;
+    height: 36px;
+    padding: 0 18px;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
+    background-color: #ffffff;
     color: #1976d2;
-    font-size: 12.5px;
+    font-size: 13px;
     font-weight: 700;
     text-decoration: none;
-    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+    transition: background-color 0.15s;
 }
 
 .favorite-info > p:last-child a:hover {
-    background-color: #1976d2;
-    border-color: #1976d2;
-    color: #ffffff;
+    background-color: #eef6fd;
 }
 
 /* スマホ対応 */
 @media (max-width: 768px) {
-    main {
-        margin: 14px 12px 110px;
+    main:has(> .favorites-list),
+    main:has(> h1:first-child) {
+        margin: 14px 12px 100px;
         padding: 20px 16px;
-        border-radius: 16px;
+        border-radius: 12px;
     }
 
     .favorite-item {
@@ -342,6 +350,5 @@ main > p:last-child {
 
     .favorite-delete-btn {
         background-color: rgba(255, 241, 242, 0.95);
-        box-shadow: 0 2px 8px rgba(15, 41, 66, 0.12);
     }
 }
