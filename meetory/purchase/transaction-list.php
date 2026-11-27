@@ -32,7 +32,14 @@ $sql = '
         bi.buy_item_id,
         bi.purchase_price,
         g.goods_id,
-        g.goods_name
+        g.goods_name,
+        (
+            SELECT gi.image_path
+            FROM goods_images AS gi
+            WHERE gi.goods_id = g.goods_id
+            ORDER BY gi.display_order ASC, gi.image_id ASC
+            LIMIT 1
+        ) AS image_path
     FROM buy AS b
     INNER JOIN buy_items AS bi
         ON b.transaction_id = bi.transaction_id
@@ -56,67 +63,105 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <?php require '../../meetory-header.php'; ?>
 
-<main>
+<link rel="stylesheet" href="../assets/css/transaction-list.css?v=<?= filemtime(__DIR__ . '/../assets/css/transaction-list.css') ?>">
 
-    <h1>取引中の商品一覧</h1>
+<div class="transaction-list-page">
+    <main class="transaction-list-container">
+        <h1>取引中の商品一覧</h1>
 
-    <?php if (empty($rows)): ?>
+        <?php if (empty($rows)): ?>
 
-        <p>取引中の商品はありません。</p>
+            <p class="transaction-list-empty">取引中の商品はありません。</p>
 
-    <?php else: ?>
+        <?php else: ?>
 
-        <table class="transaction-list-table">
-            <thead>
-                <tr>
-                    <th>商品名</th>
-                    <th>購入価格</th>
-                    <th>取引状態</th>
-                    <th>購入日時</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-
-                <?php foreach ($rows as $row): ?>
-
+            <table class="transaction-list-table">
+                <thead>
                     <tr>
-                        <td>
-                            <?= htmlspecialchars($row['goods_name'], ENT_QUOTES, 'UTF-8') ?>
-                        </td>
-                        <td>
-                            <?= number_format((int) $row['purchase_price']) ?>円
-                        </td>
-                        <td>
-                            <?= htmlspecialchars($row['transaction_status'], ENT_QUOTES, 'UTF-8') ?>
-                        </td>
-                        <td>
-                            <?= htmlspecialchars(
-                                date('Y年m月d日 H:i:s', strtotime($row['purchased_at'])),
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
-                        </td>
-                        <td>
-                            <a
-                                href="transaction-detail.php?transaction_id=<?= (int) $row['transaction_id'] ?>"
-                            >
-                                取引詳細を見る
-                            </a>
-                        </td>
+                        <th>商品名</th>
+                        <th>購入価格</th>
+                        <th>取引状態</th>
+                        <th>購入日時</th>
+                        <th>操作</th>
                     </tr>
+                </thead>
+                <tbody>
 
-                <?php endforeach; ?>
+                    <?php foreach ($rows as $row): ?>
 
-            </tbody>
-        </table>
+                        <?php
+                        $image_path = $row['image_path'] ?? '';
+                        if (
+                            !is_string($image_path) ||
+                            !preg_match(
+                                '~\Auploads/goods/[a-zA-Z0-9_-]+\.(?:jpe?g|png|gif|webp)\z~i',
+                                $image_path
+                            ) ||
+                            !is_file(__DIR__ . '/../../' . $image_path)
+                        ) {
+                            $image_path = '';
+                        }
+                        ?>
 
-    <?php endif; ?>
+                        <tr>
+                            <td class="transaction-list-product" data-label="商品名">
+                                <span class="transaction-list-product-image<?= $image_path === '' ? ' is-missing' : '' ?>" aria-hidden="true">
+                                    <?php if ($image_path !== ''): ?>
+                                        <img
+                                            src="/Meetory/<?= htmlspecialchars($image_path, ENT_QUOTES, 'UTF-8') ?>"
+                                            alt=""
+                                            loading="lazy"
+                                            onerror="this.parentElement.classList.add('is-missing')"
+                                        >
+                                    <?php endif; ?>
+                                    <span class="transaction-list-no-image">
+                                        <i class="fa-regular fa-image" aria-hidden="true"></i>
+                                        <span>画像なし</span>
+                                    </span>
+                                </span>
+                                <span class="transaction-list-product-name">
+                                    <?= htmlspecialchars($row['goods_name'], ENT_QUOTES, 'UTF-8') ?>
+                                </span>
+                            </td>
+                            <td data-label="購入価格">
+                                <span class="transaction-list-price">
+                                    <?= number_format((int) $row['purchase_price']) ?>円
+                                </span>
+                            </td>
+                            <td data-label="取引状態">
+                                <span class="transaction-status-badge <?= $row['transaction_status'] === '発送済み' ? 'is-shipped' : 'is-purchased' ?>">
+                                    <?= htmlspecialchars($row['transaction_status'], ENT_QUOTES, 'UTF-8') ?>
+                                </span>
+                            </td>
+                            <td data-label="購入日時">
+                                <?= htmlspecialchars(
+                                    date('Y年m月d日 H:i:s', strtotime($row['purchased_at'])),
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
+                            </td>
+                            <td class="transaction-list-actions" data-label="操作">
+                                <a
+                                    class="transaction-detail-link"
+                                    href="transaction-detail.php?transaction_id=<?= (int) $row['transaction_id'] ?>"
+                                >
+                                    取引詳細を見る
+                                </a>
+                            </td>
+                        </tr>
 
-    <p>
-        <a href="../user/mypage.php">マイページに戻る</a>
-    </p>
+                    <?php endforeach; ?>
 
-</main>
+                </tbody>
+            </table>
+
+        <?php endif; ?>
+
+        <p class="transaction-list-back">
+            <a href="../user/mypage.php">マイページに戻る</a>
+        </p>
+
+    </main>
+</div>
 
 <?php require '../../meetory-footer.php'; ?>
