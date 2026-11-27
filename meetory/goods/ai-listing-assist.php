@@ -775,7 +775,7 @@ PROMPT;
         ], 500);
     }
 
-    $model = 'gemini-3.8-flash';
+    $model = 'gemini-3.6-flash';
 
     $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
 
