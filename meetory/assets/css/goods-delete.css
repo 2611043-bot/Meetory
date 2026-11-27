@@ -1,0 +1,179 @@
+html,
+body {
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
+}
+
+.main-container > .goods-delete-page {
+    max-width: 1120px;
+    margin: 24px auto 80px;
+    padding: 32px 36px 44px;
+    background: transparent !important;
+    box-sizing: border-box;
+}
+
+.goods-delete-card {
+    width: 100%;
+    max-width: 760px;
+    padding: 32px 36px;
+    margin: 0 auto;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
+    box-sizing: border-box;
+}
+
+.goods-delete-card h1 {
+    margin: 0 0 8px;
+    color: #1976d2;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.goods-delete-intro {
+    margin: 0 0 22px;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.goods-delete-product {
+    padding: 20px 22px;
+    margin-bottom: 18px;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    background-color: #f8fbff;
+}
+
+.goods-delete-product h2 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.goods-delete-price {
+    margin: 8px 0 0;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.goods-delete-warning {
+    padding: 13px 16px;
+    margin: 0 0 24px;
+    border: 1px solid #fed7aa;
+    border-radius: 10px;
+    background-color: #fff7ed;
+    color: #9a3412;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+.goods-delete-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+}
+
+.goods-delete-actions form {
+    margin: 0;
+}
+
+.goods-delete-cancel,
+.goods-delete-actions button[type="submit"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 172px;
+    min-height: 46px;
+    padding: 0 24px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    box-sizing: border-box;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.goods-delete-cancel {
+    border: 1px solid #1976d2;
+    background-color: #ffffff;
+    color: #1976d2;
+}
+
+.goods-delete-cancel:hover {
+    background-color: #eef6fd;
+    text-decoration: none;
+}
+
+.goods-delete-actions button[type="submit"] {
+    border: 1px solid #c62828;
+    background-color: #d32f2f;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.goods-delete-actions button[type="submit"]:hover {
+    border-color: #b71c1c;
+    background-color: #b71c1c;
+}
+
+.goods-delete-cancel:focus-visible,
+.goods-delete-actions button[type="submit"]:focus-visible {
+    outline: 3px solid rgba(25, 118, 210, 0.28);
+    outline-offset: 3px;
+}
+
+@media (max-width: 960px) {
+    .main-container > .goods-delete-page {
+        padding-right: 56px;
+        padding-left: 56px;
+    }
+}
+
+@media (max-width: 740px) {
+    .main-container > .goods-delete-page {
+        padding: 24px 20px 36px;
+    }
+}
+
+@media (max-width: 520px) {
+    .main-container > .goods-delete-page {
+        margin: 14px auto 90px;
+        padding: 18px 14px 28px;
+    }
+
+    .goods-delete-card {
+        padding: 22px 18px;
+    }
+
+    .goods-delete-card h1 {
+        font-size: 19px;
+    }
+
+    .goods-delete-product {
+        padding: 16px;
+    }
+
+    .goods-delete-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .goods-delete-actions form {
+        width: 100%;
+    }
+
+    .goods-delete-cancel,
+    .goods-delete-actions button[type="submit"] {
+        width: 100%;
+    }
+}

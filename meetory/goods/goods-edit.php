@@ -61,6 +61,8 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 require '../../meetory-header.php';
 ?>
 
+<link rel="stylesheet" href="../assets/css/goods-edit.css?v=<?= filemtime(__DIR__ . '/../assets/css/goods-edit.css') ?>">
+
 <h2>商品編集</h2>
 
 <form action="goods-edit-process.php" method="post">
@@ -125,13 +127,12 @@ require '../../meetory-header.php';
         </select>
     </p>
 
-    <button type="submit">変更を保存</button>
+    <div class="goods-edit-actions">
+        <a class="goods-edit-cancel" href="goods-detail.php?goods_id=<?= (int)$goods['goods_id'] ?>">
+            キャンセル
+        </a>
+        <button type="submit">変更を保存</button>
+    </div>
 </form>
-
-<p>
-    <a href="goods-detail.php?goods_id=<?= (int)$goods['goods_id'] ?>">
-        商品詳細に戻る
-    </a>
-</p>
 
 <?php require '../../meetory-footer.php'; ?>

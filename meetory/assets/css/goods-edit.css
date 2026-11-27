@@ -1,0 +1,196 @@
+html,
+body {
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
+}
+
+.main-container {
+    max-width: 1120px;
+    margin: 24px auto 80px;
+    padding: 32px 36px 44px;
+    background: transparent !important;
+    box-sizing: border-box;
+}
+
+.main-container > h2 {
+    margin: 0 0 18px;
+    font-size: 19px;
+    font-weight: 700;
+    color: #1976d2;
+}
+
+.main-container form[action="goods-edit-process.php"] {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0 22px;
+    width: 100%;
+    padding: 28px 34px;
+    margin: 0;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
+    box-sizing: border-box;
+}
+
+.main-container form[action="goods-edit-process.php"] > p {
+    min-width: 0;
+    margin: 0 0 20px;
+}
+
+.main-container form[action="goods-edit-process.php"] > p:nth-of-type(1),
+.main-container form[action="goods-edit-process.php"] > p:nth-of-type(2) {
+    grid-column: 1 / -1;
+}
+
+.main-container form[action="goods-edit-process.php"] label {
+    display: block;
+    margin-bottom: 6px;
+    color: #1e293b;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.main-container form[action="goods-edit-process.php"] br {
+    display: none;
+}
+
+.main-container form[action="goods-edit-process.php"] input[type="text"],
+.main-container form[action="goods-edit-process.php"] input[type="number"],
+.main-container form[action="goods-edit-process.php"] textarea,
+.main-container form[action="goods-edit-process.php"] select {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e2ebf5;
+    border-radius: 8px;
+    background-color: #f8fbff;
+    color: #1e293b;
+    font-family: inherit;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+}
+
+.main-container form[action="goods-edit-process.php"] textarea {
+    min-height: 180px;
+    resize: vertical;
+}
+
+.main-container form[action="goods-edit-process.php"] input[type="text"]:focus,
+.main-container form[action="goods-edit-process.php"] input[type="number"]:focus,
+.main-container form[action="goods-edit-process.php"] textarea:focus,
+.main-container form[action="goods-edit-process.php"] select:focus {
+    border-color: #1976d2;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
+    outline: none;
+}
+
+.main-container form[action="goods-edit-process.php"] > .goods-edit-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 2px;
+}
+
+.main-container form[action="goods-edit-process.php"] > .goods-edit-actions > button[type="submit"],
+.main-container form[action="goods-edit-process.php"] > .goods-edit-actions > .goods-edit-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 180px;
+    height: 44px;
+    padding: 0 28px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.main-container form[action="goods-edit-process.php"] > .goods-edit-actions > button[type="submit"] {
+    border: 0;
+    background-color: #1976d2;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.main-container form[action="goods-edit-process.php"] > .goods-edit-actions > button[type="submit"]:hover {
+    background-color: #1565c0;
+}
+
+.main-container form[action="goods-edit-process.php"] > .goods-edit-actions > .goods-edit-cancel {
+    border: 1px solid #1976d2;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #1976d2;
+    transition: background-color 0.15s;
+}
+
+.main-container form[action="goods-edit-process.php"] > .goods-edit-actions > .goods-edit-cancel:hover {
+    background-color: #eef6fd;
+    text-decoration: none;
+}
+
+@media (max-width: 960px) {
+    .main-container {
+        padding-right: 56px;
+        padding-left: 56px;
+    }
+
+    .main-container form[action="goods-edit-process.php"] {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .main-container form[action="goods-edit-process.php"] > p:nth-of-type(5) {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 740px) {
+    .main-container {
+        padding: 24px 40px 36px;
+    }
+}
+
+@media (max-width: 520px) {
+    .main-container {
+        padding: 18px 34px 28px;
+    }
+
+    .main-container > h2 {
+        font-size: 17px;
+    }
+
+    .main-container form[action="goods-edit-process.php"] {
+        grid-template-columns: 1fr;
+        gap: 0;
+        padding: 22px 18px;
+    }
+
+    .main-container form[action="goods-edit-process.php"] > p:nth-of-type(1),
+    .main-container form[action="goods-edit-process.php"] > p:nth-of-type(2) {
+        grid-column: auto;
+    }
+
+    .main-container form[action="goods-edit-process.php"] > p:nth-of-type(5) {
+        grid-column: auto;
+    }
+
+    .main-container form[action="goods-edit-process.php"] > .goods-edit-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .main-container form[action="goods-edit-process.php"] > .goods-edit-actions > button[type="submit"],
+    .main-container form[action="goods-edit-process.php"] > .goods-edit-actions > .goods-edit-cancel {
+        width: 100%;
+        min-width: 0;
+    }
+}

@@ -68,49 +68,53 @@ if (
 require '../../meetory-header.php';
 ?>
 
-<main>
-    <h1>商品削除の確認</h1>
+<link rel="stylesheet" href="../assets/css/goods-delete.css?v=<?= filemtime(__DIR__ . '/../assets/css/goods-delete.css') ?>">
 
-    <p>次の商品を削除してもよろしいですか？</p>
+<main class="goods-delete-page">
+    <section class="goods-delete-card">
+        <h1>商品を削除しますか？</h1>
 
-    <h2>
-        <?= htmlspecialchars($goods['goods_name'], ENT_QUOTES, 'UTF-8') ?>
-    </h2>
+        <p class="goods-delete-intro">次の商品を削除してもよろしいですか？</p>
 
-    <p>
-        価格：<?= number_format((int)$goods['price']) ?>円
-    </p>
+        <div class="goods-delete-product">
+            <h2>
+                <?= htmlspecialchars($goods['goods_name'], ENT_QUOTES, 'UTF-8') ?>
+            </h2>
 
-    <p>削除すると元に戻せません。</p>
+            <p class="goods-delete-price">
+                価格：<?= number_format((int)$goods['price']) ?>円
+            </p>
+        </div>
 
-    <form action="goods-delete-process.php" method="post">
+        <p class="goods-delete-warning">削除すると元に戻せません。</p>
 
-        <input
-            type="hidden"
-            name="goods_id"
-            value="<?= (int)$goods['goods_id'] ?>"
-        >
+        <div class="goods-delete-actions">
+            <a class="goods-delete-cancel" href="goods-detail.php?goods_id=<?= (int)$goods['goods_id'] ?>">
+                キャンセル
+            </a>
 
-        <!-- CSRFトークン -->
-        <input
-            type="hidden"
-            name="csrf_token"
-            value="<?= htmlspecialchars(
-                $_SESSION['csrf_token'],
-                ENT_QUOTES,
-                'UTF-8'
-            ) ?>"
-        >
+            <form action="goods-delete-process.php" method="post">
+                <input
+                    type="hidden"
+                    name="goods_id"
+                    value="<?= (int)$goods['goods_id'] ?>"
+                >
 
-        <button type="submit">削除する</button>
+                <!-- CSRFトークン -->
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="<?= htmlspecialchars(
+                        $_SESSION['csrf_token'],
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                >
 
-    </form>
-
-    <p>
-        <a href="goods-detail.php?goods_id=<?= (int)$goods['goods_id'] ?>">
-            キャンセル
-        </a>
-    </p>
+                <button type="submit">削除する</button>
+            </form>
+        </div>
+    </section>
 </main>
 
 <?php require '../../meetory-footer.php'; ?>
