@@ -180,6 +180,9 @@
             // 統計情報更新
             updateStats(data.stats);
 
+            // 月間比較更新
+            updateMonthlyComparison(data.monthly_comparison);
+
             // グラフ更新
             updateCharts(data.charts);
 
@@ -218,6 +221,56 @@
         statValues[1].textContent = stats.total_goods ?? 0;
         statValues[2].textContent = stats.total_transactions ?? stats.total_orders ?? 0;
         statValues[3].textContent = stats.completed_transactions ?? stats.completed_orders ?? 0;
+    }
+
+    // 月間比較更新
+    function updateMonthlyComparison(comparison) {
+        if (!comparison) {
+            return;
+        }
+
+        const itemMap = {
+            'user_registrations': '新規ユーザー登録数',
+            'goods_listings': '商品出品数',
+            'purchases': '購入件数',
+            'inquiries': 'お問い合わせ件数',
+            'reports': '通報件数'
+        };
+
+        Object.entries(comparison).forEach(([key, item]) => {
+            const rows = document.querySelectorAll('.admin-comparison-table tbody tr');
+            rows.forEach(row => {
+                const labelCell = row.querySelector('td:first-child');
+                if (!labelCell || labelCell.textContent.trim() !== item.label) {
+                    return;
+                }
+
+                const currentCell = row.children[1];
+                const previousCell = row.children[2];
+                const changeCell = row.children[3];
+                const directionCell = row.children[4];
+
+                if (currentCell) currentCell.textContent = item.current.toLocaleString();
+                if (previousCell) previousCell.textContent = item.previous.toLocaleString();
+
+                if (changeCell) {
+                    if (item.change_percent !== null) {
+                        const sign = item.change_percent >= 0 ? '+' : '';
+                        changeCell.textContent = sign + item.change_percent + '%';
+                        changeCell.className = 'admin-change-' + item.direction;
+                    } else {
+                        changeCell.textContent = '比較対象なし';
+                        changeCell.className = 'admin-change-flat';
+                    }
+                }
+
+                if (directionCell) {
+                    const dirText = item.direction === 'up' ? '増加' : (item.direction === 'down' ? '減少' : '変化なし');
+                    directionCell.textContent = dirText;
+                    directionCell.className = 'admin-direction-' + item.direction;
+                }
+            });
+        });
     }
     // グラフ更新
     function updateCharts(charts) {

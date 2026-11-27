@@ -71,6 +71,67 @@ try {
     $stmt->execute();
     $response['stats']['completed_transactions'] = (int) $stmt->fetchColumn();
 
+    // 月間比較データ（今月 vs 前月）
+    $monthlyComparison = [];
+    $items = [
+        'user_registrations'   => ['label' => '新規ユーザー登録数',   'table' => 'users',       'date_column' => 'created_at'],
+        'goods_listings'       => ['label' => '商品出品数',           'table' => 'goods',       'date_column' => 'listed_at'],
+        'purchases'            => ['label' => '購入件数',             'table' => 'buy',         'date_column' => 'purchased_at'],
+        'inquiries'            => ['label' => 'お問い合わせ件数',     'table' => 'inquiries',   'date_column' => 'created_at'],
+        'reports'              => ['label' => '通報件数',             'table' => 'reports',     'date_column' => 'created_at'],
+    ];
+
+    $this_month_start = date('Y-m-01');
+    $this_month_end   = date('Y-m-t 23:59:59');
+    $last_month_start = date('Y-m-01', strtotime('first day of last month'));
+    $last_month_end   = date('Y-m-t 23:59:59', strtotime('last day of last month'));
+
+    try {
+        foreach ($items as $key => $item) {
+            $table   = $item['table'];
+            $column  = $item['date_column'];
+
+            // 今月の件数
+            $stmt = $pdo->prepare(
+                'SELECT COUNT(*) FROM ' . $table . ' WHERE ' . $column . ' >= :this_start AND ' . $column . ' <= :this_end'
+            );
+            $stmt->bindValue(':this_start', $this_month_start, PDO::PARAM_STR);
+            $stmt->bindValue(':this_end',   $this_month_end,   PDO::PARAM_STR);
+            $stmt->execute();
+            $current = (int) $stmt->fetchColumn();
+
+            // 前月の件数
+            $stmt = $pdo->prepare(
+                'SELECT COUNT(*) FROM ' . $table . ' WHERE ' . $column . ' >= :last_start AND ' . $column . ' <= :last_end'
+            );
+            $stmt->bindValue(':last_start', $last_month_start, PDO::PARAM_STR);
+            $stmt->bindValue(':last_end',   $last_month_end,   PDO::PARAM_STR);
+            $stmt->execute();
+            $previous = (int) $stmt->fetchColumn();
+
+            // 前月比計算
+            if ($previous > 0) {
+                $change_percent = round(($current - $previous) / $previous * 100, 1);
+                $direction = $current > $previous ? 'up' : ($current < $previous ? 'down' : 'flat');
+            } else {
+                $change_percent = null;
+                $direction = $current > 0 ? 'up' : 'flat';
+            }
+
+            $monthlyComparison[$key] = [
+                'label'           => $item['label'],
+                'current'         => $current,
+                'previous'        => $previous,
+                'change_percent'  => $change_percent,
+                'direction'       => $direction,
+            ];
+        }
+    } catch (Throwable $e) {
+        error_log('admin dashboard API monthly comparison error: ' . $e->getMessage());
+    }
+
+    $response['monthly_comparison'] = $monthlyComparison;
+
     // チャートデータ取得（dashboard.php から移植）
     // 直近6か月分の年月ラベルを必ず生成（古い月から新しい月へ）
     $monthLabels = [];

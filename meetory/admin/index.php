@@ -115,6 +115,60 @@ try {
     error_log('admin dashboard pending count error: ' . $e->getMessage());
 }
 
+// 今月・前月の実績・前月比を集計
+$monthlyComparison = [
+    'user_registrations'   => ['label' => '新規ユーザー登録数',   'table' => 'users',       'date_column' => 'created_at'],
+    'goods_listings'       => ['label' => '商品出品数',           'table' => 'goods',       'date_column' => 'listed_at'],
+    'purchases'            => ['label' => '購入件数',             'table' => 'buy',         'date_column' => 'purchased_at'],
+    'inquiries'            => ['label' => 'お問い合わせ件数',     'table' => 'inquiries',   'date_column' => 'created_at'],
+    'reports'              => ['label' => '通報件数',             'table' => 'reports',     'date_column' => 'created_at'],
+];
+
+// 今月の期間（月初から当日）
+$this_month_start = date('Y-m-01');
+$this_month_end   = date('Y-m-t 23:59:59');
+
+// 前月の期間（先月月初から先月末）
+$last_month_start = date('Y-m-01', strtotime('first day of last month'));
+$last_month_end   = date('Y-m-t 23:59:59', strtotime('last day of last month'));
+
+try {
+    foreach ($monthlyComparison as $key => &$item) {
+        $table   = $item['table'];
+        $column  = $item['date_column'];
+
+        // 今月の件数
+        $stmt = $pdo->prepare(
+            'SELECT COUNT(*) FROM ' . $table . ' WHERE ' . $column . ' >= :this_start AND ' . $column . ' <= :this_end'
+        );
+        $stmt->bindValue(':this_start', $this_month_start, PDO::PARAM_STR);
+        $stmt->bindValue(':this_end',   $this_month_end,   PDO::PARAM_STR);
+        $stmt->execute();
+        $item['current'] = (int) $stmt->fetchColumn();
+
+        // 前月の件数
+        $stmt = $pdo->prepare(
+            'SELECT COUNT(*) FROM ' . $table . ' WHERE ' . $column . ' >= :last_start AND ' . $column . ' <= :last_end'
+        );
+        $stmt->bindValue(':last_start', $last_month_start, PDO::PARAM_STR);
+        $stmt->bindValue(':last_end',   $last_month_end,   PDO::PARAM_STR);
+        $stmt->execute();
+        $item['previous'] = (int) $stmt->fetchColumn();
+
+        // 前月比計算
+        if ($item['previous'] > 0) {
+            $item['change_percent'] = round(($item['current'] - $item['previous']) / $item['previous'] * 100, 1);
+            $item['direction'] = $item['current'] > $item['previous'] ? 'up' : ($item['current'] < $item['previous'] ? 'down' : 'flat');
+        } else {
+            $item['change_percent'] = null;
+            $item['direction'] = $item['current'] > 0 ? 'up' : 'flat';
+        }
+    }
+    unset($item);
+} catch (Throwable $e) {
+    error_log('admin dashboard monthly comparison error: ' . $e->getMessage());
+}
+
 // 最近の対応待ち案件一覧（違反報告とお問い合わせを統合、最大5件）
 $pendingItems = [];
 
@@ -528,6 +582,80 @@ body:has(.admin-container) {
     border-radius: 12px;
 }
 
+/* 今月の実績・前月比セクション */
+.main-container.admin-container .admin-monthly-comparison {
+    margin: 0 0 28px;
+}
+
+.main-container.admin-container .admin-comparison-period {
+    margin: 0 0 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.main-container.admin-container .admin-comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.main-container.admin-container .admin-comparison-table th {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    text-align: left;
+}
+
+.main-container.admin-container .admin-comparison-table td {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #334155;
+}
+
+.main-container.admin-container .admin-comparison-table tr:last-child td {
+    border-bottom: none;
+}
+
+.main-container.admin-container .admin-comparison-table tr:hover {
+    background: #f8fafc;
+}
+
+.main-container.admin-container .admin-change-up {
+    color: #0f766e;
+    font-weight: 700;
+}
+
+.main-container.admin-container .admin-change-down {
+    color: #b42318;
+    font-weight: 700;
+}
+
+.main-container.admin-container .admin-change-flat {
+    color: #64748b;
+}
+
+.main-container.admin-container .admin-direction-up {
+    color: #0f766e;
+    font-weight: 700;
+}
+
+.main-container.admin-container .admin-direction-down {
+    color: #b42318;
+    font-weight: 700;
+}
+
+.main-container.admin-container .admin-direction-flat {
+    color: #64748b;
+}
+
 @media (max-width: 768px) {
     .main-container.admin-container .admin-main-content {
         padding: 20px 16px;
@@ -565,12 +693,6 @@ body:has(.admin-container) {
 
     <h1 class="admin-page-title">管理ダッシュボード</h1>
 
-    <div class="auto-update-controls">
-        <button id="autoRefreshButton" class="auto-refresh-button">今すぐ更新</button>
-        <span id="lastUpdated" class="last-updated"></span>
-        <span id="autoRefreshStatus" class="auto-update-status"></span>
-    </div>
-
     <nav class="admin-breadcrumb">
         <a href="index.php">ホーム</a>
         <span class="admin-breadcrumb-separator">›</span>
@@ -595,6 +717,51 @@ body:has(.admin-container) {
             <h2 class="admin-stat-title">取引完了数</h2>
             <p class="admin-stat-value"><?= htmlspecialchars($stats['completed_orders'], ENT_QUOTES, 'UTF-8') ?></p>
         </div>
+    </section>
+
+    <!-- 今月の実績・前月比 -->
+    <section class="admin-monthly-comparison">
+        <h2 class="admin-section-title">今月の実績・前月比</h2>
+        <table class="admin-comparison-table">
+            <thead>
+                <tr>
+                    <th>項目</th>
+                    <th>今月</th>
+                    <th>前月</th>
+                    <th>前月比</th>
+                    <th>増減</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($monthlyComparison as $key => $item): ?>
+                    <?php
+                    $label      = htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8');
+                    $current    = (int) $item['current'];
+                    $previous   = (int) $item['previous'];
+                    $change     = $item['change_percent'];
+                    $direction  = $item['direction'];
+
+                    if ($change !== null) {
+                        $changeText = $change >= 0 ? '+' . $change . '%' : $change . '%';
+                        $changeClass = 'admin-change-' . $direction;
+                    } else {
+                        $changeText = '比較対象なし';
+                        $changeClass = 'admin-change-flat';
+                    }
+
+                    $directionText = $direction === 'up' ? '増加' : ($direction === 'down' ? '減少' : '変化なし');
+                    $directionClass = 'admin-direction-' . $direction;
+                    ?>
+                    <tr>
+                        <td><?= $label ?></td>
+                        <td><?= number_format($current) ?></td>
+                        <td><?= number_format($previous) ?></td>
+                        <td class="<?= $changeClass ?>"><?= $changeText ?></td>
+                        <td class="<?= $directionClass ?>"><?= $directionText ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </section>
 
     <!-- ショートカットメニュー -->
