@@ -15,31 +15,62 @@ body {
 
 .transaction-detail-container {
     width: 100%;
-    max-width: 1140px;
-    margin: 0 auto;
+    max-width: 960px;
+    margin: 32px auto 110px;
+    padding: 32px 36px;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
     box-sizing: border-box;
 }
 
 .transaction-detail-container h1 {
-    margin: 0 0 22px 0;
-    font-size: 26px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 16px;
+    font-size: 22px;
     font-weight: 700;
     color: #1976d2;
-    border-left: 4px solid #1976d2;
-    padding-left: 12px;
 }
 
-.transaction-detail-container h2 {
-    margin: 24px 0 12px 0;
+.transaction-detail-container h1::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 18px;
+    border-radius: 2px;
+    background-color: #1976d2;
+}
+
+.transaction-detail-container > h2,
+.transaction-detail-container section > h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 24px 0 12px;
     font-size: 20px;
     font-weight: 700;
     color: #1976d2;
-    border-left: 4px solid #1976d2;
-    padding-left: 12px;
+}
+
+.transaction-detail-container section > h2 {
+    margin-top: 0;
+}
+
+.transaction-detail-container > h2::before,
+.transaction-detail-container section > h2::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 18px;
+    border-radius: 2px;
+    background-color: #1976d2;
 }
 
 .transaction-detail-container h3 {
-    margin: 12px 0 8px 0;
+    margin: 0 0 12px;
     font-size: 16px;
     font-weight: 700;
     color: #1e293b;
@@ -55,10 +86,46 @@ body {
     box-sizing: border-box;
 }
 
+.transaction-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 12px;
+}
+
+.transaction-detail-container .transaction-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid #e2ebf5;
+    border-radius: 8px;
+    background-color: #f8fbff;
+}
+
+.transaction-meta-label {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.transaction-meta strong {
+    color: #1e293b;
+    font-size: 14px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
 .transaction-detail-container p {
+    margin: 0 0 12px;
     color: #1e293b;
     font-size: 14px;
     line-height: 1.6;
+}
+
+.transaction-detail-container section > p:last-child {
+    margin-bottom: 0;
 }
 
 .transaction-detail-container hr {
@@ -67,11 +134,30 @@ body {
     margin: 12px 0;
 }
 
+.transaction-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin: 20px 0;
+    padding: 14px 18px;
+    border: 1px solid #e2ebf5;
+    border-radius: 10px;
+    background-color: #f8fbff;
+    font-weight: 700;
+}
+
+.transaction-total strong {
+    color: #1976d2;
+    font-size: 18px;
+}
+
 .transaction-user {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     vertical-align: middle;
+    min-width: 0;
 }
 
 .transaction-user-avatar {
@@ -140,10 +226,24 @@ body {
 .cancel-warning { color: #b3261e; margin: 12px 0; }
 .cancel-action-form { margin: 8px 0; }
 
-.form-group { margin-bottom: 12px; }
-.form-group label { font-size: 13px; font-weight: 700; color: #1e293b; }
-.form-group input[type="text"],
-.form-group select {
+.transaction-detail-container .form-group {
+    margin-bottom: 16px;
+}
+
+.transaction-detail-container .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.transaction-detail-container .form-group br {
+    display: none;
+}
+
+.transaction-detail-container .form-group input[type="text"],
+.transaction-detail-container .form-group select {
     width: 100%;
     box-sizing: border-box;
     padding: 10px 12px;
@@ -155,12 +255,14 @@ body {
     background-color: #f8fbff;
     outline: none;
 }
-.form-group input[type="text"]:focus,
-.form-group select:focus {
+.transaction-detail-container .form-group input[type="text"]:focus,
+.transaction-detail-container .form-group select:focus {
     border-color: #1976d2;
     background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
 }
-.form-actions .btn-ship {
+
+.transaction-detail-container .form-actions .btn-ship {
     padding: 10px 24px;
     border: none;
     border-radius: 8px;
@@ -170,7 +272,7 @@ body {
     font-weight: 700;
     cursor: pointer;
 }
-.form-actions .btn-ship:hover { background-color: #1565c0; }
+.transaction-detail-container .form-actions .btn-ship:hover { background-color: #1565c0; }
 
 .transaction-detail-container a {
     color: #1976d2;
@@ -179,8 +281,55 @@ body {
 }
 .transaction-detail-container a:hover { text-decoration: underline; }
 
-@media (max-width: 600px) {
+.transaction-detail-container .transaction-navigation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px 0 0;
+}
+
+.transaction-navigation a {
+    display: inline-block;
+    padding: 9px 16px;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
+    background-color: #ffffff;
+    text-align: center;
+    transition: background-color 0.15s;
+}
+
+.transaction-navigation a:hover {
+    background-color: #eef6fd;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
     .transaction-detail-page {
         padding: 20px 12px 100px;
+    }
+
+    .transaction-detail-container {
+        width: 100%;
+        margin: 14px 12px 100px;
+        padding: 20px 16px;
+        border-radius: 12px;
+    }
+
+    .transaction-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .transaction-detail-container section {
+        padding: 16px;
+    }
+
+    .transaction-detail-container .transaction-meta {
+        padding: 10px 12px;
+    }
+
+    .transaction-total {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
     }
 }

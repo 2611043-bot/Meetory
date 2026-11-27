@@ -141,42 +141,41 @@ require_once '../../meetory-header.php';
     <main class="transaction-detail-container">
         <h1>取引詳細</h1>
 
-<p>
-    取引ID：
-    <?= (int) $transaction['transaction_id'] ?>
-</p>
-
-<p>
-    取引状況：
-    <?= htmlspecialchars(
-        $transaction['transaction_status'],
-        ENT_QUOTES,
-        'UTF-8'
-    ) ?>
-</p>
-
-<p>
-    購入日時：
-    <?= htmlspecialchars(
-        date('Y年m月d日 H:i:s', strtotime($transaction['purchased_at'])),
-        ENT_QUOTES,
-        'UTF-8'
-    ) ?>
-</p>
-
-<p>
-    購入者：
-    <span class="transaction-user">
-        <span class="transaction-user-avatar">
-            <?= renderProfileAvatar(
-                $transaction,
-                '',
-                $transaction['buyer_name'] . 'のプロフィールアイコン'
-            ) ?>
-        </span>
-        <?= htmlspecialchars($transaction['buyer_name'], ENT_QUOTES, 'UTF-8') ?>
-    </span>
-</p>
+        <section class="transaction-summary">
+            <p class="transaction-meta">
+                <span class="transaction-meta-label">取引ID</span>
+                <strong><?= (int) $transaction['transaction_id'] ?></strong>
+            </p>
+            <p class="transaction-meta">
+                <span class="transaction-meta-label">取引状況</span>
+                <strong><?= htmlspecialchars(
+                    $transaction['transaction_status'],
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) ?></strong>
+            </p>
+            <p class="transaction-meta">
+                <span class="transaction-meta-label">購入日時</span>
+                <strong><?= htmlspecialchars(
+                    date('Y年m月d日 H:i:s', strtotime($transaction['purchased_at'])),
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) ?></strong>
+            </p>
+            <p class="transaction-meta">
+                <span class="transaction-meta-label">購入者</span>
+                <strong class="transaction-user">
+                    <span class="transaction-user-avatar">
+                        <?= renderProfileAvatar(
+                            $transaction,
+                            '',
+                            $transaction['buyer_name'] . 'のプロフィールアイコン'
+                        ) ?>
+                    </span>
+                    <?= htmlspecialchars($transaction['buyer_name'], ENT_QUOTES, 'UTF-8') ?>
+                </strong>
+            </p>
+        </section>
 
 <h2>商品情報</h2>
 
@@ -188,7 +187,7 @@ require_once '../../meetory-header.php';
 
     <?php foreach ($items as $item): ?>
 
-        <section>
+        <section class="transaction-info-card transaction-item-card">
             <h3>
                 <?= htmlspecialchars(
                     $item['goods_name'],
@@ -216,8 +215,6 @@ require_once '../../meetory-header.php';
                 <?= number_format((int) $item['purchase_price']) ?>円
             </p>
         </section>
-
-        <hr>
 
         <?php endforeach; ?>
 
@@ -252,7 +249,7 @@ require_once '../../meetory-header.php';
 
         <?php foreach ($deliveries as $delivery): ?>
 
-            <section>
+            <section class="transaction-info-card">
                 <h3>
                     <?= htmlspecialchars($delivery['seller_name'], ENT_QUOTES, 'UTF-8') ?>
                     の配送
@@ -304,8 +301,6 @@ require_once '../../meetory-header.php';
                 </p>
             </section>
 
-            <hr>
-
         <?php endforeach; ?>
 
     <?php elseif ($is_buyer || $is_seller): ?>
@@ -314,9 +309,9 @@ require_once '../../meetory-header.php';
 
     <?php endif; ?>
 
-<p>
-    合計金額：
-    <?= number_format((int) $transaction['total_price']) ?>円
+<p class="transaction-total">
+    <span>合計金額</span>
+    <strong><?= number_format((int) $transaction['total_price']) ?>円</strong>
 </p>
 
 <?php if ($transaction['completed_at'] !== null): ?>
@@ -356,7 +351,7 @@ require_once '../../meetory-header.php';
 
     <p>あなたはこの取引の購入者です。</p>
 
-    <section>
+    <section class="transaction-info-card">
         <h2>配送先情報</h2>
 
         <?php if ($transaction['transaction_status'] === '購入済み'): ?>
@@ -514,7 +509,7 @@ require_once '../../meetory-header.php';
 
     <?php if ($transaction['transaction_status'] === '購入済み'): ?>
 
-        <section>
+        <section class="transaction-info-card">
             <h2>発送手続き</h2>
             <p>この取引の商品を発送します。配送業者と追跡番号を入力して「発送完了」ボタンを押してください。</p>
 
@@ -574,7 +569,7 @@ require_once '../../meetory-header.php';
 
     <?php elseif ($transaction['transaction_status'] === '発送済み'): ?>
 
-        <section>
+        <section class="transaction-info-card">
             <h2>配送情報</h2>
             <p>この取引は発送済みです。</p>
         </section>
@@ -591,11 +586,8 @@ require_once '../../meetory-header.php';
 
 <?php endif; ?>
 
-<p>
+<p class="transaction-navigation">
     <a href="../messages/message-inbox.php">メッセージ一覧へ</a>
-</p>
-
-<p>
     <a href="../user/mypage.php">マイページへ戻る</a>
 </p>
 
