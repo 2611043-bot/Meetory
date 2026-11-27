@@ -267,7 +267,11 @@ try {
             LEFT JOIN goods AS g ON g.seller_id = u.user_id
             WHERE u.role = 'user'
             GROUP BY u.user_id, u.user_name
-            ORDER BY (active_count + inactive_count + sold_count) DESC, u.user_id ASC
+            ORDER BY (
+                SUM(CASE WHEN g.is_sold = 1 THEN 1 ELSE 0 END)
+                + SUM(CASE WHEN g.is_sold = 0 AND g.is_active = 1 THEN 1 ELSE 0 END)
+                + SUM(CASE WHEN g.is_sold = 0 AND g.is_active = 0 THEN 1 ELSE 0 END)
+            ) DESC, u.user_id ASC
             LIMIT 10
         ");
         $stmt->execute();
@@ -296,6 +300,7 @@ try {
                    AVG(r.rating) AS avg_rating
             FROM users AS u
             INNER JOIN reviews AS r ON r.reviewee_id = u.user_id
+            WHERE u.role = 'user'
             GROUP BY u.user_id, u.user_name
             HAVING review_count > 0
             ORDER BY avg_rating DESC, u.user_id ASC
@@ -379,6 +384,124 @@ try {
     } catch (Throwable $e) {
         error_log('admin analysis-api login activity error: ' . $e->getMessage());
     }
+
+    // 月別お問い合わせ件数（直近6か月）
+    $inquiryMonthlyData = [];
+    foreach ($monthLabels as $month) {
+        $inquiryMonthlyData[] = ['month' => $month, 'count' => 0];
+    }
+    try {
+        $stmt = $pdo->prepare("
+            SELECT DATE_FORMAT(created_at, '%Y-%m') AS month, COUNT(*) AS cnt
+            FROM inquiries
+            WHERE created_at >= :start_date
+            GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+            ORDER BY month ASC
+        ");
+        $stmt->bindValue(':start_date', $startDate, PDO::PARAM_STR);
+        $stmt->execute();
+        $inquiryResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($inquiryResults as $row) {
+            $month = $row['month'];
+            $index = array_search($month, $monthLabels, true);
+            if ($index !== false) {
+                $inquiryMonthlyData[$index]['count'] = (int) $row['cnt'];
+            }
+        }
+    } catch (Throwable $e) {
+        error_log('admin analysis-api inquiry monthly error: ' . $e->getMessage());
+    }
+
+    // お問い合わせ対応状況（ステータス別件数）
+    $inquiryStatusData = [];
+    try {
+        $stmt = $pdo->prepare("
+            SELECT status, COUNT(*) AS cnt
+            FROM inquiries
+            GROUP BY status
+            ORDER BY cnt DESC
+        ");
+        $stmt->execute();
+        $inquiryStatusResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($inquiryStatusResults as $row) {
+            $inquiryStatusData[] = [
+                'label' => $row['status'] ?: '未設定',
+                'count' => (int) $row['cnt']
+            ];
+        }
+    } catch (Throwable $e) {
+        error_log('admin analysis-api inquiry status error: ' . $e->getMessage());
+    }
+
+    // 月別通報件数（直近6か月）
+    $reportMonthlyData = [];
+    foreach ($monthLabels as $month) {
+        $reportMonthlyData[] = ['month' => $month, 'count' => 0];
+    }
+    try {
+        $stmt = $pdo->prepare("
+            SELECT DATE_FORMAT(created_at, '%Y-%m') AS month, COUNT(*) AS cnt
+            FROM reports
+            WHERE created_at >= :start_date
+            GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+            ORDER BY month ASC
+        ");
+        $stmt->bindValue(':start_date', $startDate, PDO::PARAM_STR);
+        $stmt->execute();
+        $reportResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($reportResults as $row) {
+            $month = $row['month'];
+            $index = array_search($month, $monthLabels, true);
+            if ($index !== false) {
+                $reportMonthlyData[$index]['count'] = (int) $row['cnt'];
+            }
+        }
+    } catch (Throwable $e) {
+        error_log('admin analysis-api report monthly error: ' . $e->getMessage());
+    }
+
+    // 通報対応状況（ステータス別件数）
+    $reportStatusData = [];
+    try {
+        $stmt = $pdo->prepare("
+            SELECT status, COUNT(*) AS cnt
+            FROM reports
+            GROUP BY status
+            ORDER BY cnt DESC
+        ");
+        $stmt->execute();
+        $reportStatusResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($reportStatusResults as $row) {
+            $reportStatusData[] = [
+                'label' => $row['status'] ?: '未設定',
+                'count' => (int) $row['cnt']
+            ];
+        }
+    } catch (Throwable $e) {
+        error_log('admin analysis-api report status error: ' . $e->getMessage());
+    }
+
+    // 通報理由ランキング TOP10
+    $reportReasonData = [];
+    try {
+        $stmt = $pdo->prepare("
+            SELECT reason, COUNT(*) AS cnt
+            FROM reports
+            GROUP BY reason
+            ORDER BY cnt DESC
+            LIMIT 10
+        ");
+        $stmt->execute();
+        $reportReasonResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($reportReasonResults as $row) {
+            $reportReasonData[] = [
+                'label' => $row['reason'] ?: '未設定',
+                'count' => (int) $row['cnt']
+            ];
+        }
+    } catch (Throwable $e) {
+        error_log('admin analysis-api report reason error: ' . $e->getMessage());
+    }
 } catch (Throwable $e) {
     error_log('admin analysis-api error: ' . $e->getMessage());
     http_response_code(500);
@@ -404,6 +527,11 @@ $response = [
     'userListingRankingData' => $userListingRankingData,
     'userRatingRankingData' => $userRatingRankingData,
     'loginActivityData' => $loginActivityData,
+    'inquiryMonthlyData' => $inquiryMonthlyData,
+    'inquiryStatusData' => $inquiryStatusData,
+    'reportMonthlyData' => $reportMonthlyData,
+    'reportStatusData' => $reportStatusData,
+    'reportReasonData' => $reportReasonData,
     'updated_at' => date('Y-m-d H:i:s')
 ];
 

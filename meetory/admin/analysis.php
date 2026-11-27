@@ -178,6 +178,51 @@ require '../../meetory-header.php';
         </section>
     </section>
 
+    <!-- お問い合わせ・通報分析 -->
+    <section class="admin-inquiry-report-analysis">
+        <h2 class="admin-section-title">お問い合わせ・通報分析</h2>
+
+        <!-- 月別お問い合わせ件数（折れ線グラフ） -->
+        <section class="admin-widget">
+            <h2 class="admin-widget-title">月別お問い合わせ件数</h2>
+            <div class="admin-chart-container" style="position: relative; height: 300px;">
+                <canvas id="inquiryMonthlyChart"></canvas>
+            </div>
+        </section>
+
+        <!-- お問い合わせ対応状況（ドーナツグラフ） -->
+        <section class="admin-widget">
+            <h2 class="admin-widget-title">お問い合わせ対応状況</h2>
+            <div class="admin-chart-container" style="position: relative; height: 300px;">
+                <canvas id="inquiryStatusChart"></canvas>
+            </div>
+        </section>
+
+        <!-- 月別通報件数（折れ線グラフ） -->
+        <section class="admin-widget">
+            <h2 class="admin-widget-title">月別通報件数</h2>
+            <div class="admin-chart-container" style="position: relative; height: 300px;">
+                <canvas id="reportMonthlyChart"></canvas>
+            </div>
+        </section>
+
+        <!-- 通報対応状況（ドーナツグラフ） -->
+        <section class="admin-widget">
+            <h2 class="admin-widget-title">通報対応状況</h2>
+            <div class="admin-chart-container" style="position: relative; height: 300px;">
+                <canvas id="reportStatusChart"></canvas>
+            </div>
+        </section>
+
+        <!-- 通報理由ランキング TOP10（横棒グラフ） -->
+        <section class="admin-widget">
+            <h2 class="admin-widget-title">通報理由ランキング TOP10</h2>
+            <div class="admin-chart-container" style="position: relative; height: 400px;">
+                <canvas id="reportReasonChart"></canvas>
+            </div>
+        </section>
+    </section>
+
         </div>
     </div>
 </main>
@@ -219,6 +264,11 @@ require '../../meetory-header.php';
     let userListingRankingChart = null;
     let loginActivityChart = null;
     let userRatingRankingChart = null;
+    let inquiryMonthlyChart = null;
+    let inquiryStatusChart = null;
+    let reportMonthlyChart = null;
+    let reportStatusChart = null;
+    let reportReasonChart = null;
 
     // API URL
     const API_URL = './api/analysis-data.php';
@@ -956,6 +1006,284 @@ require '../../meetory-header.php';
         });
     }
 
+    // 折れ線グラフ：月別お問い合わせ件数
+    function drawInquiryMonthlyChart(labels, data) {
+        const ctx = document.getElementById('inquiryMonthlyChart');
+        if (!ctx) {
+            return;
+        }
+
+        if (inquiryMonthlyChart) {
+            inquiryMonthlyChart.destroy();
+        }
+
+        inquiryMonthlyChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'お問い合わせ件数',
+                    data: data,
+                    borderColor: NAVY,
+                    backgroundColor: NAVY_LIGHT,
+                    borderWidth: 2,
+                    pointBackgroundColor: NAVY,
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function (context) {
+                                return context.parsed.y + '件';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            maxTicksLimit: 10
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // ドーナツグラフ：お問い合わせ対応状況
+    function drawInquiryStatusChart(labels, data) {
+        const ctx = document.getElementById('inquiryStatusChart');
+        if (!ctx) {
+            return;
+        }
+
+        if (inquiryStatusChart) {
+            inquiryStatusChart.destroy();
+        }
+
+        inquiryStatusChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '対応状況',
+                    data: data,
+                    backgroundColor: [GREEN, ROSE, PURPLE, ORANGE, INDIGO],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { font: { size: 12 } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.label + ': ' + context.parsed + '件';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 折れ線グラフ：月別通報件数
+    function drawReportMonthlyChart(labels, data) {
+        const ctx = document.getElementById('reportMonthlyChart');
+        if (!ctx) {
+            return;
+        }
+
+        if (reportMonthlyChart) {
+            reportMonthlyChart.destroy();
+        }
+
+        reportMonthlyChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '通報件数',
+                    data: data,
+                    borderColor: TEAL,
+                    backgroundColor: TEAL_LIGHT,
+                    borderWidth: 2,
+                    pointBackgroundColor: TEAL,
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function (context) {
+                                return context.parsed.y + '件';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            maxTicksLimit: 10
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // ドーナツグラフ：通報対応状況
+    function drawReportStatusChart(labels, data) {
+        const ctx = document.getElementById('reportStatusChart');
+        if (!ctx) {
+            return;
+        }
+
+        if (reportStatusChart) {
+            reportStatusChart.destroy();
+        }
+
+        reportStatusChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '対応状況',
+                    data: data,
+                    backgroundColor: [TEAL, GREEN, ROSE],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { font: { size: 12 } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.label + ': ' + context.parsed + '件';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 横棒グラフ：通報理由ランキング TOP10
+    function drawReportReasonChart(labels, data) {
+        const ctx = document.getElementById('reportReasonChart');
+        if (!ctx) {
+            return;
+        }
+
+        if (reportReasonChart) {
+            reportReasonChart.destroy();
+        }
+
+        reportReasonChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '通報件数',
+                    data: data,
+                    backgroundColor: ROSE,
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.parsed.x + '件';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            maxTicksLimit: 10
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     // APIからデータを取得
     async function fetchAnalysisData() {
         if (isFetching) {
@@ -1199,6 +1527,72 @@ require '../../meetory-header.php';
                     loginActivityChart.update();
                 } else {
                     drawLoginActivityChart(loginLabels, successValues, failValues);
+                }
+            }
+
+            // 月別お問い合わせ件数グラフ更新
+            if (Array.isArray(data.inquiryMonthlyData)) {
+                const inqMonthlyLabels = data.inquiryMonthlyData.map((item) => item.month);
+                const inqMonthlyValues = data.inquiryMonthlyData.map((item) => item.count);
+                if (inquiryMonthlyChart) {
+                    inquiryMonthlyChart.data.labels = inqMonthlyLabels;
+                    inquiryMonthlyChart.data.datasets[0].data = inqMonthlyValues;
+                    inquiryMonthlyChart.update();
+                } else {
+                    drawInquiryMonthlyChart(inqMonthlyLabels, inqMonthlyValues);
+                }
+            }
+
+            // お問い合わせ対応状況グラフ更新
+            if (Array.isArray(data.inquiryStatusData)) {
+                const inqStatusLabels = data.inquiryStatusData.map((item) => item.label);
+                const inqStatusValues = data.inquiryStatusData.map((item) => item.count);
+                if (inquiryStatusChart) {
+                    inquiryStatusChart.data.labels = inqStatusLabels;
+                    inquiryStatusChart.data.datasets[0].data = inqStatusValues;
+                    inquiryStatusChart.update();
+                } else {
+                    drawInquiryStatusChart(inqStatusLabels, inqStatusValues);
+                }
+            }
+
+            // 月別通報件数グラフ更新
+            if (Array.isArray(data.reportMonthlyData)) {
+                const repMonthlyLabels = data.reportMonthlyData.map((item) => item.month);
+                const repMonthlyValues = data.reportMonthlyData.map((item) => item.count);
+                if (reportMonthlyChart) {
+                    reportMonthlyChart.data.labels = repMonthlyLabels;
+                    reportMonthlyChart.data.datasets[0].data = repMonthlyValues;
+                    reportMonthlyChart.update();
+                } else {
+                    drawReportMonthlyChart(repMonthlyLabels, repMonthlyValues);
+                }
+            }
+
+            // 通報対応状況グラフ更新
+            if (Array.isArray(data.reportStatusData)) {
+                const statusMap = { 'pending': '未対応', 'resolved': '対応済み', 'rejected': '却下' };
+                const repStatusLabels = data.reportStatusData.map((item) => statusMap[item.label] || item.label);
+                const repStatusValues = data.reportStatusData.map((item) => item.count);
+                if (reportStatusChart) {
+                    reportStatusChart.data.labels = repStatusLabels;
+                    reportStatusChart.data.datasets[0].data = repStatusValues;
+                    reportStatusChart.update();
+                } else {
+                    drawReportStatusChart(repStatusLabels, repStatusValues);
+                }
+            }
+
+            // 通報理由ランキンググラフ更新
+            if (Array.isArray(data.reportReasonData)) {
+                const repReasonLabels = data.reportReasonData.map((item) => item.label);
+                const repReasonValues = data.reportReasonData.map((item) => item.count);
+                if (reportReasonChart) {
+                    reportReasonChart.data.labels = repReasonLabels;
+                    reportReasonChart.data.datasets[0].data = repReasonValues;
+                    reportReasonChart.update();
+                } else {
+                    drawReportReasonChart(repReasonLabels, repReasonValues);
                 }
             }
 
