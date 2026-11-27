@@ -375,8 +375,10 @@
             drawGoodsListingChart(goodsChartLabels, goodsChartData);
         }
 
-        // 自動更新開始
-        startAutoRefresh();
+        // 自動更新開始（ダッシュボードページのみ。分析ページでは独自の自動更新を使用）
+        if (document.getElementById('userRegistrationChart') || document.getElementById('goodsListingChart')) {
+            startAutoRefresh();
+        }
 
         // 手動更新ボタン（存在する場合のみ）
         if (autoRefreshButton) {
