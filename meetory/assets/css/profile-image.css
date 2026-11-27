@@ -2,55 +2,57 @@
 
 /* ==============================
     プロフィールアイコン変更画面専用スタイルシート
-    profile-image.php で使用（PHP変更なし）
+    profile-image.php で使用（home.css 完全準拠）
    ============================== */
 
+html,
 body {
-    background-color: #f0f5fa;
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
     margin: 0;
     color: #1e293b;
 }
 
 .profile-image-page {
     width: min(100% - 32px, 920px);
-    margin: 32px auto 100px;
+    margin: 32px auto 110px;
     box-sizing: border-box;
 }
 
 /* ==============================
-    見出しエリア
+    見出しエリア（home.css の見出し基準）
    ============================== */
 .profile-image-heading {
     margin-bottom: 20px;
     padding-left: 14px;
-    border-left: 5px solid #1976d2;
+    border-left: 4px solid #1976d2;
 }
 
 .profile-image-heading h1 {
     margin: 0 0 6px 0;
     font-size: 22px;
     font-weight: 700;
-    color: #0f2942;
+    color: #1976d2;
 }
 
 .profile-image-heading p {
     margin: 0;
     font-size: 13px;
-    color: #5b7083;
+    color: #64748b;
 }
 
 /* ==============================
-    メインカード（2カラム構成を維持）
+    メインカード（home.css の .home-intro と同じ白カード・枠線・角丸・影）
    ============================== */
 .profile-image-card {
     display: grid;
     grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
     gap: 28px;
-    padding: 28px;
-    border: 1px solid #d5e3f0;
-    border-top: 4px solid #1976d2;
-    border-radius: 10px;
+    padding: 28px 32px;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
     background-color: #ffffff;
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
     box-sizing: border-box;
 }
 
@@ -64,22 +66,22 @@ body {
     justify-content: center;
     gap: 14px;
     padding: 24px 16px;
-    border: 1px solid #d5e3f0;
-    border-radius: 8px;
-    background-color: #f4f9fd;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    background-color: #f8fbff;
     text-align: center;
 }
 
 .profile-image-current > p {
     margin: 0;
-    color: #4a6075;
+    color: #64748b;
     font-size: 13px;
     font-weight: 700;
 }
 
 .profile-image-current strong {
     font-size: 15px;
-    color: #0f2942;
+    color: #1e293b;
 }
 
 .profile-image-preview {
@@ -116,8 +118,8 @@ body {
     align-items: center;
     gap: 8px;
     margin-bottom: 14px;
-    color: #0f2942;
-    font-size: 15px;
+    color: #1976d2;
+    font-size: 16px;
     font-weight: 700;
 }
 
@@ -144,27 +146,28 @@ body {
     align-items: center;
     gap: 6px;
     padding: 12px 6px;
-    border: 1px solid #d5e3f0;
-    border-radius: 8px;
-    background-color: #fafdff;
-    color: #334155;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    background-color: #f8fbff;
+    color: #1e293b;
     cursor: pointer;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     text-align: center;
-    transition: background-color 0.15s, border-color 0.15s;
+    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 }
 
 .profile-image-option:hover {
     border-color: #90caf9;
-    background-color: #f0f7ff;
+    background-color: #eef6fd;
+    transform: translateY(-2px);
 }
 
 .profile-image-option:has(input:checked) {
     border-color: #1976d2;
-    background-color: #e8f3fe;
+    background-color: #eef6fd;
     box-shadow: 0 0 0 1px #1976d2;
-    color: #0f2942;
+    color: #1976d2;
 }
 
 .profile-image-option input,
@@ -177,7 +180,7 @@ body {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    border: 1px solid #e2eff9;
+    border: 1px solid #e2ebf5;
     background-color: #ffffff;
 }
 
@@ -193,7 +196,7 @@ body {
     gap: 10px;
     margin-top: 24px;
     padding-top: 22px;
-    border-top: 1px solid #e1ecf5;
+    border-top: 1px solid #e2ebf5;
 }
 
 .profile-image-upload-choice {
@@ -202,7 +205,7 @@ body {
     gap: 8px;
     color: #1e293b;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
 }
 
@@ -211,10 +214,10 @@ body {
     min-width: 0;
     box-sizing: border-box;
     padding: 10px 12px;
-    border: 1px solid #d5e3f0;
+    border: 1px solid #e2ebf5;
     border-radius: 8px;
-    background-color: #f7fbff;
-    color: #4a6075;
+    background-color: #f8fbff;
+    color: #64748b;
     font-family: inherit;
     font-size: 13px;
     cursor: pointer;
@@ -222,43 +225,41 @@ body {
 }
 
 .profile-image-upload input[type="file"]:hover {
-    background-color: #f0f7ff;
+    background-color: #eef6fd;
     border-color: #90caf9;
 }
 
 .profile-image-upload input[type="file"]::file-selector-button {
     margin-right: 12px;
     padding: 8px 16px;
-    border: 1px solid #90caf9;
-    border-radius: 6px;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
     background-color: #ffffff;
-    color: #1565c0;
+    color: #1976d2;
     font-family: inherit;
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
-    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+    transition: background-color 0.15s;
 }
 
 .profile-image-upload input[type="file"]::file-selector-button:hover {
-    background-color: #1976d2;
-    border-color: #1976d2;
-    color: #ffffff;
+    background-color: #eef6fd;
 }
 
 .profile-image-upload small {
-    color: #5b7083;
+    color: #64748b;
     font-size: 12px;
 }
 
 .profile-image-upload-error {
     color: #dc2626;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 /* ==============================
-    保存・キャンセルボタン
+    保存・キャンセルボタン（home.css のボタン基準・角丸 8px）
    ============================== */
 .profile-image-actions {
     display: flex;
@@ -267,14 +268,15 @@ body {
     gap: 12px;
     margin-top: 24px;
     padding-top: 20px;
-    border-top: 1px solid #e1ecf5;
+    border-top: 1px solid #e2ebf5;
 }
 
+/* メインボタン（home.css の .home-intro a と完全一致） */
 .profile-image-actions button {
     min-height: 44px;
-    padding: 10px 24px;
-    border: 0;
-    border-radius: 6px;
+    padding: 0 28px;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
     background-color: #1976d2;
     color: #ffffff;
     cursor: pointer;
@@ -288,26 +290,26 @@ body {
     background-color: #1565c0;
 }
 
+/* サブボタン（home.css の .more-goods a と完全一致） */
 .profile-image-actions a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: 44px;
-    padding: 0 18px;
-    border: 1px solid #bfd7ed;
-    border-radius: 6px;
+    padding: 0 22px;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
     background-color: #ffffff;
-    color: #1565c0;
+    color: #1976d2;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
     box-sizing: border-box;
-    transition: background-color 0.15s, border-color 0.15s;
+    transition: background-color 0.15s;
 }
 
 .profile-image-actions a:hover {
-    background-color: #eef6fc;
-    border-color: #64b5f6;
+    background-color: #eef6fd;
 }
 
 /* ==============================
@@ -319,7 +321,7 @@ body {
     padding: 12px 16px;
     border-radius: 8px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .profile-image-alert {
@@ -329,9 +331,9 @@ body {
 }
 
 .profile-image-success {
-    background-color: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    color: #047857;
+    background-color: #eef6fd;
+    border: 1px solid #90caf9;
+    color: #1976d2;
 }
 
 /* ==============================
@@ -346,7 +348,7 @@ body {
     .profile-image-card {
         grid-template-columns: 1fr;
         gap: 20px;
-        padding: 18px;
+        padding: 20px 18px;
     }
 
     .profile-image-current {

@@ -5,16 +5,15 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 require '../../meetory-header.php';
 ?>
 
-<link rel="stylesheet" href="../assets/css/login.css">
-<link rel="stylesheet" href="../assets/css/password-reset.css">
+<link rel="stylesheet" href="../assets/css/password-reset.css?v=<?= time() ?>">
 
-<div class="login-page">
+<div class="password-reset-page">
 
-    <div class="login-card">
+    <div class="password-reset-card">
 
-        <h1 class="login-title">パスワードリセット</h1>
+        <h1 class="password-reset-title">パスワードリセット</h1>
 
-        <p class="login-description">
+        <p class="password-reset-description">
             登録したメールアドレスを入力してください。
         </p>
 
@@ -31,15 +30,13 @@ require '../../meetory-header.php';
                 >
             </div>
 
-            <button type="submit" class="login-button">
+            <button type="submit" class="reset-submit-btn">
                 リセットメールを送信
             </button>
 
         </form>
 
-        <p class="register-link">
-            <a href="login.php">ログイン画面に戻る</a>
-        </p>
+        <a href="login.php" class="back-login-link">ログイン画面に戻る</a>
 
     </div>
 
