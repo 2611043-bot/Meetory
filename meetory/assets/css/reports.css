@@ -1,141 +1,507 @@
+@charset "UTF-8";
+
+/* ==============================
+    通報・制限管理画面共通スタイルシート
+    reports.css（home.css 完全準拠）
+   ============================== */
+
+/* 画面全体の背景を水色にして周りの白余白を消す（home.css と統一） */
+html:has(.report-page),
+body:has(.report-page) {
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
+    margin: 0;
+    color: #1e293b;
+}
+
+/* メインコンテナ（home.css の .home-intro と同じ白カード・枠線・角丸・影） */
 .report-page {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
+    max-width: 960px;
+    margin: 32px auto 100px;
+    padding: 28px 34px;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
+    box-sizing: border-box;
+    color: #1e293b;
+}
+
+/* ページ見出し（home.css の .home-intro h1 と統一） */
+.report-page > h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 18px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1976d2;
+}
+
+.report-page > h1::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 18px;
+    border-radius: 2px;
+    background-color: #1976d2;
+}
+
+/* 上部ナビゲーションリンク */
+.report-page > p:has(a[href="users.php"]),
+.report-page > p:has(a[href="index.php"]) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 24px;
+    color: transparent;
+    font-size: 0;
+}
+
+.report-page > p:has(a[href="users.php"]) a,
+.report-page > p:has(a[href="index.php"]) a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    padding: 0 18px;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #1976d2;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.15s;
+}
+
+.report-page > p:has(a[href="users.php"]) a:hover,
+.report-page > p:has(a[href="index.php"]) a:hover {
+    background-color: #eef6fd;
+}
+
+/* セクションカード */
+.report-page > section {
+    margin-bottom: 24px;
+    padding: 22px 24px;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    background-color: #f8fbff;
+}
+
+.report-page > section:last-of-type {
+    margin-bottom: 0;
+}
+
+.report-page > section h2 {
+    margin: 0 0 16px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1976d2;
+}
+
+.report-page > section > p {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+/* フラッシュ・エラーメッセージ */
+.report-flash {
+    padding: 13px 18px;
+    margin: 0 0 20px;
+    border: 1px solid #a7f3d0;
+    border-radius: 12px;
+    background-color: #ecfdf5;
+    color: #047857;
+    font-size: 13px;
+    font-weight: 700;
 }
 
 .report-errors {
-    border: 1px solid #dc2626;
+    padding: 14px 18px;
+    margin: 0 0 20px;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
     background-color: #fef2f2;
-    color: #b91c1c;
-    padding: 10px 15px;
-    margin-bottom: 20px;
+    color: #dc2626;
+    font-size: 13px;
+    font-weight: 700;
 }
 
 .report-errors ul {
     margin: 0;
     padding-left: 20px;
+    line-height: 1.65;
 }
 
+/* 通報対象表示 */
 .report-target {
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
-.report-form {
-    margin-bottom: 20px;
-}
-
-.report-reasons {
-    border: 1px solid #ccc;
-    padding: 10px 15px;
-    margin-bottom: 20px;
-}
-
-.report-reason {
-    display: block;
-    margin: 5px 0;
-}
-
-.report-form textarea {
-    width: 100%;
-    max-width: 500px;
-    padding: 8px;
-    box-sizing: border-box;
-}
-
-.report-form button,
-.report-filter button {
-    padding: 8px 16px;
-    margin-right: 8px;
-    cursor: pointer;
-}
-
-.report-submit-btn {
-    font-weight: bold;
-}
-
-.report-filter {
-    margin-bottom: 20px;
-}
-
-.report-filter select {
-    padding: 6px;
-    margin: 0 8px;
-}
-
-.report-list {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-.report-list th,
-.report-list td {
-    border: 1px solid #ccc;
-    padding: 8px;
-    text-align: left;
+    margin: 0 0 20px;
+    padding: 12px 16px;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    background-color: #f8fbff;
     font-size: 14px;
-}
-
-.report-list th {
-    background-color: #f5f5f5;
-}
-
-.report-status-pending,
-.report-status-reviewing,
-.report-status-resolved,
-.report-status-rejected {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 13px;
-}
-
-.report-status-pending {
-    background-color: #e5e7eb;
-    color: #374151;
-}
-
-.report-status-reviewing {
-    background-color: #dbeafe;
-    color: #1e40af;
-}
-
-.report-status-resolved {
-    background-color: #dcfce7;
-    color: #166534;
-}
-
-.report-status-rejected {
-    background-color: #fee2e2;
-    color: #991b1b;
-}
-
-.report-detail dt {
-    font-weight: bold;
-    margin-top: 12px;
-}
-
-.report-detail dd {
-    margin: 4px 0 0 0;
+    font-weight: 700;
+    color: #1e293b;
 }
 
 .report-target-meta {
     display: block;
-    color: #666;
-    font-size: 13px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 400;
     margin-top: 4px;
 }
 
-.report-flash {
-    padding: 10px 15px;
-    background-color: #dcfce7;
-    color: #166534;
-    border: 1px solid #86efac;
+/* ==============================
+    フォーム（通報・制限設定・絞り込み）
+   ============================== */
+.report-form {
     margin-bottom: 20px;
+}
+
+.report-form p {
+    margin: 0 0 18px;
+}
+
+.report-form label {
+    display: inline-block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.report-reasons {
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    background-color: #f8fbff;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+}
+
+.report-reason {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    font-size: 13px;
+    color: #1e293b;
+    cursor: pointer;
+}
+
+.report-form select,
+.report-form textarea,
+.report-form input[type="datetime-local"],
+.report-form input[type="text"],
+.report-filter select {
+    width: 100%;
+    max-width: 480px;
+    padding: 10px 14px;
+    border: 1px solid #e2ebf5;
+    border-radius: 8px;
+    background-color: #ffffff;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1e293b;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+.report-form select,
+.report-form input[type="datetime-local"],
+.report-form input[type="text"],
+.report-filter select {
+    height: 44px;
+}
+
+.report-filter select {
+    width: auto;
+    min-width: 180px;
+    margin: 0 8px;
+}
+
+.report-form textarea {
+    max-width: 100%;
+    min-height: 110px;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+.report-form select:focus,
+.report-form textarea:focus,
+.report-form input[type="datetime-local"]:focus,
+.report-form input[type="text"]:focus,
+.report-filter select:focus {
+    border-color: #1976d2;
+    background-color: #ffffff;
+}
+
+.report-form input[type="datetime-local"]:disabled {
+    background-color: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+/* 無期限制限チェックボックス行 */
+.report-form label:has(#unlimited) {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0;
+    padding: 10px 14px;
+    border: 1px solid #e2ebf5;
+    border-radius: 8px;
+    background-color: #ffffff;
+    cursor: pointer;
+}
+
+.report-form input[type="checkbox"],
+.report-form input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #1976d2;
+    cursor: pointer;
+}
+
+.report-form .hint {
+    display: block;
+    margin-top: 6px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+/* メインボタン（home.css の .home-intro a と完全一致・高さ 44px・角丸 8px） */
+.report-form button,
+.report-filter button,
+.report-submit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 28px;
+    margin-right: 8px;
+    border: none;
+    border-radius: 8px;
+    background-color: #1976d2;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.report-form button:hover,
+.report-filter button:hover,
+.report-submit-btn:hover {
+    background-color: #1565c0;
+}
+
+.report-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+/* ==============================
+    一覧テーブル（home.css の白カード・枠線基準に統一）
+   ============================== */
+.report-list {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
+}
+
+.report-list th,
+.report-list td {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 13px;
+    color: #1e293b;
+    vertical-align: middle;
+}
+
+.report-list th {
+    background-color: #f8fbff;
+    border-bottom: 1px solid #e2ebf5;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+.report-list tr:last-child td {
+    border-bottom: none;
+}
+
+.report-list tr:hover td {
+    background-color: #f8fbff;
+}
+
+.report-list a {
+    color: #1976d2;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.report-list a:hover {
+    text-decoration: underline;
+}
+
+/* 解除ボタン（角丸 8px） */
+.report-list button[name="revoke_restriction_id"] {
+    height: 34px;
+    padding: 0 14px;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    background-color: #fef2f2;
+    color: #dc2626;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.report-list button[name="revoke_restriction_id"]:hover {
+    background-color: #dc2626;
+    border-color: #dc2626;
+    color: #ffffff;
+}
+
+.restriction-note {
+    margin: 10px 0 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
+/* ステータスバッジ */
+.report-status-pending,
+.report-status-reviewing,
+.report-status-resolved,
+.report-status-rejected {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.report-status-pending {
+    background-color: #f8fafc;
+    border: 1px solid #e2ebf5;
+    color: #64748b;
+}
+
+.report-status-reviewing {
+    background-color: #eef6fd;
+    border: 1px solid #e2ebf5;
+    color: #1976d2;
+}
+
+.report-status-resolved {
+    background-color: #dcfce7;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+}
+
+.report-status-rejected {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+}
+
+/* 詳細表示（dl / dt / dd） */
+.report-detail {
+    margin: 0;
+    padding: 18px 20px;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    background-color: #f8fbff;
+}
+
+.report-detail dt {
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    margin-top: 14px;
+}
+
+.report-detail dt:first-child {
+    margin-top: 0;
+}
+
+.report-detail dd {
+    margin: 4px 0 0 0;
+    font-size: 14px;
+    color: #1e293b;
+    line-height: 1.6;
 }
 
 .profile-report-link {
     margin-top: 10px;
+    font-size: 12px;
+}
+
+/* ==============================
+    レスポンシブ対応（home.css の 520px ブレークポイントに統一）
+   ============================== */
+@media (max-width: 740px) {
+    .report-page {
+        margin: 20px 20px 80px;
+        padding: 24px 20px;
+    }
+
+    .report-list {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 520px) {
+    .report-page {
+        margin: 18px 14px 90px;
+        padding: 22px 18px;
+    }
+
+    .report-page > h1 {
+        font-size: 19px;
+    }
+
+    .report-page > section {
+        padding: 18px 14px;
+    }
+
+    .report-page > section h2 {
+        font-size: 17px;
+    }
+
+    .report-form select,
+    .report-form input[type="datetime-local"],
+    .report-form input[type="text"],
+    .report-filter select,
+    .report-form button,
+    .report-filter button,
+    .report-submit-btn {
+        max-width: 100%;
+        width: 100%;
+        margin-right: 0;
+        margin-left: 0;
+    }
 }

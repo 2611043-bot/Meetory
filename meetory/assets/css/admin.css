@@ -1,35 +1,88 @@
+@charset "UTF-8";
+
 /* ============================================================
-   管理者ダッシュボード専用CSS
+   管理者画面共通スタイルシート
+   admin/ 配下で使用（home.css 完全準拠）
    ============================================================ */
 
-.admin-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 24px;
-    background: #f8fafc;
-    min-height: calc(100vh - 200px);
+/* 画面全体の背景を水色にして周りの白余白を消す（home.css と統一） */
+html:has(.admin-container),
+body:has(.admin-container) {
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
+    margin: 0;
+    color: #1e293b;
 }
 
-/* ページタイトル */
+.main-container.admin-container,
+.admin-container {
+    max-width: 1120px;
+    margin: 0 auto 80px;
+    padding: 32px 36px 44px;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    min-height: calc(100vh - 200px);
+    box-sizing: border-box;
+}
+
+/* サイドバーレイアウトコンテナ */
+.admin-layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    background: transparent !important;
+}
+
+/* 右側メインエリア（home.css の .home-intro と同じ白カード・枠線・角丸・影） */
+.admin-main-content {
+    flex: 1;
+    min-width: 0;
+    padding: 28px 34px;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
+    box-sizing: border-box;
+}
+
+/* ページタイトル（home.css の .home-intro h1 と統一） */
 .admin-page-title {
-    font-size: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 22px;
     font-weight: 700;
-    color: #1e293b;
+    color: #1976d2;
     margin: 0 0 16px;
+}
+
+.admin-page-title::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 18px;
+    border-radius: 2px;
+    background-color: #1976d2;
 }
 
 /* パンくずナビゲーション */
 .admin-breadcrumb {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
-    color: #64748b;
     margin: 0 0 24px;
+    padding: 6px 14px;
+    border: 1px solid #e2ebf5;
+    border-radius: 8px;
+    background-color: #f8fbff;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
 }
 
 .admin-breadcrumb a {
-    color: #1a3a5c;
+    color: #1976d2;
     text-decoration: none;
 }
 
@@ -41,53 +94,130 @@
     color: #94a3b8;
 }
 
-/* 統計カードセクション */
+/* セクション見出し（home.css の .new-goods h2 と統一） */
+.admin-section-title {
+    font-size: 19px;
+    font-weight: 700;
+    color: #1976d2;
+    margin: 0 0 16px;
+}
+
+/* ============================================================
+   統計カードセクション（home.css の .goods-card と同じ枠線・角丸・影）
+   ============================================================ */
 .admin-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 16px;
-    margin-bottom: 32px;
+    margin: 0 0 32px;
 }
 
 .admin-stat-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background-color: #ffffff;
+    border: 1px solid #e2ebf5;
     border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 18px 20px;
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.admin-stat-card:hover {
+    transform: translateY(-2px);
+    border-color: #90caf9;
+    box-shadow: 0 8px 20px rgba(25, 118, 210, 0.1);
 }
 
 .admin-stat-title {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 700;
     color: #64748b;
     margin: 0 0 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
 .admin-stat-value {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 700;
-    color: #1a3a5c;
+    color: #1976d2;
     margin: 0;
+    line-height: 1.2;
 }
 
-/* ショートカットセクション */
-.admin-shortcuts {
-    margin-bottom: 32px;
+/* ============================================================
+   今月の実績・前月比セクション
+   ============================================================ */
+.admin-monthly-comparison {
+    margin: 0 0 32px;
 }
 
-.admin-section-title {
-    font-size: 18px;
+.admin-comparison-period {
+    margin: 0 0 12px;
+    font-size: 13px;
     font-weight: 700;
+    color: #64748b;
+}
+
+.admin-comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
+}
+
+.admin-comparison-table th {
+    background-color: #f8fbff;
+    border-bottom: 1px solid #e2ebf5;
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    text-align: left;
+}
+
+.admin-comparison-table td {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 12px 16px;
+    font-size: 13px;
     color: #1e293b;
-    margin: 0 0 16px;
+}
+
+.admin-comparison-table tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-comparison-table tr:hover {
+    background-color: #f8fbff;
+}
+
+.admin-change-up,
+.admin-direction-up {
+    color: #047857;
+    font-weight: 700;
+}
+
+.admin-change-down,
+.admin-direction-down {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.admin-change-flat,
+.admin-direction-flat {
+    color: #64748b;
+}
+
+/* ============================================================
+   ショートカットセクション（クイックアクセス）
+   ============================================================ */
+.admin-shortcuts {
+    margin: 0 0 32px;
 }
 
 .admin-shortcut-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
 }
 
@@ -95,50 +225,217 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 16px;
+    background-color: #ffffff;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    padding: 16px 20px;
     text-decoration: none;
     color: #1e293b;
-    transition: box-shadow 0.2s, border-color 0.2s;
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s, color 0.15s;
 }
 
 .admin-shortcut-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border-color: #1a3a5c;
+    transform: translateY(-2px);
+    border-color: #90caf9;
+    box-shadow: 0 8px 20px rgba(25, 118, 210, 0.1);
+    color: #1976d2;
 }
 
 .admin-shortcut-card i {
-    font-size: 20px;
-    color: #1a3a5c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background-color: #eef6fd;
+    color: #1976d2;
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.admin-shortcut-card:hover i {
+    background-color: #1976d2;
+    color: #ffffff;
 }
 
 .admin-shortcut-card span {
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 700;
 }
 
-/* ウィジェットセクション（ダッシュボード詳細用） */
-.admin-widget {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+/* ============================================================
+   対応が必要な案件セクション
+   ============================================================ */
+.admin-notices {
+    margin: 0 0 32px;
+}
+
+.admin-notice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin: 0 0 16px;
+}
+
+.admin-notice-card {
+    padding: 16px 20px;
+    border: 1px solid #e2ebf5;
     border-radius: 12px;
-    padding: 24px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-notice-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.admin-notice-icon.report {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+.admin-notice-icon.inquiry {
+    background-color: #fef3c7;
+    color: #b45309;
+}
+
+.admin-notice-info {
+    flex: 1;
+}
+
+.admin-notice-label {
+    margin: 0 0 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.admin-notice-value {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.admin-notice-list {
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
+}
+
+.admin-notice-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-notice-list th {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2ebf5;
+    background-color: #f8fbff;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    text-align: left;
+}
+
+.admin-notice-list td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+    color: #1e293b;
+    vertical-align: middle;
+}
+
+.admin-notice-list tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-notice-list tr:hover {
+    background-color: #f8fbff;
+}
+
+.admin-notice-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.admin-notice-badge-report {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+.admin-notice-badge-inquiry {
+    background-color: #fef3c7;
+    color: #b45309;
+}
+
+.admin-notice-link {
+    color: #1976d2;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.admin-notice-link:hover {
+    text-decoration: underline;
+}
+
+.admin-notice-empty {
+    margin: 0;
+    padding: 32px 16px;
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+    background-color: #f8fbff;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+}
+
+/* ============================================================
+   ウィジェットセクション（チャート・ダッシュボード詳細用）
+   ============================================================ */
+.admin-widget {
+    background-color: #ffffff;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    padding: 22px 24px;
     margin-bottom: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
+}
+
+.admin-widget:last-child {
+    margin-bottom: 0;
 }
 
 .admin-widget-title {
     font-size: 16px;
     font-weight: 700;
-    color: #1e293b;
+    color: #1976d2;
     margin: 0 0 16px;
 }
 
 .admin-widget-placeholder {
-    background: #f1f5f9;
-    border: 1px dashed #cbd5e1;
+    background-color: #f8fbff;
+    border: 1px dashed #e2ebf5;
     border-radius: 8px;
     padding: 32px 24px;
     text-align: center;
@@ -146,30 +443,6 @@
     font-size: 14px;
 }
 
-/* レスポンシブ対応（スマートフォン） */
-@media (max-width: 768px) {
-    .admin-container {
-        padding: 16px;
-    }
-
-    .admin-stats {
-        grid-template-columns: 1fr;
-    }
-
-    .admin-shortcut-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .admin-widget {
-        padding: 16px;
-    }
-
-    .admin-chart-container {
-        height: 250px !important;
-    }
-}
-
-/* チャートコンテナ */
 .admin-chart-container {
     position: relative;
     height: 300px;
@@ -182,149 +455,140 @@
 }
 
 /* ============================================================
-   最近の活動テーブル
+   最近の活動テーブル・ランキングテーブル共通
    ============================================================ */
-
-.admin-activity-table {
+.admin-activity-table,
+.admin-product-ranking-table,
+.admin-user-ranking-table {
     width: 100%;
     border-collapse: collapse;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    background-color: #ffffff;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
     overflow: hidden;
 }
 
-.admin-activity-table th {
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+.admin-product-ranking-table,
+.admin-user-ranking-table {
+    margin-top: 16px;
+}
+
+.admin-widget > .admin-activity-table {
+    margin: 0;
+}
+
+.admin-activity-table th,
+.admin-product-ranking-table th,
+.admin-user-ranking-table th {
+    background-color: #f8fbff;
+    border-bottom: 1px solid #e2ebf5;
     padding: 12px 16px;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 700;
     color: #64748b;
     text-align: left;
 }
 
-.admin-activity-table td {
+.admin-activity-table td,
+.admin-product-ranking-table td,
+.admin-user-ranking-table td {
     border-bottom: 1px solid #f1f5f9;
     padding: 12px 16px;
     font-size: 13px;
-    color: #334155;
+    color: #1e293b;
 }
 
-.admin-activity-table tr:last-child td {
+.admin-activity-table tr:last-child td,
+.admin-product-ranking-table tr:last-child td,
+.admin-user-ranking-table tr:last-child td {
     border-bottom: none;
 }
 
-.admin-activity-table tr:hover {
-    background: #f8fafc;
+.admin-activity-table tr:hover,
+.admin-product-ranking-table tr:hover,
+.admin-user-ranking-table tr:hover {
+    background-color: #f8fbff;
 }
 
 /* 活動種別バッジ */
 .admin-activity-badge {
     display: inline-flex;
     align-items: center;
-    padding: 4px 10px;
+    padding: 3px 10px;
     border-radius: 6px;
     font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-weight: 700;
 }
 
 .admin-activity-registration {
-    background: #e0f2fe;
-    color: #0369a1;
+    background-color: #eef6fd;
+    color: #1976d2;
 }
 
 .admin-activity-listing {
-    background: #fef3c7;
+    background-color: #fef3c7;
     color: #b45309;
 }
 
 .admin-activity-purchase {
-    background: #dcfce7;
+    background-color: #dcfce7;
     color: #15803d;
 }
 
 .admin-activity-shipping {
-    background: #ede9fe;
+    background-color: #ede9fe;
     color: #6d28d9;
 }
 
 .admin-activity-completion {
-    background: #ccfbf1;
+    background-color: #ccfbf1;
     color: #0f766e;
 }
 
 .admin-activity-restriction_created,
 .admin-activity-restriction_revoked {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-/* 活動テーブルのレスポンシブ対応 */
-.admin-widget > .admin-activity-table {
-    margin: 0;
-}
-
-@media (max-width: 768px) {
-    .admin-widget {
-        overflow-x: auto;
-    }
-
-    .admin-activity-table {
-        min-width: 600px;
-    }
+    background-color: #fef2f2;
+    color: #dc2626;
 }
 
 /* ============================================================
-   管理者サイドバー
+   管理者サイドバー（home.css の白カード・メインブルー基準）
    ============================================================ */
-
-/* サイドバーレイアウトコンテナ */
-.admin-layout {
-    display: flex;
-    gap: 24px;
-    align-items: flex-start;
-}
-
-/* サイドバー */
 .admin-sidebar {
-    width: 260px;
+    width: 250px;
     flex-shrink: 0;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    background-color: #ffffff;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
     padding: 0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
     height: fit-content;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
-/* サイドバーブランド（ロゴ・タイトル） */
 .admin-sidebar-brand {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 20px 20px 24px;
-    border-bottom: 1px solid #e2e8f0;
+    padding: 20px;
+    border-bottom: 1px solid #e2ebf5;
 }
 
 .admin-sidebar-brand-icon {
     width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, #1a3a5c 0%, #2d5a87 100%);
+    background-color: #1976d2;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(26, 58, 92, 0.2);
 }
 
 .admin-sidebar-brand-icon i {
     color: #ffffff;
-    font-size: 20px;
+    font-size: 18px;
 }
 
 .admin-sidebar-brand-text {
@@ -333,45 +597,40 @@
 }
 
 .admin-sidebar-brand-name {
-    font-size: 18px;
-    font-weight: 800;
-    color: #1a3a5c;
-    letter-spacing: 0.05em;
-    line-height: 1;
+    font-size: 17px;
+    font-weight: 700;
+    color: #1976d2;
+    line-height: 1.1;
 }
 
 .admin-sidebar-brand-sub {
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    line-height: 1;
-    margin-top: 2px;
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+    margin-top: 3px;
 }
 
-/* サイドバーナビゲーション */
 .admin-sidebar-nav {
-    padding: 0;
+    padding: 8px 0;
     flex: 1;
 }
 
-/* カテゴリコンテナ */
 .admin-sidebar-category {
     margin: 0;
 }
 
-/* カテゴリヘッダー */
 .admin-sidebar-category-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 14px 20px;
+    padding: 12px 20px;
     background: transparent;
     text-align: left;
     cursor: default;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     color: #64748b;
 }
@@ -383,20 +642,19 @@
     width: 24px;
     height: 24px;
     margin-right: 10px;
-    background: #f1f5f9;
+    background-color: #eef6fd;
     border-radius: 6px;
 }
 
 .admin-sidebar-category-icon i {
-    color: #64748b;
-    font-size: 14px;
+    color: #1976d2;
+    font-size: 13px;
 }
 
 .admin-sidebar-category-title {
     flex: 1;
 }
 
-/* カテゴリリスト（常時表示） */
 .admin-sidebar-category-list {
     list-style: none;
     padding: 0;
@@ -405,250 +663,174 @@
     border-top: 1px solid #f1f5f9;
 }
 
-/* カテゴリ展開時のメニュー項目を右にずらす */
 .admin-sidebar-category-list .admin-sidebar-link {
-    padding-left: 34px;
+    padding-left: 32px;
 }
 
-/* サイドバーリンク */
 .admin-sidebar-link {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 10px 20px;
-    border-radius: 0;
-    color: #475569;
+    color: #1e293b;
     text-decoration: none;
     font-size: 13px;
-    font-weight: 500;
-    transition: background 0.15s, color 0.15s;
+    font-weight: 700;
+    transition: background-color 0.15s, color 0.15s;
     border-left: 3px solid transparent;
 }
 
 .admin-sidebar-link i {
-    font-size: 15px;
-    width: 20px;
+    font-size: 14px;
+    width: 18px;
     text-align: center;
-    color: #94a3b8;
+    color: #64748b;
     transition: color 0.15s;
 }
 
 .admin-sidebar-link:hover:not(.disabled) {
-    background: #f1f5f9;
-    color: #1a3a5c;
+    background-color: #f8fbff;
+    color: #1976d2;
 }
 
 .admin-sidebar-link:hover:not(.disabled) i {
-    color: #1a3a5c;
+    color: #1976d2;
 }
 
-/* アクティブなリンク */
 .admin-sidebar-link.active {
-    background: #eef2ff;
-    color: #1a3a5c;
-    font-weight: 600;
-    border-left: 3px solid #1a3a5c;
+    background-color: #eef6fd;
+    color: #1976d2;
+    border-left: 3px solid #1976d2;
 }
 
 .admin-sidebar-link.active i {
-    color: #1a3a5c;
+    color: #1976d2;
 }
 
-/* 無効リンク（準備中） */
 .admin-sidebar-link.disabled {
     color: #94a3b8;
     cursor: not-allowed;
     background: transparent;
 }
 
-.admin-sidebar-link.disabled:hover {
-    background: transparent;
-    color: #94a3b8;
-}
-
-.admin-sidebar-link.disabled i {
-    color: #cbd5e1;
-}
-
+.admin-sidebar-link.disabled i,
 .admin-sidebar-link.disabled span {
     color: #94a3b8;
 }
 
-/* 準備中バッジ */
 .admin-sidebar-badge {
     display: inline-block;
     font-size: 10px;
     font-weight: 700;
-    color: #94a3b8;
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
+    color: #64748b;
+    background-color: #f8fbff;
+    border: 1px solid #e2ebf5;
+    border-radius: 6px;
     padding: 1px 6px;
     margin-left: auto;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.admin-sidebar-link.disabled .admin-sidebar-badge {
-    color: #94a3b8;
-    background: #f1f5f9;
-    border-color: #e2e8f0;
-}
-
-/* メインコンテンツ */
-.admin-main-content {
-    flex: 1;
-    min-width: 0;
-}
-
-/* サイドバーのレスポンシブ対応 */
-@media (max-width: 768px) {
-    .admin-layout {
-        flex-direction: column;
-        gap: 16px;
-    }
-
-    .admin-sidebar {
-        width: 100%;
-    }
-
-    .admin-sidebar-brand {
-        padding: 16px 16px 20px;
-    }
-
-    .admin-main-content {
-        padding-left: 0;
-    }
-
-    .admin-sidebar-category-toggle {
-        padding: 12px 16px;
-        font-size: 12.5px;
-    }
-
-    .admin-sidebar-link {
-        padding: 10px 16px;
-        font-size: 13px;
-    }
 }
 
 /* ============================================================
-   自動更新関連UI
+   自動更新関連UI（home.css のボタン基準に統一）
    ============================================================ */
-
-/* 自動更新コントロールコンテナ */
 .auto-update-controls {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px 12px;
     margin: 0 0 16px 0;
     flex-wrap: wrap;
 }
 
-/* 更新ボタン */
 .auto-refresh-button {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    padding: 8px 16px;
-    background: #1a3a5c;
+    height: 38px;
+    padding: 0 18px;
+    background-color: #1976d2;
     color: #ffffff;
     border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
     cursor: pointer;
-    transition: background 0.2s, opacity 0.2s;
+    transition: background-color 0.15s;
 }
 
 .auto-refresh-button:hover:not(:disabled) {
-    background: #16456b;
+    background-color: #1565c0;
 }
 
 .auto-refresh-button:disabled {
-    background: #cbd5e1;
+    background-color: #cbd5e1;
     color: #94a3b8;
     cursor: not-allowed;
 }
 
-/* 最終更新時刻 */
-.last-updated {
-    font-size: 13px;
+.last-updated:not(:empty) {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border: 1px solid #e2ebf5;
+    border-radius: 8px;
+    background-color: #f8fbff;
+    font-size: 12px;
+    font-weight: 700;
     color: #64748b;
     white-space: nowrap;
 }
 
-/* 更新状態表示 */
-.auto-update-status {
-    font-size: 13px;
-    padding: 4px 10px;
-    border-radius: 4px;
+.auto-update-status:not(:empty) {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 8px;
     white-space: nowrap;
 }
 
 .auto-update-status.normal {
-    background: #eef2ff;
-    color: #1a3a5c;
+    background-color: #eef6fd;
+    color: #1976d2;
 }
 
 .auto-update-status.updating {
-    background: #fef3c7;
+    background-color: #fef3c7;
     color: #b45309;
 }
 
 .auto-update-status.error {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-/* スマートフォンでの自動更新UI調整 */
-@media (max-width: 768px) {
-    .auto-update-controls {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-    .auto-refresh-button {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .last-updated {
-        font-size: 12px;
-    }
-
-    .auto-update-status {
-        font-size: 12px;
-        padding: 4px 8px;
-    }
+    background-color: #fef2f2;
+    color: #dc2626;
 }
 
 /* ============================================================
    管理者サイドバー情報パネル
    ============================================================ */
-
 .admin-sidebar-info {
-    margin-top: 24px;
-    padding: 16px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-top: 20px;
+    padding: 18px 20px;
+    background-color: #ffffff;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
 }
 
 .admin-sidebar-info-title {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
-    color: #1e293b;
-    margin: 0 0 16px;
+    color: #1976d2;
+    margin: 0 0 14px;
     padding-bottom: 8px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2ebf5;
 }
 
 .admin-sidebar-info-list {
     list-style: none;
     padding: 0;
-    margin: 0 0 16px;
+    margin: 0 0 14px;
 }
 
 .admin-sidebar-info-item {
@@ -658,7 +840,7 @@
     padding: 8px 0;
     border-bottom: 1px solid #f1f5f9;
     font-size: 13px;
-    color: #475569;
+    color: #1e293b;
 }
 
 .admin-sidebar-info-item:last-child {
@@ -670,9 +852,9 @@
 }
 
 .admin-sidebar-info-value {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
-    color: #1a3a5c;
+    color: #1976d2;
 }
 
 .admin-sidebar-recent-logs {
@@ -680,12 +862,12 @@
 }
 
 .admin-sidebar-recent-logs-title {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     color: #1e293b;
     margin: 0 0 8px;
-    padding-top: 8px;
-    border-top: 1px solid #e2e8f0;
+    padding-top: 10px;
+    border-top: 1px solid #e2ebf5;
 }
 
 .admin-sidebar-recent-logs-list {
@@ -701,7 +883,7 @@
     padding: 6px 0;
     border-bottom: 1px solid #f1f5f9;
     font-size: 12px;
-    color: #475569;
+    color: #1e293b;
 }
 
 .admin-sidebar-recent-log-item:last-child {
@@ -717,42 +899,34 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* スマートフォンでの情報パネル調整 */
-@media (max-width: 768px) {
-    .admin-sidebar-info {
-        margin-top: 16px;
-        padding: 16px;
-    }
-}
-
 /* ============================================================
    管理者商品詳細画面専用スタイル
    ============================================================ */
-
 .admin-goods-detail {
     max-width: 100%;
 }
 
 .admin-goods-detail .admin-detail-section {
     margin: 0 0 24px;
-    padding: 20px;
-    border: 1px solid #e2e8f0;
+    padding: 22px 24px;
+    border: 1px solid #e2ebf5;
     border-radius: 12px;
-    background: #ffffff;
+    background-color: #ffffff;
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
 }
 
 .admin-goods-detail .admin-detail-section h2 {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 700;
-    color: #1e293b;
+    color: #1976d2;
     margin: 0 0 16px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #e2ebf5;
 }
 
 .admin-goods-detail .admin-detail-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 16px;
 }
 
@@ -764,46 +938,44 @@
 
 .admin-goods-detail .admin-detail-label {
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
 .admin-goods-detail .admin-detail-value {
     font-size: 14px;
-    color: #334155;
+    color: #1e293b;
     word-break: break-word;
 }
 
 .admin-goods-detail .admin-detail-value.price {
     font-size: 18px;
     font-weight: 700;
-    color: #15803d;
+    color: #1976d2;
 }
 
 .admin-goods-detail .admin-detail-badge {
     display: inline-flex;
     align-items: center;
-    padding: 4px 10px;
+    padding: 3px 10px;
     border-radius: 6px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .admin-goods-detail .badge-sold {
-    background: #e2e8f0;
-    color: #475569;
+    background-color: #f1f5f9;
+    color: #64748b;
 }
 
 .admin-goods-detail .badge-active {
-    background: #dcfce7;
+    background-color: #dcfce7;
     color: #15803d;
 }
 
 .admin-goods-detail .badge-inactive {
-    background: #fecaca;
-    color: #991b1b;
+    background-color: #fef2f2;
+    color: #dc2626;
 }
 
 /* フラッシュメッセージ */
@@ -812,25 +984,25 @@
     padding: 12px 16px;
     border-radius: 8px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .admin-goods-detail .admin-flash-success {
-    background: #dcfce7;
-    color: #15803d;
-    border: 1px solid #86efac;
+    background-color: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
 }
 
 .admin-goods-detail .admin-flash-error {
-    background: #fecaca;
-    color: #991b1b;
-    border: 1px solid #fca5a5;
+    background-color: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
 }
 
 .admin-goods-detail .admin-flash-info {
-    background: #fef3c7;
-    color: #b45309;
-    border: 1px solid #fcd34d;
+    background-color: #eef6fd;
+    color: #1976d2;
+    border: 1px solid #90caf9;
 }
 
 /* 画像ギャラリー */
@@ -844,8 +1016,8 @@
     position: relative;
     padding-top: 100%;
     border-radius: 8px;
-    border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    border: 1px solid #e2ebf5;
+    background-color: #f8fafc;
     overflow: hidden;
 }
 
@@ -863,9 +1035,9 @@
     align-items: center;
     justify-content: center;
     height: 150px;
-    border: 1px solid #e2e8f0;
+    border: 1px dashed #e2ebf5;
     border-radius: 8px;
-    background: #f8fafc;
+    background-color: #f8fafc;
     font-size: 12px;
     color: #94a3b8;
 }
@@ -876,25 +1048,25 @@
     height: 48px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #e2ebf5;
 }
 
-/* テーブル */
+/* 詳細テーブル */
 .admin-goods-detail .admin-detail-table {
     width: 100%;
     border-collapse: collapse;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    background-color: #ffffff;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
     overflow: hidden;
 }
 
 .admin-goods-detail .admin-detail-table th {
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+    background-color: #f8fbff;
+    border-bottom: 1px solid #e2ebf5;
     padding: 12px 16px;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 700;
     color: #64748b;
     text-align: left;
 }
@@ -903,7 +1075,7 @@
     border-bottom: 1px solid #f1f5f9;
     padding: 12px 16px;
     font-size: 13px;
-    color: #334155;
+    color: #1e293b;
 }
 
 .admin-goods-detail .admin-detail-table tr:last-child td {
@@ -911,10 +1083,10 @@
 }
 
 .admin-goods-detail .admin-detail-table tr:hover {
-    background: #f8fafc;
+    background-color: #f8fbff;
 }
 
-/* トグルボタン */
+/* トグルボタン（角丸 8px に統一） */
 .admin-goods-detail .admin-toggle-form {
     display: inline-flex;
     gap: 8px;
@@ -922,133 +1094,131 @@
 }
 
 .admin-goods-detail .admin-toggle-btn {
-    height: 38px;
-    padding: 0 18px;
+    height: 40px;
+    padding: 0 20px;
     border: none;
-    border-radius: 999px;
+    border-radius: 8px;
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
     color: #ffffff;
-    transition: opacity 0.15s;
+    transition: background-color 0.15s;
 }
 
-.admin-goods-detail .admin-toggle-btn:hover {
-    opacity: 0.9;
-}
-
-.admin-goods-detail .admin-toggle-btn-stop {
+.admin-goods-detail .admin-toggle-btn-stop,
+.admin-goods-detail .admin-toggle-btn-delete {
     background-color: #dc2626;
+}
+
+.admin-goods-detail .admin-toggle-btn-stop:hover,
+.admin-goods-detail .admin-toggle-btn-delete:hover {
+    background-color: #b91c1c;
 }
 
 .admin-goods-detail .admin-toggle-btn-resume {
     background-color: #1976d2;
 }
 
-/* アクションリンク */
+.admin-goods-detail .admin-toggle-btn-resume:hover {
+    background-color: #1565c0;
+}
+
+/* アクションリンク（home.css の .more-goods a と同じ白背景・青枠線・角丸 8px） */
 .admin-goods-detail .admin-back-link {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     margin: 0 0 24px;
-    padding: 10px 16px;
-    border: 1px solid #dce6f2;
-    border-radius: 999px;
+    height: 40px;
+    padding: 0 20px;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
     background-color: #ffffff;
-    color: #64748b;
+    color: #1976d2;
     font-size: 13px;
     font-weight: 700;
     text-decoration: none;
-    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    transition: background-color 0.15s;
 }
 
 .admin-goods-detail .admin-back-link:hover {
-    background-color: #f1f5f9;
-    color: #0f2942;
-    border-color: #bfdbfe;
+    background-color: #eef6fd;
 }
 
-@media (max-width: 768px) {
-    .admin-main-content {
-        padding: 20px 16px;
+/* ============================================================
+   レスポンシブ対応
+   ============================================================ */
+@media (max-width: 960px) {
+    .admin-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+}
+
+@media (max-width: 740px) {
+    .main-container.admin-container,
+    .admin-container {
+        padding: 24px 20px 80px;
+    }
+
+    .admin-layout {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .admin-sidebar {
+        width: 100%;
+    }
+
+    .admin-main-content {
+        width: 100%;
+        padding: 22px 18px;
+    }
+
+    .admin-notice-grid,
+    .admin-shortcut-grid,
     .admin-goods-detail .admin-detail-grid {
         grid-template-columns: 1fr;
     }
+
+    .admin-widget {
+        overflow-x: auto;
+    }
+
+    .admin-activity-table {
+        min-width: 600px;
+    }
+
+    .admin-chart-container {
+        height: 250px !important;
+    }
 }
 
-.admin-goods-detail .admin-toggle-btn-delete {
-    background-color: #dc2626;
-}
+@media (max-width: 520px) {
+    .main-container.admin-container,
+    .admin-container {
+        padding: 18px 14px 90px;
+    }
 
-/* 商品別売上ランキングテーブル */
-.admin-product-ranking-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-top: 16px;
-}
+    .admin-page-title {
+        font-size: 19px;
+    }
 
-.admin-product-ranking-table th {
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 10px 16px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #64748b;
-    text-align: left;
-}
+    .admin-section-title {
+        font-size: 17px;
+    }
 
-.admin-product-ranking-table td {
-    border-bottom: 1px solid #f1f5f9;
-    padding: 10px 16px;
-    font-size: 13px;
-    color: #334155;
-}
+    .admin-stats {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
 
-.admin-product-ranking-table tr:last-child td {
-    border-bottom: none;
-}
+    .auto-update-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
 
-.admin-product-ranking-table tr:hover {
-    background: #f8fafc;
-}
-
-/* ユーザー分析ランキングテーブル */
-.admin-user-ranking-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-top: 16px;
-}
-
-.admin-user-ranking-table th {
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 10px 16px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #64748b;
-    text-align: left;
-}
-
-.admin-user-ranking-table td {
-    border-bottom: 1px solid #f1f5f9;
-    padding: 10px 16px;
-    font-size: 13px;
-    color: #334155;
-}
-
-.admin-user-ranking-table tr:last-child td {
-    border-bottom: none;
-}
-
-.admin-user-ranking-table tr:hover {
-    background: #f8fafc;
+    .auto-refresh-button {
+        width: 100%;
+    }
 }
