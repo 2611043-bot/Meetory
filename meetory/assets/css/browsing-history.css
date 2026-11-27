@@ -1,61 +1,67 @@
+@charset "UTF-8";
+
 /* ============================================================
-   閲覧履歴専用スタイルシート（Meetory標準デザイン）
+   閲覧履歴専用スタイルシート
+   browsing-history.php で使用（home.css 完全準拠）
    ============================================================ */
 
-/* ページ全体の背景（Meetory標準の淡いブルーグラデーション） */
+/* 画面全体の背景（home.css と完全統一・白余白なし） */
 html:has(main > .browsing-history-list),
 html:has(main > h1:first-child),
 body:has(main > .browsing-history-list),
 body:has(main > h1:first-child) {
     background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
     background-attachment: fixed !important;
+    margin: 0;
+    color: #1e293b;
 }
 
+/* メインコンテナ（home.css の .home-intro と同じ白カード・枠線・角丸・影） */
 main {
     position: relative;
     max-width: 960px;
-    margin: 28px auto 110px;
-    padding: 30px 34px;
-    border: 1px solid rgba(25, 118, 210, 0.12);
-    border-radius: 20px;
-    background-color: rgba(255, 255, 255, 0.96) !important;
-    box-shadow: 0 10px 30px -8px rgba(15, 41, 66, 0.08);
+    margin: 32px auto 100px;
+    padding: 28px 34px;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    background-color: #ffffff !important;
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
     box-sizing: border-box;
 }
 
-/* 見出し */
+/* 見出し（home.css の .home-intro h1 と統一） */
 main > h1 {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 0 0 16px;
+    margin: 0 0 18px;
     font-size: 22px;
-    font-weight: 800;
-    color: #0f2942;
-    letter-spacing: -0.01em;
+    font-weight: 700;
+    color: #1976d2;
 }
 
 main > h1::before {
     content: "";
     display: inline-block;
-    width: 5px;
-    height: 22px;
-    border-radius: 999px;
+    width: 4px;
+    height: 18px;
+    border-radius: 2px;
     background-color: #1976d2;
 }
 
-/* 登録件数バッジ風（履歴がある場合） */
+/* 登録件数バッジ（履歴がある場合） */
 main:has(.browsing-history-list) > p:first-of-type {
     display: inline-flex;
     align-items: center;
-    padding: 6px 16px;
+    height: 36px;
+    padding: 0 16px;
     margin: 0 12px 22px 0;
-    border: 1px solid #bfdbfe;
-    border-radius: 999px;
-    background-color: #eff6ff;
+    border: 1px solid #e2ebf5;
+    border-radius: 8px;
+    background-color: #eef6fd;
     color: #1976d2;
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 700;
     vertical-align: middle;
 }
 
@@ -67,64 +73,66 @@ main > .clear-form {
 }
 
 main > .clear-btn {
-    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
     padding: 0 16px;
-    border: 1px solid #fecdd3;
-    border-radius: 999px;
-    background-color: #fff1f2;
-    color: #e11d48;
-    font-size: 12.5px;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    background-color: #fef2f2;
+    color: #dc2626;
+    font-size: 13px;
     font-weight: 700;
+    font-family: inherit;
     cursor: pointer;
     transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 
 main > .clear-btn:hover {
-    background-color: #e11d48;
-    border-color: #e11d48;
+    background-color: #dc2626;
+    border-color: #dc2626;
     color: #ffffff;
 }
 
-/* 空状態のときの枠デザイン */
+/* 空状態（home.css の .new-goods > p と統一） */
 main:not(:has(.browsing-history-list)) > p:first-of-type {
-    padding: 44px 20px 28px;
+    padding: 36px 16px;
     margin: 10px 0 20px;
-    border: 1px dashed #cbd5e1;
-    border-radius: 16px;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
     background-color: #f8fbff;
     text-align: center;
     color: #64748b;
-    font-size: 14.5px;
-    font-weight: 700;
+    font-size: 14px;
 }
 
-/* マイページに戻る ボタン風リンク */
+/* マイページに戻る ボタン風リンク（home.css の .more-goods a と完全一致・白背景＋青枠線・角丸 8px） */
 main > p > a[href="mypage.php"] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 170px;
-    height: 40px;
-    padding: 0 22px;
-    border: 1px solid #dce6f2;
-    border-radius: 999px;
-    background-color: #f8fbff;
-    color: #334155;
-    font-size: 13.5px;
+    min-width: 210px;
+    height: 42px;
+    padding: 0 28px;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #1976d2;
+    font-size: 13px;
     font-weight: 700;
     text-decoration: none;
-    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+    transition: background-color 0.15s;
 }
 
 main > p > a[href="mypage.php"]:hover {
-    background-color: #e8f3fe;
-    border-color: #bfdbfe;
-    color: #1976d2;
+    background-color: #eef6fd;
 }
 
 main > p:last-child {
     margin-top: 24px;
     margin-bottom: 0;
+    text-align: center;
 }
 
 /* 閲覧履歴一覧 */
@@ -134,24 +142,24 @@ main > p:last-child {
     gap: 16px;
 }
 
-/* 各商品カード */
+/* 各商品カード（home.css の .goods-card と同じ白背景・枠線・角丸・影・ホバー浮き） */
 .history-item {
     position: relative;
     display: flex;
     align-items: flex-start;
-    gap: 22px;
-    padding: 20px 22px;
+    gap: 20px;
+    padding: 18px 22px;
     border: 1px solid #e2ebf5;
-    border-radius: 16px;
-    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border-radius: 12px;
+    background-color: #ffffff;
     box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
     transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
 }
 
 .history-item:hover {
     transform: translateY(-2px);
-    border-color: #bfdbfe;
-    box-shadow: 0 8px 22px rgba(25, 118, 210, 0.09);
+    border-color: #90caf9;
+    box-shadow: 0 8px 20px rgba(25, 118, 210, 0.1);
 }
 
 .history-item hr {
@@ -161,11 +169,11 @@ main > p:last-child {
 /* 商品画像エリア */
 .history-image {
     flex-shrink: 0;
-    width: 150px;
-    height: 150px;
+    width: 140px;
+    height: 140px;
     border: 1px solid #e2ebf5;
-    border-radius: 14px;
-    background-color: #ffffff;
+    border-radius: 8px;
+    background-color: #f8fafc;
     overflow: hidden;
 }
 
@@ -180,7 +188,7 @@ main > p:last-child {
     font-weight: 700;
     color: #94a3b8;
     text-align: center;
-    background-color: #f8fbff;
+    background-color: #f8fafc;
 }
 
 .history-image img {
@@ -204,14 +212,15 @@ main > p:last-child {
 
 .history-info h2 {
     margin: 0 0 8px;
-    font-size: 17px;
-    font-weight: 800;
-    line-height: 1.4;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.45;
 }
 
 .history-info h2 a {
-    color: #0f2942;
+    color: #1e293b;
     text-decoration: none;
+    transition: color 0.15s;
 }
 
 .history-info h2 a:hover {
@@ -222,15 +231,15 @@ main > p:last-child {
 .history-info p {
     margin: 0 0 5px;
     font-size: 13px;
-    color: #475569;
+    color: #64748b;
     line-height: 1.5;
 }
 
-/* 価格の強調（1番目のp要素） */
+/* 価格の強調（home.css の .goods-price と同じメインブルー） */
 .history-info > p:nth-of-type(1) {
     margin-bottom: 8px;
     font-size: 16px;
-    font-weight: 800;
+    font-weight: 700;
     color: #1976d2;
 }
 
@@ -239,10 +248,10 @@ main > p:last-child {
 .history-active {
     display: inline-block;
     margin: 6px 0 8px !important;
-    padding: 3px 12px;
-    border-radius: 999px;
-    font-size: 11.5px !important;
-    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px !important;
+    font-weight: 700;
 }
 
 .history-active {
@@ -255,7 +264,7 @@ main > p:last-child {
     color: #64748b;
 }
 
-/* 個別削除ボタン（カード右上配置） */
+/* 個別削除ボタン（カード右上配置・角丸 8px） */
 .history-delete-form {
     position: absolute;
     top: 18px;
@@ -265,42 +274,56 @@ main > p:last-child {
 }
 
 .history-delete-btn {
-    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
     padding: 0 14px;
-    border: 1px solid #fecdd3;
-    border-radius: 999px;
-    background-color: #fff1f2;
-    color: #e11d48;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    background-color: #fef2f2;
+    color: #dc2626;
     font-size: 12px;
     font-weight: 700;
+    font-family: inherit;
     cursor: pointer;
     transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 
 .history-delete-btn:hover {
-    background-color: #e11d48;
-    border-color: #e11d48;
+    background-color: #dc2626;
+    border-color: #dc2626;
     color: #ffffff;
 }
 
 /* 確認モーダル */
 .delete-account-modal-content {
-    border-radius: 20px !important;
-    border: 1px solid rgba(25, 118, 210, 0.14);
-    box-shadow: 0 20px 45px rgba(15, 41, 66, 0.2) !important;
+    border-radius: 16px !important;
+    border: 1px solid #e2ebf5;
+    box-shadow: 0 16px 40px rgba(15, 41, 66, 0.16) !important;
 }
 
 .delete-account-modal-btn {
-    border-radius: 999px !important;
+    border-radius: 8px !important;
     font-weight: 700 !important;
 }
 
-/* スマホ対応 */
-@media (max-width: 768px) {
+/* スマホ対応（home.css の 520px ブレークポイントに統一） */
+@media (max-width: 740px) {
     main {
-        margin: 14px 12px 110px;
-        padding: 20px 16px;
-        border-radius: 16px;
+        margin: 20px 20px 80px;
+        padding: 24px 20px;
+    }
+}
+
+@media (max-width: 520px) {
+    main {
+        margin: 18px 14px 90px;
+        padding: 22px 18px;
+    }
+
+    main > h1 {
+        font-size: 19px;
     }
 
     .history-item {
@@ -325,7 +348,13 @@ main > p:last-child {
     }
 
     .history-delete-btn {
-        background-color: rgba(255, 241, 242, 0.95);
-        box-shadow: 0 2px 8px rgba(15, 41, 66, 0.12);
+        background-color: rgba(254, 242, 242, 0.95);
+        box-shadow: 0 2px 8px rgba(15, 41, 66, 0.1);
+    }
+
+    main > p > a[href="mypage.php"] {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
 }

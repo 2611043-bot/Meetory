@@ -22,6 +22,8 @@ $stmt->execute([$user_id]);
 $addresses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 require '../../meetory-header.php';
 ?>
+<link rel="stylesheet" href="/Meetory/meetory/assets/css/address-list.css?v=<?= filemtime(__DIR__ . '/../assets/css/address-list.css') ?>">
+
 <h1>住所管理</h1>
 <?php if (isset($_SESSION['flash_success'])): ?>
 <p class="success-msg"><?= htmlspecialchars($_SESSION['flash_success'], ENT_QUOTES, 'UTF-8') ?></p>

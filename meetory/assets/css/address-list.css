@@ -1,0 +1,309 @@
+@charset "UTF-8";
+
+/* ============================================================
+   住所管理専用スタイルシート
+   address-list.php で使用（home.css 完全準拠）
+   ============================================================ */
+
+/* 画面全体の背景（home.css と完全統一・白余白なし） */
+html:has(.address-card),
+html:has(a[href="address-register.php"]),
+body:has(.address-card),
+body:has(a[href="address-register.php"]) {
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
+    margin: 0;
+    color: #1e293b;
+}
+
+/* コンテンツ中央配置（meetory-header.php に <main> がある場合・ない場合の両対応） */
+body:has(a[href="address-register.php"]) > h1,
+body:has(a[href="address-register.php"]) > .success-msg,
+body:has(a[href="address-register.php"]) > .error-msg,
+body:has(a[href="address-register.php"]) > p,
+body:has(a[href="address-register.php"]) > .address-card,
+main:has(a[href="address-register.php"]) > h1,
+main:has(a[href="address-register.php"]) > .success-msg,
+main:has(a[href="address-register.php"]) > .error-msg,
+main:has(a[href="address-register.php"]) > p,
+main:has(a[href="address-register.php"]) > .address-card {
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+}
+
+/* ページ見出し（home.css の .home-intro h1 と統一） */
+body:has(a[href="address-register.php"]) > h1,
+main:has(a[href="address-register.php"]) > h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 32px;
+    margin-bottom: 18px;
+    padding: 0 20px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1976d2;
+}
+
+body:has(a[href="address-register.php"]) > h1::before,
+main:has(a[href="address-register.php"]) > h1::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 18px;
+    border-radius: 2px;
+    background-color: #1976d2;
+}
+
+/* フラッシュメッセージ */
+.success-msg,
+.error-msg {
+    margin-top: 0;
+    margin-bottom: 18px;
+    padding: 13px 18px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.success-msg {
+    border: 1px solid #a7f3d0;
+    background-color: #ecfdf5;
+    color: #047857;
+}
+
+.error-msg {
+    border: 1px solid #fecaca;
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+/* 「新しい住所を登録する」ボタンエリア（home.css の .home-intro a と完全一致・単色ブルー・角丸 8px） */
+p:has(> a[href="address-register.php"]) {
+    margin-top: 0;
+    margin-bottom: 24px;
+    padding: 0 20px;
+}
+
+a[href="address-register.php"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 28px;
+    border: none;
+    border-radius: 8px;
+    background-color: #1976d2;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.15s;
+}
+
+a[href="address-register.php"]:hover {
+    background-color: #1565c0;
+}
+
+/* 空状態（「登録された住所はありません。」） */
+body:not(:has(.address-card)) > p:not(:has(a[href="address-register.php"])),
+main:not(:has(.address-card)):has(a[href="address-register.php"]) > p:not(:has(a[href="address-register.php"])) {
+    padding: 44px 20px;
+    margin-top: 0;
+    margin-bottom: 100px;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* 住所カード（home.css の .home-intro / .goods-card と同じ白カード・枠線・角丸・影） */
+.address-card {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding: 22px 28px;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.address-card:last-of-type {
+    margin-bottom: 100px;
+}
+
+.address-card:hover {
+    transform: translateY(-2px);
+    border-color: #90caf9;
+    box-shadow: 0 8px 20px rgba(25, 118, 210, 0.1);
+}
+
+.address-card p {
+    margin: 0 0 6px;
+    font-size: 14px;
+    color: #1e293b;
+    line-height: 1.6;
+}
+
+.address-card p:empty {
+    display: none;
+}
+
+/* 受取人名（1行目） */
+.address-card p:first-child {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* （デフォルト）バッジ */
+.address-card p:first-child strong {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border: 1px solid #e2ebf5;
+    border-radius: 6px;
+    background-color: #eef6fd;
+    color: #1976d2;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* 郵便番号・電話番号は落ち着いたサブカラー */
+.address-card p:nth-child(2),
+.address-card p:nth-child(5) {
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* 操作ボタンエリア（編集・削除・デフォルトに設定） */
+.address-card p:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    margin-bottom: 0;
+    padding-top: 14px;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* 編集・デフォルトに設定ボタン（home.css の .more-goods a と同じ白背景＋青枠線・角丸 8px） */
+.address-card a[href^="address-edit.php"],
+.address-card button[type="submit"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    padding: 0 16px;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #1976d2;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.address-card a[href^="address-edit.php"]:hover,
+.address-card button[type="submit"]:hover {
+    background-color: #eef6fd;
+}
+
+/* 削除ボタン（角丸 8px・レッド系） */
+.address-card a[href^="address-delete-confirm.php"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    padding: 0 16px;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    background-color: #fef2f2;
+    color: #dc2626;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.address-card a[href^="address-delete-confirm.php"]:hover {
+    background-color: #dc2626;
+    border-color: #dc2626;
+    color: #ffffff;
+}
+
+/* スマホ対応（home.css の 520px ブレークポイントに統一） */
+@media (max-width: 992px) {
+    body:has(a[href="address-register.php"]) > .success-msg,
+    body:has(a[href="address-register.php"]) > .error-msg,
+    body:has(a[href="address-register.php"]) > .address-card,
+    main:has(a[href="address-register.php"]) > .success-msg,
+    main:has(a[href="address-register.php"]) > .error-msg,
+    main:has(a[href="address-register.php"]) > .address-card {
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+}
+
+@media (max-width: 520px) {
+    body:has(a[href="address-register.php"]) > h1,
+    main:has(a[href="address-register.php"]) > h1 {
+        margin-top: 20px;
+        padding: 0 14px;
+        font-size: 19px;
+    }
+
+    p:has(> a[href="address-register.php"]) {
+        padding: 0 14px;
+    }
+
+    a[href="address-register.php"] {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    body:has(a[href="address-register.php"]) > .success-msg,
+    body:has(a[href="address-register.php"]) > .error-msg,
+    body:has(a[href="address-register.php"]) > .address-card,
+    main:has(a[href="address-register.php"]) > .success-msg,
+    main:has(a[href="address-register.php"]) > .error-msg,
+    main:has(a[href="address-register.php"]) > .address-card {
+        margin-left: 14px;
+        margin-right: 14px;
+    }
+
+    .address-card {
+        padding: 18px 16px;
+    }
+
+    .address-card p:last-child {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .address-card a[href^="address-edit.php"],
+    .address-card a[href^="address-delete-confirm.php"],
+    .address-card form,
+    .address-card button[type="submit"] {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}

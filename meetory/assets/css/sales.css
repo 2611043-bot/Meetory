@@ -1,72 +1,159 @@
-.sales-page {
-    width: min(100% - 32px, 1040px);
-    margin: 28px auto 90px;
-    color: #243447;
+@charset "UTF-8";
+
+/* ==============================
+    売上・販売実績専用スタイルシート
+    sales.css（home.css 完全準拠）
+   ============================== */
+
+/* 画面全体の背景（home.css と完全統一・白余白なし） */
+html:has(.sales-page),
+body:has(.sales-page) {
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
+    margin: 0;
+    color: #1e293b;
 }
 
+/* 中央コンテナ（home.css の .home-main と最大幅・左右余白を統一） */
+.sales-page {
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto 80px;
+    padding: 32px 36px 44px;
+    background: transparent !important;
+    box-sizing: border-box;
+    color: #1e293b;
+}
+
+/* 見出しエリア（home.css の .home-intro h1 / p と統一） */
 .sales-heading {
-    margin-bottom: 20px;
+    margin: 0 0 24px;
 }
 
 .sales-heading h1 {
-    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1976d2;
 }
 
-.sales-heading p,
+.sales-heading h1::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 18px;
+    border-radius: 2px;
+    background-color: #1976d2;
+}
+
+.sales-heading p {
+    margin: 0;
+    padding-left: 14px;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.6;
+}
+
 .sales-empty {
-    color: #667085;
+    margin: 0;
+    padding: 36px 16px;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    background-color: #f8fbff;
+    text-align: center;
+    font-size: 14px;
+    color: #64748b;
 }
 
+/* エラーアラート */
+.sales-error {
+    margin: 0 0 20px;
+    padding: 14px 18px;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    background-color: #fef2f2;
+    color: #dc2626;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* ==============================
+    1. 売上集計サマリーグリッド
+   ============================== */
 .sales-summary-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
+    gap: 16px;
 }
 
+/* 白カード共通（home.css の .home-intro と同じ枠線・角丸・影） */
 .sales-summary-card,
 .sales-section {
     min-width: 0;
-    padding: 20px;
-    border: 1px solid #e1e8ed;
-    border-radius: 12px;
-    background: #fff;
+    padding: 24px 28px;
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
+    box-sizing: border-box;
 }
 
 .sales-summary-card {
-    min-height: 116px;
+    min-height: 112px;
+    padding: 20px 24px;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.sales-summary-card:hover {
+    transform: translateY(-2px);
+    border-color: #90caf9;
+    box-shadow: 0 8px 20px rgba(25, 118, 210, 0.1);
 }
 
 .sales-summary-card h2 {
-    margin: 0 0 14px;
-    color: #667085;
-    font-size: 16px;
-    font-weight: 600;
+    margin: 0 0 10px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 700;
 }
 
 .sales-amount,
 .sales-count {
     margin: 0;
-    color: #1769aa;
-    font-size: clamp(22px, 3vw, 30px);
+    color: #1976d2;
+    font-size: clamp(22px, 2.8vw, 28px);
     font-weight: 700;
+    line-height: 1.2;
     overflow-wrap: anywhere;
 }
 
 .sales-amount span,
 .sales-count span {
     margin-left: 4px;
-    font-size: 16px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #64748b;
 }
 
+/* ==============================
+    2. 各セクション（表示期間・日別・月別・履歴）
+   ============================== */
 .sales-section {
-    margin-top: 18px;
+    margin-top: 24px;
 }
 
+/* セクション見出し（home.css の .new-goods h2 と完全一致） */
 .sales-section > h2 {
-    margin: 0 0 16px;
-    font-size: 20px;
+    margin: 0 0 18px;
+    font-size: 19px;
+    font-weight: 700;
+    color: #1976d2;
 }
 
+/* 期間切り替えナビゲーション（角丸 8px・メインブルー基準） */
 .sales-period-nav {
     display: flex;
     flex-wrap: wrap;
@@ -74,32 +161,59 @@
 }
 
 .sales-period-nav a {
-    padding: 9px 14px;
-    border: 1px solid #dfe6ee;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    padding: 0 16px;
+    border: 1px solid #e2ebf5;
     border-radius: 8px;
-    color: #344054;
+    background-color: #f8fbff;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 700;
     text-decoration: none;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.sales-period-nav a:hover {
+    border-color: #90caf9;
+    background-color: #eef6fd;
+    color: #1976d2;
 }
 
 .sales-period-nav a[aria-current="page"] {
-    border-color: #1a73e8;
-    background: #1a73e8;
-    color: #fff;
+    border-color: #1976d2;
+    background-color: #1976d2;
+    color: #ffffff;
 }
 
 .sales-period-total {
     margin: 18px 0 0;
-    color: #475467;
+    padding: 12px 16px;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    background-color: #f8fbff;
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
 }
 
 .sales-period-total strong {
-    color: #1769aa;
-    font-size: 22px;
+    color: #1976d2;
+    font-size: 20px;
+    margin: 0 4px;
 }
 
+/* ==============================
+    3. テーブル（日別・月別・販売履歴）
+   ============================== */
 .sales-table-wrap {
     width: 100%;
     overflow-x: auto;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
+    background-color: #ffffff;
 }
 
 .sales-table {
@@ -115,62 +229,119 @@
 
 .sales-table th,
 .sales-table td {
-    padding: 12px 10px;
-    border-bottom: 1px solid #e8edf2;
-    vertical-align: top;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+    color: #1e293b;
+    vertical-align: middle;
 }
 
 .sales-table th {
-    background: #f7f9fb;
-    font-weight: 600;
+    background-color: #f8fbff;
+    border-bottom: 1px solid #e2ebf5;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
     white-space: nowrap;
+}
+
+.sales-table tr:last-child td {
+    border-bottom: none;
+}
+
+.sales-table tbody tr:hover td {
+    background-color: #f8fbff;
 }
 
 .sales-table td {
     overflow-wrap: anywhere;
 }
 
-.sales-table a,
-.sales-back-link a {
-    color: #1769aa;
-    font-weight: 600;
+.sales-table a {
+    color: #1976d2;
+    font-weight: 700;
+    text-decoration: none;
 }
 
-.sales-empty {
-    margin: 0;
-    padding: 20px 8px;
+.sales-table a:hover {
+    text-decoration: underline;
 }
 
-.sales-error {
-    padding: 16px;
-    border: 1px solid #f0c5c5;
-    border-radius: 8px;
-    background: #fff7f7;
-    color: #9b2929;
-}
-
+/* ==============================
+    4. 下部「マイページに戻る」ボタン（home.css の .more-goods a と完全一致）
+   ============================== */
 .sales-back-link {
-    margin-top: 18px;
+    margin: 28px 0 0;
+    text-align: center;
 }
 
-@media (max-width: 700px) {
+.sales-back-link a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 210px;
+    height: 42px;
+    padding: 0 28px;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #1976d2;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.15s;
+}
+
+.sales-back-link a:hover {
+    background-color: #eef6fd;
+}
+
+/* ==============================
+    レスポンシブ対応（home.css の 520px ブレークポイントに統一）
+   ============================== */
+@media (max-width: 740px) {
+    .sales-page {
+        padding: 24px 20px 80px;
+    }
+
     .sales-summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
     }
 
     .sales-summary-card,
     .sales-section {
-        padding: 16px;
+        padding: 20px 18px;
     }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 520px) {
     .sales-page {
-        width: min(100% - 20px, 1040px);
-        margin-top: 18px;
+        margin: 14px auto 90px;
+        padding: 18px 14px 28px;
+    }
+
+    .sales-heading h1 {
+        font-size: 19px;
     }
 
     .sales-summary-grid {
         grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .sales-section {
+        margin-top: 18px;
+        padding: 18px 16px;
+    }
+
+    .sales-section > h2 {
+        font-size: 17px;
+    }
+
+    .sales-back-link a {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
 }
