@@ -1,13 +1,21 @@
 /* ==============================
     商品一覧ページ専用スタイルシート
-    goods-list.php で使用
+    goods-list.php で使用（カードの大きさ維持・背景とデザインだけホーム画面基準に統一）
    ============================== */
 
-/* ページ全体の淡いブルー背景 */
+/* ページ全体の淡いブルー背景（home.css と統一） */
+html,
+body {
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
+    margin: 0;
+    color: #1e293b;
+}
+
 .goods-list-page {
     min-height: calc(100vh - 120px);
     padding: 36px 20px 110px;
-    background: linear-gradient(135deg, #eef8ff, #f8fbff);
+    background: transparent !important;
     box-sizing: border-box;
 }
 
@@ -22,12 +30,12 @@
 .goods-list-container h1 {
     margin: 0 0 22px 0;
     font-size: 26px;
-    font-weight: bold;
+    font-weight: 700;
     color: #1976d2;
 }
 
 /* ==============================
-    検索フォーム（そのまま維持）
+    検索フォーム（home.css の .home-intro と同じ枠線・影・角丸に統一）
    ============================== */
 .goods-search-form {
     display: flex;
@@ -37,9 +45,9 @@
     padding: 20px 24px;
     margin-bottom: 28px;
     background-color: #ffffff;
-    border: 1px solid #d9eaf7;
-    border-radius: 14px;
-    box-shadow: 0 6px 20px rgba(30, 136, 229, 0.08);
+    border: 1px solid #e2ebf5;
+    border-radius: 16px;
+    box-shadow: 0 6px 22px rgba(15, 41, 66, 0.05);
     box-sizing: border-box;
 }
 
@@ -57,8 +65,8 @@
 
 .goods-search-form label {
     font-size: 13px;
-    font-weight: bold;
-    color: #34495e;
+    font-weight: 700;
+    color: #1e293b;
 }
 
 .goods-search-form input[type="text"],
@@ -67,22 +75,21 @@
     width: 100%;
     box-sizing: border-box;
     padding: 10px 12px;
-    border: 1px solid #cddfea;
+    border: 1px solid #e2ebf5;
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
-    color: #333;
-    background-color: #fafdff;
+    color: #1e293b;
+    background-color: #f8fbff;
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.15s, background-color 0.15s;
 }
 
 .goods-search-form input[type="text"]:focus,
 .goods-search-form input[type="number"]:focus,
 .goods-search-form select:focus {
-    border-color: #2196f3;
+    border-color: #1976d2;
     background-color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.12);
 }
 
 .goods-search-form .search-price span {
@@ -96,44 +103,43 @@
     flex: 0 0 auto;
 }
 
+/* 検索ボタン（home.css の .home-intro a と同じ単色 #1976d2 に統一） */
 .goods-search-form button[type="submit"] {
     padding: 10px 24px;
     border: none;
     border-radius: 8px;
-    background: linear-gradient(135deg, #2196f3, #1976d2);
+    background-color: #1976d2;
     color: #ffffff;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 3px 10px rgba(25, 118, 210, 0.2);
-    transition: 0.2s;
+    transition: background-color 0.15s;
 }
 
 .goods-search-form button[type="submit"]:hover {
-    background: linear-gradient(135deg, #1976d2, #1565c0);
+    background-color: #1565c0;
 }
 
+/* リセットボタン（home.css の .more-goods a と同じ白抜きブルー枠に統一） */
 .goods-search-form .search-actions a {
     display: inline-block;
     padding: 9px 16px;
-    border: 1px solid #cddfea;
+    border: 1px solid #1976d2;
     border-radius: 8px;
     background-color: #ffffff;
-    color: #64748b;
+    color: #1976d2;
     font-size: 13px;
-    font-weight: bold;
+    font-weight: 700;
     text-decoration: none;
-    transition: 0.2s;
+    transition: background-color 0.15s;
 }
 
 .goods-search-form .search-actions a:hover {
-    border-color: #90caf9;
-    color: #1976d2;
-    background-color: #f5faff;
+    background-color: #eef6fd;
 }
 
 /* ==============================
-    下の商品カード一覧（3列・中間サイズで全カード完全統一）
+    下の商品カード一覧（元の大きさ・3列構成をそのまま維持）
    ============================== */
 .goods-list {
     display: grid !important;
@@ -146,7 +152,7 @@
     display: none !important;
 }
 
-/* 個別の商品カード（左と右の中間サイズに統一） */
+/* 個別の商品カード（大きさ維持・枠線と影を home.css に統一） */
 .goods-item {
     position: relative;
     display: flex !important;
@@ -154,19 +160,19 @@
     width: 100% !important;
     min-width: 0 !important;
     max-width: 100% !important;
-    border: 1px solid #dcebf7;
-    border-radius: 14px;
+    border: 1px solid #e2ebf5;
+    border-radius: 12px;
     padding: 16px;
     box-sizing: border-box;
-    background: #ffffff;
-    box-shadow: 0 4px 14px rgba(30, 136, 229, 0.07);
+    background-color: #ffffff;
+    box-shadow: 0 4px 14px rgba(15, 41, 66, 0.04);
     transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
 }
 
 .goods-item:hover {
     transform: translateY(-2px);
     border-color: #90caf9;
-    box-shadow: 0 8px 22px rgba(30, 136, 229, 0.13);
+    box-shadow: 0 8px 20px rgba(25, 118, 210, 0.1);
 }
 
 /* ほしいものリストボタン */
@@ -176,7 +182,7 @@
     margin: 0 0 8px 0;
 }
 
-/* 商品画像のラッパー（高さを170pxに統一） */
+/* 商品画像のラッパー（高さ170px維持） */
 .goods-image {
     display: flex;
     align-items: center;
@@ -184,7 +190,7 @@
     width: 100%;
     height: 170px;
     margin-bottom: 12px;
-    background-color: #f8fbff;
+    background-color: #f8fafc;
     border-radius: 10px;
     overflow: hidden;
 }
@@ -197,7 +203,7 @@
     object-fit: contain;
 }
 
-/* 画像なし時のボックス（画像と同じ170pxに統一） */
+/* 画像なし時のボックス（高さ170px維持） */
 .no-image-box {
     display: flex;
     align-items: center;
@@ -205,18 +211,18 @@
     width: 100%;
     height: 170px;
     margin: 0 0 12px 0;
-    background-color: #f3f7fb;
-    border: 1px dashed #cddfea;
+    background-color: #f8fafc;
+    border: 1px dashed #e2ebf5;
     border-radius: 10px;
-    color: #8899aa;
+    color: #94a3b8;
     font-size: 13px;
 }
 
-/* 商品名（2行分の高さを確保して位置を揃える） */
+/* 商品名 */
 .goods-item h2 {
     margin: 0 0 8px 0;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 700;
     color: #1e293b;
     line-height: 1.4;
     height: 2.8em;
@@ -226,12 +232,12 @@
     overflow: hidden;
 }
 
-/* 価格 */
+/* 価格（home.css と同じ #1976d2 に統一） */
 .goods-price {
     margin: 0 0 8px 0;
     font-size: 18px;
-    font-weight: bold;
-    color: #1565c0;
+    font-weight: 700;
+    color: #1976d2;
 }
 
 /* 商品の状態バッジ */
@@ -240,10 +246,10 @@
     margin: 0 0 12px 0;
     padding: 3px 10px;
     font-size: 12px;
-    font-weight: bold;
+    font-weight: 700;
     color: #1976d2;
-    background-color: #eef8ff;
-    border: 1px solid #d0e7fa;
+    background-color: #eef6fd;
+    border: 1px solid #e2ebf5;
     border-radius: 6px;
 }
 
@@ -254,8 +260,8 @@
     gap: 8px;
     margin: 0 0 10px 0;
     padding-top: 10px;
-    border-top: 1px solid #f0f5fa;
-    color: #475569;
+    border-top: 1px solid #f1f5f9;
+    color: #64748b;
     font-size: 13px;
     text-decoration: none;
     white-space: nowrap;
@@ -275,7 +281,7 @@
     border-radius: 50%;
 }
 
-/* 商品説明文（長文でも2行分の高さで完全に統一） */
+/* 商品説明文（2行固定維持） */
 .goods-description,
 .goods-item > p:last-of-type {
     margin: 0 0 14px 0 !important;
@@ -291,34 +297,34 @@
     word-break: break-all;
 }
 
-/* 商品詳細を見るボタン（常にカードの一番下に揃える） */
+/* 商品詳細を見るボタン（home.css の .more-goods a と同じデザイン） */
 .goods-detail-link {
     margin-top: auto;
     display: block;
     text-align: center;
     padding: 9px 14px;
-    border: 1.5px solid #1976d2;
+    border: 1px solid #1976d2;
     border-radius: 8px;
     background-color: #ffffff;
     color: #1976d2;
     font-size: 13px;
-    font-weight: bold;
+    font-weight: 700;
     text-decoration: none;
-    transition: background-color 0.2s, color 0.2s;
+    transition: background-color 0.15s, color 0.15s;
 }
 
 .goods-detail-link:hover {
-    background-color: #1976d2;
-    color: #ffffff;
+    background-color: #eef6fd;
 }
 
-/* 商品0件時のメッセージ */
+/* 商品0件時のメッセージ（home.css の .new-goods > p と統一） */
 .goods-empty {
     text-align: center;
     padding: 48px 20px;
     background-color: #ffffff;
-    border: 1px solid #d9eaf7;
+    border: 1px solid #e2ebf5;
     border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(15, 41, 66, 0.04);
     color: #64748b;
     font-size: 15px;
 }
