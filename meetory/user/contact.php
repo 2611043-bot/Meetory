@@ -5,8 +5,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 
 if (
-    !isset($_SESSION['user_id']) ||
-    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false ||
+    !isset($_SESSION['user_id']) or
+    filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT) === false or
     (int) $_SESSION['user_id'] <= 0
 ) {
     header('Location: login.php');
@@ -16,15 +16,14 @@ if (
 require_once '../../meetory-functions.php';
 
 if (
-    !isset($_SESSION['csrf_token']) ||
-    !is_string($_SESSION['csrf_token']) ||
-    $_SESSION['csrf_token'] === ''
+    !isset($_SESSION['csrf_token']) or
+    !is_string($_SESSION['csrf_token']) or$_SESSION['csrf_token'] === ''
 ) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 if (
-    !isset($_SESSION['contact_submission_tokens']) ||
+    !isset($_SESSION['contact_submission_tokens']) or
     !is_array($_SESSION['contact_submission_tokens'])
 ) {
     $_SESSION['contact_submission_tokens'] = [];
@@ -32,28 +31,25 @@ if (
 $submission_token = bin2hex(random_bytes(32));
 $_SESSION['contact_submission_tokens'][$submission_token] = true;
 if (count($_SESSION['contact_submission_tokens']) > 10) {
-    $_SESSION['contact_submission_tokens'] = array_slice(
-        $_SESSION['contact_submission_tokens'],
+    $_SESSION['contact_submission_tokens'] = array_slice($_SESSION['contact_submission_tokens'],
         -10,
         null,
         true
     );
 }
 
-$form_data = $_SESSION['contact_form_data'] ?? [];
-$errors = $_SESSION['contact_form_errors'] ?? [];
-unset($_SESSION['contact_form_data'], $_SESSION['contact_form_errors']);
+$form_data =$_SESSION['contact_form_data'] ?? [];
+$errors =$_SESSION['contact_form_errors'] ?? [];
+unset($_SESSION['contact_form_data'],$_SESSION['contact_form_errors']);
 
-if (!is_array($form_data)) {
-    $form_data = [];
+if (!is_array($form_data)) {$form_data = [];
 }
-if (!is_array($errors)) {
-    $errors = [];
+if (!is_array($errors)) {$errors = [];
 }
 
-$category_value = $form_data['category'] ?? '';
-$subject_value = $form_data['subject'] ?? '';
-$message_value = $form_data['message'] ?? '';
+$category_value =$form_data['category'] ?? '';
+$subject_value =$form_data['subject'] ?? '';
+$message_value =$form_data['message'] ?? '';
 $escape = static function ($value): string {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 };
@@ -61,7 +57,7 @@ $escape = static function ($value): string {
 require '../../meetory-header.php';
 ?>
 
-<link rel="stylesheet" href="../assets/css/inquiries.css">
+<link rel="stylesheet" href="../assets/css/contact.css?v=<?= time() ?>">
 
 <div class="inquiry-page">
     <h1>お問い合わせ</h1>
@@ -70,7 +66,7 @@ require '../../meetory-header.php';
     <?php if (!empty($errors)): ?>
         <div class="inquiry-alert" role="alert">
             <ul>
-                <?php foreach ($errors as $error): ?>
+                <?php foreach ($errors as$error): ?>
                     <li><?= $escape($error) ?></li>
                 <?php endforeach; ?>
             </ul>
@@ -85,7 +81,7 @@ require '../../meetory-header.php';
         <select id="category" name="category" required>
             <option value="">選択してください</option>
             <?php foreach (getInquiryCategories() as $category): ?>
-                <option value="<?= $escape($category) ?>" <?= $category_value === $category ? 'selected' : '' ?>>
+                <option value="<?= $escape($category) ?>" <?= $category_value ===$category ? 'selected' : '' ?>>
                     <?= $escape($category) ?>
                 </option>
             <?php endforeach; ?>

@@ -1,0 +1,293 @@
+/* ============================================================
+   お問い合わせ一覧専用スタイルシート（Meetory標準デザイン）
+   ============================================================ */
+
+/* ページ全体の背景（Meetory標準の淡いブルーグラデーション） */
+html:has(.inquiry-page),
+body:has(.inquiry-page) {
+    background: linear-gradient(135deg, #e6f1fc 0%, #f4f8fc 52%, #ebf3fb 100%) !important;
+    background-attachment: fixed !important;
+}
+
+.inquiry-page {
+    max-width: 920px;
+    margin: 28px auto 120px;
+    padding: 0 18px;
+    box-sizing: border-box;
+}
+
+/* 見出し */
+.inquiry-page > h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 18px;
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f2942;
+    letter-spacing: -0.01em;
+}
+
+.inquiry-page > h1::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 24px;
+    border-radius: 999px;
+    background-color: #4a7fb5;
+}
+
+/* 「新しいお問い合わせを送信」ボタン（淡いスカイブルー） */
+.inquiry-page > p:first-of-type {
+    margin: 0 0 22px;
+}
+
+.inquiry-page .inquiry-new-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    padding: 0 24px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+    color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(25, 118, 210, 0.26);
+    transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+}
+
+.inquiry-page .inquiry-new-link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(25, 118, 210, 0.34);
+    filter: brightness(1.04);
+}
+
+/* エラーアラート */
+.inquiry-page .inquiry-alert {
+    margin: 0 0 20px;
+    padding: 16px 20px;
+    border: 1px solid #fecdd3;
+    border-radius: 16px;
+    background-color: #fff1f2;
+    color: #be123c;
+    font-size: 13.5px;
+    font-weight: 700;
+    box-shadow: 0 6px 20px rgba(225, 29, 72, 0.08);
+}
+
+/* 空状態（履歴なし） */
+.inquiry-page > p:not(:first-of-type):not(.inquiry-alert) {
+    padding: 52px 20px;
+    margin: 0;
+    border: 1px solid rgba(74, 127, 181, 0.16);
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.96);
+    text-align: center;
+    color: #64748b;
+    font-size: 14.5px;
+    font-weight: 700;
+    box-shadow: 0 10px 30px -8px rgba(15, 41, 66, 0.08);
+}
+
+/* カード一覧 */
+.inquiry-page .inquiry-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* 各お問い合わせカード */
+.inquiry-page .inquiry-card {
+    display: block;
+    padding: 22px 26px;
+    border: 1px solid rgba(74, 127, 181, 0.16);
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.96) !important;
+    color: inherit;
+    text-decoration: none;
+    box-shadow: 0 10px 30px -8px rgba(15, 41, 66, 0.08);
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.inquiry-page .inquiry-card:hover {
+    transform: translateY(-2px);
+    border-color: #a9c4df;
+    box-shadow: 0 14px 32px -8px rgba(44, 82, 120, 0.14);
+}
+
+/* カード上部（問い合わせ番号・ステータス） */
+.inquiry-page .inquiry-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.inquiry-page .inquiry-card-number {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #64748b;
+    letter-spacing: 0.02em;
+}
+
+/* ステータスバッジ */
+.inquiry-page .inquiry-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.inquiry-page .inquiry-status--pending {
+    background-color: #fff1f2;
+    border: 1px solid #fecdd3;
+    color: #e11d48;
+}
+
+.inquiry-page .inquiry-status--in-progress {
+    background-color: #fef3c7;
+    border: 1px solid #fde68a;
+    color: #b45309;
+}
+
+.inquiry-page .inquiry-status--answered {
+    background-color: #eef5fc;
+    border: 1px solid #c6daf0;
+    color: #3c6e9f;
+}
+
+.inquiry-page .inquiry-status--complete {
+    background-color: #dcfce7;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+}
+
+.inquiry-page .inquiry-status--unknown {
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+}
+
+/* 件名 */
+.inquiry-page .inquiry-card-title {
+    margin: 0 0 14px;
+    font-size: 17px;
+    font-weight: 800;
+    color: #0f2942;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.inquiry-page .inquiry-card:hover .inquiry-card-title {
+    color: #3c6e9f;
+}
+
+/* メタ情報（カテゴリ・送信日時・最終更新日時） */
+.inquiry-page .inquiry-card-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px 16px;
+    margin: 0 0 14px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background-color: #f8fbff;
+    border: 1px solid #eef4fb;
+}
+
+.inquiry-page .inquiry-card-meta > div {
+    min-width: 0;
+}
+
+.inquiry-page .inquiry-card-meta dt {
+    margin: 0 0 3px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.inquiry-page .inquiry-card-meta dd {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    overflow-wrap: anywhere;
+}
+
+/* 右下「問い合わせ詳細 →」 */
+.inquiry-page .inquiry-card-action {
+    display: inline-flex;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: #3c6e9f;
+}
+
+.inquiry-page .inquiry-card:hover .inquiry-card-action {
+    text-decoration: underline;
+}
+
+/* ページネーション */
+.inquiry-page .inquiry-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 26px;
+}
+
+.inquiry-page .inquiry-pagination a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    padding: 0 18px;
+    border: 1px solid #d5e1ee;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.96);
+    color: #3c6e9f;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(15, 41, 66, 0.05);
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.inquiry-page .inquiry-pagination a:hover {
+    background-color: #eef5fc;
+    border-color: #b8cfe6;
+}
+
+.inquiry-page .inquiry-pagination span {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #475569;
+}
+
+/* スマホ対応 */
+@media (max-width: 768px) {
+    .inquiry-page {
+        margin: 16px auto 110px;
+        padding: 0 12px;
+    }
+
+    .inquiry-page > h1 {
+        font-size: 20px;
+    }
+
+    .inquiry-page .inquiry-card {
+        padding: 18px 16px;
+        border-radius: 16px;
+    }
+
+    .inquiry-page .inquiry-card-meta {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}
